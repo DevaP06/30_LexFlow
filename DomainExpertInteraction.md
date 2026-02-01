@@ -6,7 +6,7 @@
    **Mode of Interaction:** Video Call  
    **Duration:** 33 minutes  
    **Publicly Accessible Video Link:**  
-   [Google Drive Video](https://drive.google.com/file/d/1Dh2gzy5vnhfzDItBVz4XFIGoXVoSpAO3/view?usp=sharing)
+   [Google Drive Video](https://drive.google.com/file/d/1Dh2gzy5vnhfzDItBVz4XFIGoXVoSpAO3/view?usp=drive_link)
 
 ## Domain Expert Details
     Role/ designation: Associate Lawyer
@@ -45,25 +45,28 @@
 
 ## Core workflows
 
-- Client onboarding
-  - Client goes to firm
-  - Firms assigns a lawyer according to condition
-  - Initial client dealing by Clerk/Intern
-  - Draft prepared by intern
-  - Meeting with Lawyer scheduled
-  - Lawyer prepares case after meeting
-  - Final case is prepared to be presented initially in court
+- Workflow 1
+  - Client onboarding
+    - Client goes to firm
+    - Firms assigns a lawyer according to condition
+    - Initial client dealing by Clerk/Intern
+    - Draft prepared by intern
+    - Meeting with Lawyer scheduled
+    - Lawyer prepares case after meeting
+    - Final case is prepared to be presented initially in court
 
-- Lawyer Changed in middle of case
-  - Client wants to change lawyer
-  - Requests all the previous brief from the lawyer
-  - Handles the brief to new lawyer
- 
-- Hearing Schedule preparation
-  - Clerk/Intern reads Cause List
-  - Identifies the cases of a specific lawyer
-  - Writes the schedule in diary(manually)
-  - Gives schedule to lawyer
+- Workflow 2
+  - Lawyer Changed in middle of case
+    - Client wants to change lawyer
+    - Requests all the previous brief from the lawyer
+    - Handles the brief to new lawyer
+
+- Workflow 3 
+  - Hearing Schedule preparation
+    - Clerk/Intern reads Cause List
+    - Identifies the cases of a specific lawyer
+    - Writes the schedule in diary(manually)
+    - Gives schedule to lawyer
 
 ## Rules, Constraints, and Exceptions
 
