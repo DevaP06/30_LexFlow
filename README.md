@@ -1,106 +1,139 @@
 # LexFlow
 
-## Problem Statement
+## Unified Digital Platform for Legal Consultation and Law Firm ERP
 
-### Introduction
+### Problem Statement
 
-The legal industry continues to rely on fragmented systems for client interaction and internal case handling. Clients face difficulties in identifying suitable legal professionals, scheduling consultations, securely sharing documents, and tracking case progress. Law firms, on the other hand, struggle with managing consultations, cases, documents, hearings, and billing using disconnected tools or manual workflows.
+The legal industry in India largely relies on manual and fragmented systems for managing client consultations, case preparation, hearing schedules, document handling, and billing. Most law firms use physical diaries, paper files, emails, and informal communication tools such as WhatsApp for daily operations.
 
-This project proposes a **Unified Digital Platform** that integrates **online legal consultation services** with a **Law Firm Enterprise Resource Planning (ERP) system**, enabling seamless management of the complete legal service lifecycle—from initial client consultation to case resolution.
+In real practice, clients usually approach a law firm rather than individual lawyers. The firm then assigns an available and suitable lawyer based on workload and expertise. This allocation process is mostly handled manually, which often leads to inefficiencies, delays, missed hearings, misplaced documents, and poor coordination among legal staff.
+
+Due to the absence of a centralized digital system, maintaining complete communication history, tracking case progress, and managing billing records becomes difficult. Important context from meetings and client interactions is often lost, especially when lawyers are changed or when interns handle initial communication.
+
+Document collection is also inefficient, as clients frequently forget to submit required documents. Payment tracking is inconsistent, making it difficult for both clients and firm administrators to maintain financial transparency.
+
+This project proposes a Unified Digital Platform that onboards law firms and digitizes their internal workflows. Clients interact with law firms through the platform, while firms manage lawyer allocation, case handling, communication, documentation, and billing in a secure and centralized environment.
+
+### System-Wide Features
+
+#### Interaction Summary System
+- Automatic or manual meeting summaries  
+- Context preservation across staff changes  
+- Historical interaction timeline  
+- Searchable case discussions  
+- Centralized case notes repository  
+
+#### Document Requirement Management
+- Custom document checklist for each case  
+- Mandatory document fields  
+- Upload reminders and notifications  
+- Submission status tracking  
+- Version control for uploaded files  
+
+#### Confidentiality & Access Control
+- Limited intern access  
+- Restricted document visibility  
+- Role-based permissions  
+- Audit logs for data access  
+- Encrypted chats and documents.
+- Secure authentication mechanisms  
+
+#### Unified Payment Management
+- Centralized payment dashboard  
+- Client-visible payment history  
+- Firm-level financial overview  
+- Invoice and receipt generation  
+- Payment status tracking  
 
 ---
 
-###  Objectives
+### Expected Outcomes
 
-- Provide a single platform for clients to consult legal professionals online
-- Automate the conversion of consultations into structured legal cases
-- Digitize law firm operations including case, document, and hearing management
-- Ensure secure, role-based access to sensitive legal data
-- Improve transparency, efficiency, and accessibility in legal services
+After implementation, the proposed platform is expected to:
 
-## Identified Actors
+- Reduce dependency on manual records and paper files  
+- Minimize document loss and scheduling errors  
+- Preserve communication context across all interactions  
+- Improve coordination among lawyers, interns, and admins  
+- Ensure transparent financial management  
+- Enhance client experience through digital accessibility  
+- Support long-term digital transformation of law firms  
+- Improve operational efficiency and accountability  
 
-| Actors            | Description                                                   |
-| -------------------- | ------------------------------------------------------------- |
-| **Clients**          | Individuals or businesses seeking legal advice                |
-| **Lawyers**          | Legal professionals offering consultations and handling cases |
-| **Clerks / Interns** | Assist lawyers with documentation and case updates            |
-| **Firm Admins**      | Manage users, billing, and analytics                          |
+---
 
-## Planned Features for each actor
+### Identified Actors
 
-**Client**
+| Actor / Role   | Description                                                                  |
+|---------------|------------------------------------------------------------------------------|
+| Client         | Individuals or organizations seeking legal services through registered firms |
+| Lawyer         | Legal professionals assigned by firms to handle consultations and cases      |
+| Clerk / Intern | Assists lawyers with documentation, scheduling, and case preparation         |
+| Firm Admin     | Manages users, lawyer allocation, billing, and firm-level operations          |
 
-- [ ] Register and manage personal profile
+---
 
-- [ ] Search lawyers by specialization, location, and rating
+### Planned Features for Each Actor
 
-- [ ] Book online consultations (chat / video / in-person)
+#### Client
 
-- [ ] Upload and download legal documents securely
+- Register and manage personal profile  
+- Select and approach registered law firms  
+- Submit consultation requests  
+- Fill structured forms with required document fields  
+- Upload mandatory and optional documents  
+- View pending document checklist  
+- Schedule online or in-person meetings  
+- Communicate securely with assigned staff  
+- Access meeting summaries and case updates  
+- View case status and hearing schedules  
+- Make online payments  
+- View complete payment history and invoices  
 
-- [ ] View case status and progress updates
+---
 
-- [ ] Communicate with assigned lawyer
+#### Lawyer
 
-- [ ] Receive hearing and appointment reminders
+- View assigned consultations and cases  
+- Access complete communication history  
+- View meeting summaries and interaction logs  
+- Add post-meeting case notes and summaries  
+- Review intern-client interaction records  
+- Manage case progress and documentation  
+- Track document submission status  
+- View hearing schedules and cause list updates  
+- Communicate securely with clients and staff  
+- Track tasks and deadlines  
 
-- [ ] Make online payments and view invoices
+---
 
-- [ ] Access consultation and case history
+#### Clerk / Intern
 
-**Lawyer**
+- Assist in client onboarding  
+- Collect and verify required documents  
+- Prepare and upload draft documents  
+- Maintain interaction records  
+- Add meeting notes under supervision  
+- Update hearing schedules  
+- Manage document versions  
+- Work under restricted access permissions  
+- Follow confidentiality policies  
+- Support lawyers in case preparation  
 
-- [ ] Create and manage professional profile
+---
 
-- [ ] Accept or reject consultation requests
+#### Firm Admin
 
-- [ ] Schedule and manage client appointments
+- Onboard and manage law firm profile  
+- Approve and manage user accounts  
+- Assign lawyers based on availability  
+- Monitor lawyer workload  
+- Control intern access levels  
+- Define confidentiality policies  
+- Monitor communication logs  
+- Handle lawyer changes with full context transfer  
+- View complete payment and billing records  
+- Track firm-wide financial data  
+- Configure billing structures  
+- Manage role-based permissions  
 
-- [ ] View assigned cases and client details
-
-- [ ] Upload, edit, and manage legal documents
-
-- [ ] Update case status and progress reports
-
-- [ ] Communicate with clients and interns
-
-- [ ] Assign tasks to interns/clerks
-
-- [ ] Track working hours and billing details
-
-- [ ] Generate invoices and payment reports
-
-**Clerk / Intern**
-
-- [ ] Access assigned cases and tasks
-
-- [ ] Upload and organize legal documents
-
-- [ ] Update case files and hearing details
-
-- [ ] Prepare drafts and reports for lawyers
-
-- [ ] Maintain document versions
-
-- [ ] Assist in scheduling hearings
-
-- [ ] Communicate with lawyers internally
-
-**Firm Admin**
-
-- [ ] Manage lawyers, clerks, and staff accounts
-
-- [ ] Assign roles and access permissions
-
-- [ ] Monitor firm-wide cases and workload
-
-- [ ] Configure billing rules and fee structures
-
-- [ ] Approve invoices and payments
-
-- [ ] Generate performance and financial reports
-
-- [ ] Manage firm profile and branding
-
-- [ ] Handle client complaints and feedback
