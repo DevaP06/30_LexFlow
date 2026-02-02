@@ -1,6 +1,6 @@
 # Domain: Legal Services (Online Consultation + Law Firm ERP)
 # Problem Statement: A Unified Digital Platform for Online Legal Consultation and Law Firm ERP.
-# Last Updated: 01-02-2026
+# Last Updated: 02-02-2026
 
   name: Client
   definition: A person or organization that seeks legal advice or representation through the platform and owns the matters, documents, and payments associated with their legal service lifecycle.
@@ -48,16 +48,6 @@
     - Intern
 
 
-
-  name: Lawyer Discovery
-  definition: The search and recommendation workflow that helps clients find lawyers based on expertise, location, languages, availability, and fees.
-  examples:
-    - "Client filters for 'Family Law' lawyers available for video consultation in Chennai."
-  aliases:
-    - Search
-    - Find a lawyer
-
-
   name: Expertise Area
   definition: A standardized categorization of legal practice domains used for discovery, profiling, and case tagging (e.g., criminal, civil, corporate).
   examples:
@@ -77,7 +67,7 @@
 
 
   name: Consultation Booking
-  definition: The workflow where a client selects a lawyer, chooses consultation mode and slot, confirms details, and optionally pays to finalize the consultation.
+  definition: The workflow where a Client selects a law firm, chooses consultation mode and slot, confirms details, and optionally pays to finalize the consultation.
   examples:
     - "Client books a 6 PM chat consultation and receives confirmation."
   aliases:
