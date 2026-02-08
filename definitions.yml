@@ -1,9 +1,9 @@
 # Domain: Legal Services (Online Consultation + Law Firm ERP)
 # Problem Statement: A Unified Digital Platform for Online Legal Consultation and Law Firm ERP.
-# Last Updated: 02-02-2026
+# Last Updated: 05-02-2026
 
   name: Client
-  definition: A person or organization that seeks legal advice or representation through the platform and owns the matters, documents, and payments associated with their legal service lifecycle.
+  definition: A person or organization that seeks legal advice or representation through the platform and owns the matters, documents, and payments associated with the law firm.
   examples:
     - "Priya books an online consultation for a property dispute and uploads sale deed documents."
   aliases:
@@ -42,7 +42,7 @@
   name: Clerk / Intern
   definition: A firm staff member who supports lawyers by preparing documents, updating case notes, scheduling, and managing tasks, typically with limited role-based permissions.
   examples:
-    - "A clerk uploads a drafted affidavit and tags it for lawyer review."
+    - "A clerk uploads a case note and tags it for lawyer review."
   aliases:
     - Paralegal
     - Intern
@@ -58,7 +58,7 @@
 
 
   name: Consultation
-  definition: A time-bound professional interaction between a client and a lawyer (chat/video/in-person) intended to provide legal advice and collect initial facts, optionally leading to a case.
+  definition: A time-bound professional interaction between a client and a lawyer (chat/video/in-person) intended to provide legal advice and collect facts.
   examples:
     - "A 30-minute video consultation to review a legal notice draft."
   aliases:
@@ -102,7 +102,7 @@
 
 
   name: Consultation-to-Case Conversion
-  definition: The process of transforming consultation details (facts, documents, parties, scope, fee agreement) into a formal case record with workflows and ownership.
+  definition: The process of transforming the initial consultation details (facts, documents, parties, scope, fee agreement) into a formal case record with workflows and ownership.
   examples:
     - "System auto-creates a case draft after the lawyer marks consultation as 'Proceed'."
   aliases:
@@ -128,14 +128,6 @@
     - Stage
 
 
-  name: Hearing
-  definition: A scheduled court/tribunal appearance or procedural date linked to a case, with associated venue, agenda, outcomes, and reminders.
-  examples:
-    - "Hearing scheduled on 2026-02-10 for 'Arguments' in District Court."
-  aliases:
-    - Court date
-    - Listing
-
   name: Hearing Schedule
   definition: The calendar plan for hearings and procedural deadlines for a case, including automated reminders and assignment to responsible users.
   examples:
@@ -146,7 +138,7 @@
 
 
   name: Task
-  definition: A unit of work assigned to a user (lawyer/clerk) with a due date, priority, and linkage to a case, document, or hearing.
+  definition: A unit of work assigned to a lawyer or clerk with a due date, priority, and linkage to a case, document, or hearing.
   examples:
     - "Task: 'Draft written statement' due by 2026-02-03."
   aliases:
@@ -263,7 +255,7 @@
     - Digital Docket
 
   name: Cause List 
-  definition: The Cause List is the official schedule of cases to be heard by a court on a specific day. In the proposed platform, this feature would automate the tracking of "hearing schedules", replacing the manual "physical diaries" currently used by law firms. The system would likely fetch the official Cause List from court websites to automatically notify lawyers of upcoming hearings, thereby solving the stated problem of "missed hearings" and "inefficiencies" in allocation.
+  definition: The Cause List is the official schedule of cases to be heard by a court on a specific day.
   examples:
     - "You don't need to check the court website manually; the app has already synced tomorrow's Cause List and flagged item 45 for us."
     - "We almost missed the hearing because the case was added to the supplementary Cause List late last night, but the system sent a notification."   
@@ -283,4 +275,16 @@
   - Client Correspondence
   - Activity Trail
   - Audit Trail
+
+
+  name: System
+  definition: System refers to the Unified Digital Legal Platform that acts as the central software application responsible for managing, controlling, and coordinating all interactions between users and internal services.
+  examples:
+    - "The system automatically generates an invoice after the consultation is marked as completed."
+    - "When a client uploads a document, the system checks before allowing access."
+  aliases:
+    - Platform
+    - Enterprise System
+    
+
 
