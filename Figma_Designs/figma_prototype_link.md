@@ -1,1 +1,6 @@
-[Click here](https://www.figma.com/proto/i0QMpcfhBhnLKbLtKj5GG4/Client-Consultation-and-Case-tracker?node-id=31-266&p=f&t=6lMHgZ2KumDL1VGx-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=31%3A266)
+[Figma design link](https://www.figma.com/design/i0QMpcfhBhnLKbLtKj5GG4/Client-Consultation-and-Case-tracker?t=x1VC97xUffabma0o-1)
+
+
+[Figma Prototype Link(Desktop)](https://www.figma.com/proto/i0QMpcfhBhnLKbLtKj5GG4/Client-Consultation-and-Case-tracker?t=x1VC97xUffabma0o-1)
+
+[Figma Prototype Link(Mobile)](https://www.figma.com/proto/cEmIs2HvTV7CmQpmpJ4avg/Mobile-design?t=LnMBvZpStFeRy7q7-1)
