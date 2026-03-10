@@ -1,6 +1,5 @@
 --  Use this below syntax for auto generated primary key ---> recommender for newer versions
 
--- to think whether admin table needs to be created..
 
 CREATE TABLE lawfirm_meta (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
