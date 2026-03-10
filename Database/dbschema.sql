@@ -207,22 +207,6 @@ CREATE TABLE consultations (
         ON DELETE SET NULL
 );
 
--- ONE-TO-MANY: one consultation can have multiple meetings (follow-ups etc.)
-CREATE TABLE consultation_meetings (
-    id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    consultation_id     INT NOT NULL,
-    meeting_type        VARCHAR(20) NOT NULL CHECK (meeting_type IN ('Online', 'In-Person')),
-    scheduled_at        TIMESTAMP NOT NULL,
-    duration_minutes    INT,
-    location_or_link    TEXT,
-    status              VARCHAR(20) DEFAULT 'Scheduled'
-                            CHECK (status IN ('Scheduled','Completed','Cancelled')),
-
-    CONSTRAINT meeting_belongs_to_consultation
-        FOREIGN KEY (consultation_id)
-        REFERENCES consultations(id)
-        ON DELETE CASCADE
-);
 
 -- ONE-TO-ONE with meeting: each meeting has at most one summary.
 CREATE TABLE interaction_summaries (
