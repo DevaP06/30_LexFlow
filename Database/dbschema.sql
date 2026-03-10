@@ -3,41 +3,49 @@
 -- to think whether admin table needs to be created..
 
 CREATE TABLE lawfirm_meta (
-    id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name                VARCHAR(100) NOT NULL,
-    admin_email         VARCHAR(255) NOT NULL UNIQUE,
-    password_hash       TEXT NOT NULL,
-    address             TEXT NOT NULL,
-    avg_rating          NUMERIC(3,2) CHECK (avg_rating BETWEEN 0 AND 5),
-    logo_url            TEXT,
-    firm_size           INT,
-    established_in      INT,
-    is_active           BOOLEAN DEFAULT TRUE,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name            VARCHAR(100) NOT NULL,
+    address         TEXT NOT NULL,
+    avg_rating      NUMERIC(3,2) CHECK (avg_rating BETWEEN 0 AND 5),
+    logo_url        TEXT,
+    firm_size       INT,
+    established_in  INT,
+    is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ONE-TO-ONE: each firm has exactly one contact detail record.
+-- lawfirm_id is the PK (not a separate id), eliminating the redundant identity column.
+CREATE TABLE lawfirm_contact_details (
+    lawfirm_id      INT PRIMARY KEY,
+    email           TEXT[],
+    website_url     TEXT[],
+    phone_number    TEXT[],
+
+    CONSTRAINT contact_details_belongs_to_firm
+        FOREIGN KEY (lawfirm_id)
+        REFERENCES lawfirm_meta(id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE practice_areas (
     id      INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name    VARCHAR(100) UNIQUE NOT NULL       -- e.g. 'Criminal', 'Civil', 'Corporate'
+    name    VARCHAR(100) UNIQUE NOT NULL      -- e.g. 'Criminal', 'Civil', 'Corporate'
 );
 
-
-
-
-
--- Many-to-many: firm <--> practice areas
+-- MANY-TO-MANY: firm <--> practice areas
 CREATE TABLE lawfirm_practice_areas (
     lawfirm_id          INT NOT NULL,
     practice_area_id    INT NOT NULL,
 
     PRIMARY KEY (lawfirm_id, practice_area_id),
 
-    CONSTRAINT fk_lpa_lawfirm
+    CONSTRAINT lawfirm_practice_areas_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_lpa_practice_area
+    CONSTRAINT lawfirm_practice_areas_refers_to_practice_area
         FOREIGN KEY (practice_area_id)
         REFERENCES practice_areas(id)
         ON DELETE CASCADE
@@ -45,44 +53,35 @@ CREATE TABLE lawfirm_practice_areas (
 
 CREATE TABLE courts (
     id      INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name    VARCHAR(200) UNIQUE NOT NULL,      -- e.g. 'Madras High Court'
+    name    VARCHAR(200) UNIQUE NOT NULL,     -- e.g. 'Madras High Court'
     city    VARCHAR(100),
     state   VARCHAR(100)
 );
 
--- Many-to-many: firm <--> courts
+-- MANY-TO-MANY: firm <--> courts
 CREATE TABLE lawfirm_courts (
     lawfirm_id  INT NOT NULL,
     court_id    INT NOT NULL,
 
     PRIMARY KEY (lawfirm_id, court_id),
 
-    CONSTRAINT fk_lc_lawfirm
+    CONSTRAINT lawfirm_courts_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_lc_court
+    CONSTRAINT lawfirm_courts_refers_to_court
         FOREIGN KEY (court_id)
         REFERENCES courts(id)
         ON DELETE CASCADE
 );
 
-CREATE TABLE lawfirm_contact_details (
-    -- is this id below necessary? we can use lawfirm_id as primary key since it is one to one relationship
-    id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    lawfirm_id      INT NOT NULL,
-    email           TEXT[],
-    website_url     TEXT[],
-    phone_number    TEXT[],
 
-    CONSTRAINT fk_lcd_lawfirm
-        FOREIGN KEY (lawfirm_id)
-        REFERENCES lawfirm_meta(id)
-        ON DELETE CASCADE
-);
+-- ============================================================
+-- SECTION 2: USERS
+-- ============================================================
 
-
+-- ONE-TO-MANY: one firm can have multiple admins
 CREATE TABLE lawfirm_admin (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     lawfirm_id      INT NOT NULL,
@@ -92,12 +91,11 @@ CREATE TABLE lawfirm_admin (
     is_active       BOOLEAN DEFAULT TRUE,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_admin_lawfirm
+    CONSTRAINT admin_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE
 );
-
 
 CREATE TABLE clients (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -111,6 +109,7 @@ CREATE TABLE clients (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ONE-TO-MANY: one firm has many lawyers
 CREATE TABLE lawyers (
     id                      INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     lawfirm_id              INT NOT NULL,
@@ -123,32 +122,31 @@ CREATE TABLE lawyers (
     is_active               BOOLEAN DEFAULT TRUE,
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_lawyer_lawfirm
+    CONSTRAINT lawyer_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE
-
 );
 
+-- MANY-TO-MANY: a lawyer can have multiple specializations
 CREATE TABLE lawyer_specializations (
     lawyer_id           INT NOT NULL,
     practice_area_id    INT NOT NULL,
 
     PRIMARY KEY (lawyer_id, practice_area_id),
 
-    CONSTRAINT fk_ls_lawyer
+    CONSTRAINT lawyer_specialization_belongs_to_lawyer
         FOREIGN KEY (lawyer_id)
         REFERENCES lawyers(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_ls_practice_area
+    CONSTRAINT lawyer_specialization_refers_to_practice_area
         FOREIGN KEY (practice_area_id)
         REFERENCES practice_areas(id)
         ON DELETE CASCADE
 );
 
-
-
+-- ONE-TO-MANY: one firm has many interns
 CREATE TABLE interns (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     lawfirm_id      INT NOT NULL,
@@ -159,29 +157,43 @@ CREATE TABLE interns (
     is_active       BOOLEAN DEFAULT TRUE,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_intern_lawfirm
+    CONSTRAINT intern_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE
 );
 
+-- ONE-TO-ONE: each intern has exactly one permissions record.
+-- intern_id is the PK instead of a separate identity column.
+-- The old code had id as PK + UNIQUE(intern_id) which structurally allowed
+-- one-to-many (multiple permission rows per intern before the UNIQUE was added).
+-- Making intern_id the PK is the correct, explicit way to enforce 1-1.
 CREATE TABLE intern_permissions (
-    id                      INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    intern_id               INT NOT NULL,
-    -- ! to think about these permissions
+    intern_id               INT PRIMARY KEY,
     can_view_documents      BOOLEAN DEFAULT FALSE,
     can_upload_documents    BOOLEAN DEFAULT FALSE,
     can_add_notes           BOOLEAN DEFAULT FALSE,
     can_onboard_clients     BOOLEAN DEFAULT TRUE,
-    granted_by_admin_id     INT,                    -- references lawfirm_meta admin
+    granted_by_admin_id     INT,
     updated_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_ip_intern
+    CONSTRAINT intern_permissions_belong_to_intern
         FOREIGN KEY (intern_id)
         REFERENCES interns(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT intern_permissions_granted_by_admin
+        FOREIGN KEY (granted_by_admin_id)
+        REFERENCES lawfirm_admin(id)
+        ON DELETE SET NULL
 );
 
+
+-- ============================================================
+-- SECTION 3: CONSULTATIONS
+-- ============================================================
+
+-- ONE-TO-MANY: a client can have many consultations with different firms
 CREATE TABLE consultations (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     client_id       INT NOT NULL,
@@ -195,25 +207,23 @@ CREATE TABLE consultations (
     accepted_at     TIMESTAMP,
     closed_at       TIMESTAMP,
 
-    CONSTRAINT fk_cons_client
+    CONSTRAINT consultation_requested_by_client
         FOREIGN KEY (client_id)
         REFERENCES clients(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_cons_lawfirm
+    CONSTRAINT consultation_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_cons_lawyer
+    CONSTRAINT consultation_assigned_to_lawyer
         FOREIGN KEY (lawyer_id)
         REFERENCES lawyers(id)
         ON DELETE SET NULL
 );
 
-
-
--- Meeting scheduling within a consultation
+-- ONE-TO-MANY: one consultation can have multiple meetings (follow-ups etc.)
 CREATE TABLE consultation_meetings (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     consultation_id     INT NOT NULL,
@@ -224,59 +234,65 @@ CREATE TABLE consultation_meetings (
     status              VARCHAR(20) DEFAULT 'Scheduled'
                             CHECK (status IN ('Scheduled','Completed','Cancelled')),
 
-    CONSTRAINT fk_cm_consultation
+    CONSTRAINT meeting_belongs_to_consultation
         FOREIGN KEY (consultation_id)
         REFERENCES consultations(id)
         ON DELETE CASCADE
 );
 
--- Interaction summaries for each meeting
+-- ONE-TO-ONE with meeting: each meeting has at most one summary.
+-- UNIQUE(meeting_id) enforces this — one summary row per meeting.
+-- A summary can also exist without a meeting (phone call, walk-in), hence meeting_id is nullable.
 CREATE TABLE interaction_summaries (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     consultation_id     INT NOT NULL,
-    meeting_id          INT,
+    meeting_id          INT UNIQUE,
     created_by_lawyer   INT,
     created_by_intern   INT,
     summary_text        TEXT NOT NULL,
-    is_approved         BOOLEAN DEFAULT FALSE,   -- intern drafts need lawyer approval
+    is_approved         BOOLEAN DEFAULT FALSE,
     approved_by         INT,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_is_consultation
+    CONSTRAINT summary_belongs_to_consultation
         FOREIGN KEY (consultation_id)
         REFERENCES consultations(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_is_meeting
+    CONSTRAINT summary_linked_to_meeting
         FOREIGN KEY (meeting_id)
         REFERENCES consultation_meetings(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_is_created_by_lawyer
+    CONSTRAINT summary_written_by_lawyer
         FOREIGN KEY (created_by_lawyer)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_is_created_by_intern
+    CONSTRAINT summary_written_by_intern
         FOREIGN KEY (created_by_intern)
         REFERENCES interns(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_is_approved_by
+    CONSTRAINT summary_approved_by_lawyer
         FOREIGN KEY (approved_by)
         REFERENCES lawyers(id)
         ON DELETE SET NULL
 );
 
+
+-- ============================================================
+-- SECTION 4: CASES
+-- ============================================================
+
+-- ONE-TO-ONE with consultation: one consultation leads to at most one case.
+-- UNIQUE(consultation_id) enforces this.
 CREATE TABLE cases (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    -- is this needed?
-    consultation_id     INT,
-
+    consultation_id     INT UNIQUE,
     lawfirm_id          INT NOT NULL,
     lawyer_id           INT,
     court_id            INT,
-    -- 16 digit number as required by court
     cnr                 VARCHAR(16) UNIQUE,
     case_type           VARCHAR(50) NOT NULL,
     brief_description   VARCHAR(1000) NOT NULL,
@@ -286,28 +302,28 @@ CREATE TABLE cases (
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_case_consultation
+    CONSTRAINT case_originated_from_consultation
         FOREIGN KEY (consultation_id)
         REFERENCES consultations(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_case_lawfirm
+    CONSTRAINT case_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_case_lawyer
+    CONSTRAINT case_handled_by_lawyer
         FOREIGN KEY (lawyer_id)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_case_court
+    CONSTRAINT case_filed_in_court
         FOREIGN KEY (court_id)
         REFERENCES courts(id)
         ON DELETE SET NULL
 );
 
--- Many-to-many: case <--> clients
+-- MANY-TO-MANY: a case involves multiple clients; a client can have multiple cases
 CREATE TABLE case_clients (
     case_id     INT NOT NULL,
     client_id   INT NOT NULL,
@@ -316,12 +332,12 @@ CREATE TABLE case_clients (
 
     PRIMARY KEY (case_id, client_id),
 
-    CONSTRAINT fk_cc_case
+    CONSTRAINT case_client_linked_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_cc_client
+    CONSTRAINT case_client_linked_to_client
         FOREIGN KEY (client_id)
         REFERENCES clients(id)
         ON DELETE CASCADE
@@ -334,18 +350,18 @@ CREATE TABLE case_opposing_party (
 
     PRIMARY KEY (case_id, client_id),
 
-    CONSTRAINT fk_cop_case
+    CONSTRAINT opposing_party_linked_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_cop_client
+    CONSTRAINT opposing_party_linked_to_client
         FOREIGN KEY (client_id)
         REFERENCES clients(id)
         ON DELETE CASCADE
 );
 
-
+-- MANY-TO-MANY: multiple interns can assist on a case
 CREATE TABLE case_interns (
     case_id     INT NOT NULL,
     intern_id   INT NOT NULL,
@@ -353,42 +369,44 @@ CREATE TABLE case_interns (
 
     PRIMARY KEY (case_id, intern_id),
 
-    CONSTRAINT fk_ci_case
+    CONSTRAINT case_intern_linked_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_ci_intern
+    CONSTRAINT case_intern_linked_to_intern
         FOREIGN KEY (intern_id)
         REFERENCES interns(id)
         ON DELETE CASCADE
 );
 
+-- ONE-TO-MANY: a case accumulates many notes over its lifetime
 CREATE TABLE case_notes (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     case_id         INT NOT NULL,
     author_lawyer   INT,
     author_intern   INT,
     note_text       TEXT NOT NULL,
-    is_approved     BOOLEAN DEFAULT TRUE,   -- intern notes may need lawyer approval
+    is_approved     BOOLEAN DEFAULT TRUE,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_cn_case
+    CONSTRAINT note_belongs_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_cn_lawyer
+    CONSTRAINT note_authored_by_lawyer
         FOREIGN KEY (author_lawyer)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_cn_intern
+    CONSTRAINT note_authored_by_intern
         FOREIGN KEY (author_intern)
         REFERENCES interns(id)
         ON DELETE SET NULL
 );
 
+-- ONE-TO-MANY: a case can have many tasks and deadlines
 CREATE TABLE case_tasks (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     case_id             INT NOT NULL,
@@ -401,22 +419,26 @@ CREATE TABLE case_tasks (
                             CHECK (status IN ('Pending','In Progress','Completed','Overdue')),
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_ct_case
+    CONSTRAINT task_belongs_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_ct_lawyer
+    CONSTRAINT task_assigned_to_lawyer
         FOREIGN KEY (assigned_to_lawyer)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_ct_intern
+    CONSTRAINT task_assigned_to_intern
         FOREIGN KEY (assigned_to_intern)
         REFERENCES interns(id)
         ON DELETE SET NULL
 );
 
+
+-- ============================================================
+-- SECTION 5: DOCUMENTS
+-- ============================================================
 
 CREATE TABLE documents (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -433,52 +455,57 @@ CREATE TABLE documents (
     version             INT DEFAULT 1,
     is_encrypted        BOOLEAN DEFAULT TRUE,
     is_mandatory        BOOLEAN DEFAULT FALSE,
-    is_verified         BOOLEAN DEFAULT FALSE,       -- verified by intern/lawyer
+    is_verified         BOOLEAN DEFAULT FALSE,
     uploaded_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_doc_case
+    CONSTRAINT document_belongs_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_doc_client
+    CONSTRAINT document_belongs_to_client
         FOREIGN KEY (client_id)
         REFERENCES clients(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_doc_lawyer
+    CONSTRAINT document_uploaded_by_lawyer
         FOREIGN KEY (uploaded_by_lawyer)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_doc_intern
+    CONSTRAINT document_uploaded_by_intern
         FOREIGN KEY (uploaded_by_intern)
         REFERENCES interns(id)
         ON DELETE SET NULL
 );
 
+-- ONE-TO-ONE with document: each checklist item links to at most one uploaded document.
+-- UNIQUE(document_id) prevents the same document from satisfying two checklist items.
 CREATE TABLE document_checklist (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     case_id         INT NOT NULL,
     document_name   VARCHAR(255) NOT NULL,
     is_mandatory    BOOLEAN DEFAULT TRUE,
     submitted       BOOLEAN DEFAULT FALSE,
-    document_id     INT,                        -- linked once the document is uploaded
+    document_id     INT UNIQUE,
     reminder_sent   BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_dc_case
+    CONSTRAINT checklist_belongs_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_dc_document
+    CONSTRAINT checklist_linked_to_document
         FOREIGN KEY (document_id)
         REFERENCES documents(id)
         ON DELETE SET NULL
 );
 
---- Messaging
+
+-- ============================================================
+-- SECTION 6: MESSAGING
+-- ============================================================
 
 CREATE TABLE message_threads (
     id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -487,12 +514,12 @@ CREATE TABLE message_threads (
     subject     VARCHAR(255),
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_mt_case
+    CONSTRAINT thread_linked_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_mt_lawfirm
+    CONSTRAINT thread_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE
@@ -504,41 +531,44 @@ CREATE TABLE messages (
     sender_client   INT,
     sender_lawyer   INT,
     sender_intern   INT,
-    content         TEXT NOT NULL,                  -- stored encrypted at rest
+    content         TEXT NOT NULL,
     sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_msg_thread
+    CONSTRAINT message_belongs_to_thread
         FOREIGN KEY (thread_id)
         REFERENCES message_threads(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_msg_client
+    CONSTRAINT message_sent_by_client
         FOREIGN KEY (sender_client)
         REFERENCES clients(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_msg_lawyer
+    CONSTRAINT message_sent_by_lawyer
         FOREIGN KEY (sender_lawyer)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_msg_intern
+    CONSTRAINT message_sent_by_intern
         FOREIGN KEY (sender_intern)
         REFERENCES interns(id)
         ON DELETE SET NULL
 );
 
--- billing structure is the basic unit of a service
+
+-- ============================================================
+-- SECTION 7: BILLING & PAYMENTS
+-- ============================================================
 
 CREATE TABLE billing_structures (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     lawfirm_id      INT NOT NULL,
-    service_name    VARCHAR(150) NOT NULL,           -- e.g. 'Consultation Fee', 'Filing Fee'
+    service_name    VARCHAR(150) NOT NULL,
     amount          NUMERIC(12,2) NOT NULL,
     billing_type    VARCHAR(20) DEFAULT 'Fixed'
                         CHECK (billing_type IN ('Fixed','Hourly','Milestone')),
 
-    CONSTRAINT fk_bs_lawfirm
+    CONSTRAINT billing_structure_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE
@@ -558,17 +588,17 @@ CREATE TABLE invoices (
     notes           TEXT,
     transaction_ref VARCHAR(100) UNIQUE,
 
-    CONSTRAINT fk_inv_lawfirm
+    CONSTRAINT invoice_issued_by_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_inv_client
+    CONSTRAINT invoice_billed_to_client
         FOREIGN KEY (client_id)
         REFERENCES clients(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_inv_case
+    CONSTRAINT invoice_linked_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE SET NULL
@@ -582,14 +612,16 @@ CREATE TABLE invoice_line_items (
     unit_price      NUMERIC(12,2) NOT NULL,
     line_total      NUMERIC(12,2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
 
-    CONSTRAINT fk_ili_invoice
+    CONSTRAINT line_item_belongs_to_invoice
         FOREIGN KEY (invoice_id)
         REFERENCES invoices(id)
         ON DELETE CASCADE
 );
 
----
---- Scheduling stuff
+
+-- ============================================================
+-- SECTION 8: HEARINGS & SCHEDULING
+-- ============================================================
 
 CREATE TABLE hearings (
     id              INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -599,23 +631,21 @@ CREATE TABLE hearings (
     hearing_time    TIME,
     result          TEXT,
     next_date       DATE,
-    -- to think about this --> like what is adjourned
     status          VARCHAR(20) DEFAULT 'Scheduled'
                         CHECK (status IN ('Scheduled','Completed','Postponed','Cancelled')),
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_hearing_case
+    CONSTRAINT hearing_belongs_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_hearing_court
+    CONSTRAINT hearing_held_in_court
         FOREIGN KEY (court_id)
         REFERENCES courts(id)
         ON DELETE SET NULL
 );
 
--- General schedule events (meetings, deadlines, reminders)
 CREATE TABLE schedule_events (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     case_id             INT,
@@ -632,29 +662,28 @@ CREATE TABLE schedule_events (
     reminder_sent       BOOLEAN DEFAULT FALSE,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_se_case
+    CONSTRAINT event_linked_to_case
         FOREIGN KEY (case_id)
         REFERENCES cases(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_se_lawfirm
+    CONSTRAINT event_belongs_to_firm
         FOREIGN KEY (lawfirm_id)
         REFERENCES lawfirm_meta(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_se_lawyer
+    CONSTRAINT event_created_by_lawyer
         FOREIGN KEY (created_by_lawyer)
         REFERENCES lawyers(id)
         ON DELETE SET NULL,
 
-    CONSTRAINT fk_se_intern
+    CONSTRAINT event_created_by_intern
         FOREIGN KEY (created_by_intern)
         REFERENCES interns(id)
         ON DELETE SET NULL
 );
 
 
---- Audit log
 
 CREATE TABLE audit_logs (
     id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -664,34 +693,35 @@ CREATE TABLE audit_logs (
     action      VARCHAR(50) NOT NULL,
     performed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_al_document
+    CONSTRAINT audit_log_refers_to_document
         FOREIGN KEY (document_id)
         REFERENCES documents(id)
         ON DELETE CASCADE
 );
+
 
 CREATE TABLE notifications (
     id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     recipient_client    INT,
     recipient_lawyer    INT,
     recipient_intern    INT,
-    type                VARCHAR(50) NOT NULL,    -- e.g. 'Hearing Reminder', 'Document Request', 'Payment Due'
+    type                VARCHAR(50) NOT NULL,
     title               VARCHAR(255) NOT NULL,
     body                TEXT,
     is_read             BOOLEAN DEFAULT FALSE,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_notif_client
+    CONSTRAINT notification_sent_to_client
         FOREIGN KEY (recipient_client)
         REFERENCES clients(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_notif_lawyer
+    CONSTRAINT notification_sent_to_lawyer
         FOREIGN KEY (recipient_lawyer)
         REFERENCES lawyers(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_notif_intern
+    CONSTRAINT notification_sent_to_intern
         FOREIGN KEY (recipient_intern)
         REFERENCES interns(id)
         ON DELETE CASCADE
