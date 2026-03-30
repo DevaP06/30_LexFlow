@@ -40,6 +40,12 @@
         if (el) el.classList.add('active');
       }
 
+      // Update role label from localStorage
+      const roleLabels = { client: 'Client', lawfirm: 'Law Firm' };
+      const userRole = localStorage.getItem('userRole');
+      const roleEl = container.querySelector('.user-role');
+      if (roleEl && userRole) roleEl.textContent = roleLabels[userRole] ?? 'User';
+
     } catch (err) {
       console.error(`[sidebar.js] Network error loading "${url}":`, err);
     }

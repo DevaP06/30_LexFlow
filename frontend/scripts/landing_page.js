@@ -58,6 +58,7 @@
 
   if (loginClientBtn) {
     loginClientBtn.addEventListener('click', function () {
+      localStorage.setItem('userRole', 'client');
       login.close();
       window.location.href = '../pages/SignIn.html';
     });
@@ -65,6 +66,7 @@
 
   if (loginLawfirmBtn) {
     loginLawfirmBtn.addEventListener('click', function () {
+      localStorage.setItem('userRole', 'lawfirm');
       login.close();
       window.location.href = '../pages/SignIn.html';
     });
