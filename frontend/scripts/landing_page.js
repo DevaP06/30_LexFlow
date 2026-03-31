@@ -66,7 +66,7 @@
 
   if (loginLawfirmBtn) {
     loginLawfirmBtn.addEventListener('click', function () {
-      localStorage.setItem('userRole', 'lawfirm');
+      localStorage.setItem('userRole', 'firmAdmin');
       login.close();
       window.location.href = '../pages/SignIn.html';
     });
