@@ -41,7 +41,7 @@
     });
   });
 
- /* Close when pressing ESC */
+  /* Close when pressing ESC */
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') allAnchors.forEach(function (a) { a.close(); });
   });
@@ -57,7 +57,6 @@
 
   if (loginClientBtn) {
     loginClientBtn.addEventListener('click', function () {
-      localStorage.setItem('userRole', 'client');
       login.close();
       window.location.href = '../pages/SignIn.html';
     });
@@ -65,7 +64,6 @@
 
   if (loginLawfirmBtn) {
     loginLawfirmBtn.addEventListener('click', function () {
-      localStorage.setItem('userRole', 'firmAdmin');
       login.close();
       window.location.href = '../pages/SignIn.html';
     });
