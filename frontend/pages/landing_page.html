@@ -7,7 +7,7 @@
     <meta content="LexFlow - Comprehensive Legal Solutions Platform for modern law firms" name="description" />
     <title>LexFlow - Legal Consultation Platform</title>
 
-    <!-- Global reset, fonts and design tokens -->
+    <!-- Global styles -->
     <link href="../styles/globals_harshkumar.css" rel="stylesheet" />
     <!-- Page-specific layout and components -->
     <link href="../styles/landing_page.css" rel="stylesheet" />
@@ -18,7 +18,7 @@
         <!-- ================= HEADER / NAVIGATION ================= -->
         <header class="site-header">
             <div class="page-inner site-header__nav">
-                <!-- Logo (you can keep the original image asset) -->
+                <!-- logo -->
                 <a href="#" class="site-header__logo">
                     <img src="../assets/img/logo.svg" alt="LexFlow logo" />
                 </a>
@@ -34,16 +34,16 @@
                 <div class="site-header__actions">
                     <!-- Login dropdown anchor -->
                     <div class="nav-dropdown-anchor" id="login-anchor">
-                        <button type="button" class="btn-outline" id="login-btn" aria-haspopup="true" aria-expanded="false">
+                        <button type="button" class="btn-outline" id="login-btn">
                             <span>Login</span>
                             <img src="../assets/img/icon-chevron.svg" alt="" class="chevron-icon" />
                         </button>
 
-                        <div class="nav-dropdown" id="login-dropdown" role="menu">
+                        <div class="nav-dropdown" id="login-dropdown">
                             <div class="nav-dropdown__label">Continue as</div>
 
                             <!-- Login as Client -->
-                            <button type="button" class="nav-dropdown__item" id="login-client-btn" role="menuitem">
+                            <button type="button" class="nav-dropdown__item" id="login-client-btn">
                                 <img src="../assets/img/icon-consultation.svg" alt="" class="item-icon" />
                                 <span class="nav-dropdown__item-text">
                                     <span class="nav-dropdown__item-label">Client</span>
@@ -54,7 +54,7 @@
                             <div class="nav-dropdown__divider"></div>
 
                             <!-- Login as Law Firm -->
-                            <button type="button" class="nav-dropdown__item" id="login-lawfirm-btn" role="menuitem">
+                            <button type="button" class="nav-dropdown__item" id="login-lawfirm-btn">
                                 <img src="../assets/img/icon-access.svg" alt="" class="item-icon" />
                                 <span class="nav-dropdown__item-text">
                                     <span class="nav-dropdown__item-label">Law Firm</span>
@@ -64,35 +64,46 @@
                         </div>
                     </div>
 
-                    <!-- Language dropdown anchor -->
+                    <!-- Language dropdown anchor 
                     <div class="nav-dropdown-anchor" id="lang-anchor">
-                        <button type="button" class="lang-switch" id="lang-btn" aria-haspopup="true" aria-expanded="false">
+                        <button type="button" class="lang-switch" id="lang-btn">
                             <img src="../assets/img/icon-flag.svg" alt="Language flag" />
                             <span id="lang-label">EN</span>
                             <img src="../assets/img/icon-chevron.svg" alt="Open language menu" class="chevron-icon" />
                         </button>
 
-                        <div class="nav-dropdown" id="lang-dropdown" role="menu">
+                        <div class="nav-dropdown" id="lang-dropdown">
                             <div class="nav-dropdown__label">Language</div>
 
-                            <!-- English -->
-                            <button type="button" class="nav-dropdown__item is-active" id="lang-en-btn" data-lang="en" data-label="EN" role="menuitem">
+                             English 
+                            <button type="button" class="nav-dropdown__item is-active" id="lang-en-btn" data-lang="en"
+                                data-label="EN">
                                 <span class="nav-dropdown__item-text">
                                     <span class="nav-dropdown__item-label">English</span>
                                 </span>
-                                <svg class="item-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg class="item-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
                             </button>
 
-                            <!-- Hindi -->
-                            <button type="button" class="nav-dropdown__item" id="lang-hi-btn" data-lang="hi" data-label="HI" role="menuitem">
+                             Hindi
+                            <button type="button" class="nav-dropdown__item" id="lang-hi-btn" data-lang="hi"
+                                data-label="HI">
                                 <span class="nav-dropdown__item-text">
                                     <span class="nav-dropdown__item-label">हिन्दी</span>
                                     <span class="nav-dropdown__item-sub">Hindi</span>
                                 </span>
-                                <svg class="item-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg class="item-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
                             </button>
                         </div>
                     </div>
+                -->
                 </div>
             </div>
         </header>
@@ -289,7 +300,7 @@
             <div class="page-inner">
                 <div class="security-card">
                     <!-- Left: copy and bullet points -->
-                    <div class= "s_and_c">
+                    <div class="s_and_c">
                         <div class="security-card__headline">
                             <img src="../assets/img/icon-security.svg" alt="" />
                             <h2 class="security-card__headline-text">
