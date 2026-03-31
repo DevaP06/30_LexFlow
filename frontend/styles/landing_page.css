@@ -924,8 +924,31 @@
         font-size: 42px;
     }
 
+    .security-card{
+        padding: 40px 20px; 
+    }
+
+    .security-card__headline-text{
+        font-size: 24px;
+        }
+
     .law-firms-card {
-        padding: 48px 24px;
+        padding: 40px 20px;
+    }
+
+    .law-firms-title {
+        font-size: 24px;
+        letter-spacing: 1px;
+        }
+
+    .law-firms-tag {
+        font-size: 18px;
+        
+    }
+
+    .law-firms-body {
+        font-size: 16px;
+        letter-spacing: 0;
     }
 
     .footer-main {
