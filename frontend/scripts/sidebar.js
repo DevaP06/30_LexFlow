@@ -6,13 +6,23 @@
 
 (function () {
 
-  // Maps page filename (lowercase) → nav item ID in sidebar.html
+  // Maps page filename → nav item ID (for active highlighting)
   const PAGE_TO_NAV = {
-    'ScheduleManagement.html': 'nav-scheduling',
-    'consultations.html':      'nav-consultations',
-    'cases.html':              'nav-cases',
-    'documents.html':          'nav-documents',
-    'billing.html':            'nav-billing',
+    'ScheduleManagement.html':            'nav-scheduling',
+    'client-consultation-dashboard.html': 'nav-consultations',
+    'firm-consultation-dashboard.html':   'nav-consultations',
+    'cases.html':                         'nav-cases',
+    'documents.html':                     'nav-documents',
+    'billing.html':                       'nav-billing',
+    'client-law_firm-search.html':        'nav-search',
+  };
+
+  // Maps nav item ID → relative page path (for link resolution)
+  // Add entries here as new pages are built
+  const NAV_TO_PAGE = {
+    'nav-consultations': 'client-consultation-dashboard.html',
+    'nav-search':        'client-law_firm-search.html',
+    'nav-scheduling':    'ScheduleManagement.html',
   };
 
   async function loadComponent(selector, url) {
@@ -40,11 +50,36 @@
         if (el) el.classList.add('active');
       }
 
+      // Resolve nav link hrefs for pages that exist
+      Object.entries(NAV_TO_PAGE).forEach(([id, pagePath]) => {
+        const link = document.getElementById(id);
+        if (link) link.href = pagePath;
+      });
+
       // Update role label from localStorage
-      const roleLabels = { client: 'Client', lawfirm: 'Law Firm' };
+      const roleLabels = { client: 'Client', firmAdmin: 'Law Firm' };
       const userRole = localStorage.getItem('userRole');
       const roleEl = container.querySelector('.user-role');
       if (roleEl && userRole) roleEl.textContent = roleLabels[userRole] ?? 'User';
+
+      // Role-based nav visibility
+      // firmAdmin: hide "Find a Law Firm", point Consultations to firm dashboard
+      // client:    hide "Schedules",        point Consultations to client dashboard
+      if (userRole === 'firmAdmin') {
+        const searchLink = document.getElementById('nav-search');
+        if (searchLink) searchLink.closest('a').style.display = 'none';
+
+        const consultLink = document.getElementById('nav-consultations');
+        if (consultLink) consultLink.href = 'firm-consultation-dashboard.html';
+
+      } else {
+        // default to client behaviour
+        const schedLink = document.getElementById('nav-scheduling');
+        if (schedLink) schedLink.closest('a').style.display = 'none';
+
+        const consultLink = document.getElementById('nav-consultations');
+        if (consultLink) consultLink.href = 'client-consultation-dashboard.html';
+      }
 
     } catch (err) {
       console.error(`[sidebar.js] Network error loading "${url}":`, err);
