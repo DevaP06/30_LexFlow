@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Log</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f7f7f5;
+            --surface: #ffffff;
+            --border: #e4e4e0;
+            --border-light: #f0f0ec;
+            --text-primary: #1a1a18;
+            --text-secondary: #6b6b65;
+            --text-muted: #9f9f98;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --accent-soft: #eff6ff;
+            --tag-bg: #eef2ff;
+            --tag-text: #3730a3;
+            --tag-border: #c7d2fe;
+            --undo: #2563eb;
+            --row-hover: #fafaf8;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-full: 999px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 24px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+            color: var(--text-primary);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrap {
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 38px;
+            padding: 0 14px 0 36px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 38px;
+            padding: 0 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-filter:hover {
+            background: var(--row-hover);
+            border-color: #d0d0c8;
+        }
+
+        .btn-more {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            cursor: pointer;
+            transition: background 0.15s;
+            color: var(--text-secondary);
+        }
+
+        .btn-more:hover {
+            background: var(--row-hover);
+        }
+
+        /* Active Filters */
+        .active-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 30px;
+            padding: 0 10px;
+            border: 1px solid var(--tag-border);
+            border-radius: var(--radius-full);
+            background: var(--tag-bg);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--tag-text);
+        }
+
+        .filter-tag button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--tag-text);
+            padding: 0;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+
+        .filter-tag button:hover {
+            opacity: 1;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            padding: 11px 20px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        th.sortable {
+            cursor: pointer;
+        }
+
+        th.sortable:hover {
+            color: var(--text-primary);
+        }
+
+        th .th-inner {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.12s;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--row-hover);
+        }
+
+        td {
+            padding: 14px 20px;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        /* Date cell */
+        .td-date {
+            font-family: 'DM Mono', monospace;
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* User cell */
+        .user-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .user-email {
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        /* Change cell */
+        .change-cell {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+        }
+
+        .change-cell a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .change-cell a:hover {
+            text-decoration: underline;
+        }
+
+
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-light);
+            gap: 12px;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .page-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .page-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--row-hover);
+            border-color: #d0d0c8;
+            color: var(--text-primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Animation */
+        tbody tr {
+            animation: rowIn 0.2s ease both;
+        }
+
+        @keyframes rowIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="page-header">
+            <h1>Activity log</h1>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-wrap">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M10 6.5C10 8.433 8.433 10 6.5 10C4.567 10 3 8.433 3 6.5C3 4.567 4.567 3 6.5 3C8.433 3 10 4.567 10 6.5ZM9.34 10.4C8.58 10.9 7.67 11.2 6.7 11.2C4.1 11.2 2 9.1 2 6.5C2 3.9 4.1 1.8 6.7 1.8C9.3 1.8 11.4 3.9 11.4 6.5C11.4 7.5 11.1 8.4 10.5 9.1L13.2 11.8C13.4 12 13.4 12.3 13.2 12.5C13 12.7 12.7 12.7 12.5 12.5L9.34 10.4Z"
+                        fill="currentColor" />
+                </svg>
+                <input class="search-input" type="text" id="searchInput" placeholder="Search activity..."
+                    oninput="filterTable()">
+            </div>
+            <div class="toolbar-actions">
+                <button class="btn-filter">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.4"
+                            stroke-linecap="round" />
+                    </svg>
+                    Add filter
+                </button>
+                <button class="btn-more" title="More options">
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                        <circle cx="3" cy="7.5" r="1.2" fill="currentColor" />
+                        <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" />
+                        <circle cx="12" cy="7.5" r="1.2" fill="currentColor" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="active-filters" id="activeFilters">
+            <span class="filter-tag">
+                Change: download, upload
+                <button onclick="removeFilter()" title="Remove filter">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </span>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable(0)">
+                            <span class="th-inner">
+                                Date and time
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M6 2.5l3 4H3l3-4z" fill="currentColor" opacity="0.5" />
+                                </svg>
+                            </span>
+                        </th>
+                        <th>User</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-state" id="emptyState" style="display:none;">No matching activity found.</div>
+            <div class="pagination">
+                <span class="page-info" id="pageInfo"></span>
+                <div class="page-btns">
+                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)" title="Previous">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M8.5 3L5 7l3.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <button class="page-btn" id="nextBtn" onclick="changePage(1)" title="Next">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M5.5 3L9 7l-3.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const ALL_ROWS = [
+            { date: "09/16/2019, 06:17PM", user: "Jesse Roy", email: "spinka.godfrey@yahoo.com", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 08:27PM", user: "Mayme Marsh", email: "landen_bauch@hotmail.com", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 10:03AM", user: "Isabel Jennings", email: "arjun_johns@sauer.com", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 02:07AM", user: "Katharine Maldonado", email: "alvena.hahn@geovanni.net", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 11:44AM", user: "Tony Williamson", email: "alden.greenholt@iliana.info", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 09:13AM", user: "Jackson Dawson", email: "kozey.frieda@yahoo.com", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 03:02PM", user: "Gary Flowers", email: "crystal.donnelly@klocko.tv", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 11:10PM", user: "Sue McGee", email: "kassulke_jacinto@yahoo.com", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 05:29PM", user: "Zachary Daniels", email: "estefania.bashirian@lois.com", file: "name_of_file.pdf" },
+            { date: "09/16/2019, 06:31AM", user: "Aiden Herrera", email: "larson_kaitlyn@cole.ca", file: "name_of_file.pdf" },
+            { date: "09/17/2019, 08:10AM", user: "Lily Carter", email: "lily.carter@company.com", file: "report_q3.pdf" },
+            { date: "09/17/2019, 09:45AM", user: "Marcus Webb", email: "m.webb@webgroup.io", file: "summary.pdf" },
+            { date: "09/17/2019, 11:22AM", user: "Diane Foster", email: "diane.foster@outlook.com", file: "invoice_oct.pdf" },
+            { date: "09/17/2019, 01:05PM", user: "Owen Blake", email: "o.blake@techcorp.net", file: "name_of_file.pdf" },
+            { date: "09/17/2019, 02:55PM", user: "Sophie Lane", email: "sophie.lane@domain.co", file: "contract.pdf" },
+            { date: "09/17/2019, 04:33PM", user: "Henry Cruz", email: "h.cruz@mailbox.com", file: "name_of_file.pdf" },
+            { date: "09/17/2019, 06:12PM", user: "Nina Patel", email: "nina.p@globex.in", file: "data_export.pdf" },
+            { date: "09/17/2019, 07:48PM", user: "Chris Simmons", email: "c.simmons@corp.us", file: "name_of_file.pdf" },
+            { date: "09/18/2019, 08:30AM", user: "Eva Morris", email: "eva.morris@horizon.co", file: "brief.pdf" },
+            { date: "09/18/2019, 10:00AM", user: "Luke Richardson", email: "luke.r@intech.io", file: "name_of_file.pdf" },
+        ];
+
+        const ROWS_PER_PAGE = 10;
+        let currentPage = 1;
+        let filteredRows = [...ALL_ROWS];
+        let sortAsc = false;
+
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            filteredRows = ALL_ROWS.filter(r =>
+                r.date.toLowerCase().includes(q) ||
+                r.user.toLowerCase().includes(q) ||
+                r.email.toLowerCase().includes(q) ||
+                r.file.toLowerCase().includes(q)
+            );
+            currentPage = 1;
+            render();
+        }
+
+        function sortTable(col) {
+            sortAsc = !sortAsc;
+            filteredRows.sort((a, b) => {
+                const va = a.date, vb = b.date;
+                return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+            render();
+        }
+
+        function changePage(dir) {
+            const total = Math.ceil(filteredRows.length / ROWS_PER_PAGE);
+            currentPage = Math.max(1, Math.min(total, currentPage + dir));
+            render();
+        }
+
+        function removeFilter() {
+            document.getElementById('activeFilters').style.display = 'none';
+        }
+
+        function render() {
+            const tbody = document.getElementById('tableBody');
+            const total = filteredRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+            const start = (currentPage - 1) * ROWS_PER_PAGE;
+            const end = Math.min(start + ROWS_PER_PAGE, total);
+            const pageRows = filteredRows.slice(start, end);
+
+            document.getElementById('emptyState').style.display = total === 0 ? 'block' : 'none';
+            document.getElementById('pageInfo').textContent = total > 0
+                ? `${start + 1}–${end} of ${total}`
+                : '';
+
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+
+            tbody.innerHTML = '';
+            pageRows.forEach((row, i) => {
+                const tr = document.createElement('tr');
+                tr.style.animationDelay = `${i * 30}ms`;
+                tr.innerHTML = `
+        <td class="td-date">${row.date}</td>
+        <td>
+          <div class="user-name">${row.user}</div>
+          <div class="user-email">${row.email}</div>
+        </td>
+        <td class="change-cell">Downloaded <a href="#">${row.file}</a></td>
+
+      `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        render();
+    </script>
+</body>
+
+</html>
