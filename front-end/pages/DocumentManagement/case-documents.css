@@ -101,6 +101,7 @@ table {
 
 
 /* ---------- SIDEBAR ---------- */
+/*
 .sidebar {
     width: var(--sidebar-width);
     min-height: 100vh;
@@ -123,7 +124,6 @@ table {
     gap: 32px;
 }
 
-/* Brand */
 .sidebar-brand {
     display: flex;
     align-items: center;
@@ -138,7 +138,6 @@ table {
     letter-spacing: -0.3px;
 }
 
-/* Nav */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -179,7 +178,6 @@ table {
     opacity: 1;
 }
 
-/* User Profile */
 .sidebar-bottom {
     padding: 0 12px;
 }
@@ -241,6 +239,7 @@ table {
     color: #fff;
     background: rgba(255, 255, 255, 0.12);
 }
+*/
 
 /* ---------- MAIN CONTENT ---------- */
 .main-content {
