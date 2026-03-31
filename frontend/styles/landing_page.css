@@ -896,8 +896,8 @@
 
     .trusted-badge {
         position: static;
-        margin-top: -20px; 
-        margin-bottom: 16px; 
+        margin-top: -20px;
+        margin-bottom: 16px;
         align-self: flex-start;
     }
 
@@ -924,13 +924,13 @@
         font-size: 42px;
     }
 
-    .security-card{
-        padding: 40px 20px; 
+    .security-card {
+        padding: 40px 20px;
     }
 
-    .security-card__headline-text{
+    .security-card__headline-text {
         font-size: 24px;
-        }
+    }
 
     .law-firms-card {
         padding: 40px 20px;
@@ -939,11 +939,11 @@
     .law-firms-title {
         font-size: 24px;
         letter-spacing: 1px;
-        }
+    }
 
     .law-firms-tag {
         font-size: 18px;
-        
+
     }
 
     .law-firms-body {
