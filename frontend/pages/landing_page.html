@@ -15,6 +15,8 @@
 
 <body>
     <div class="landingpage">
+
+        <div class="first-page">
         <!-- ================= HEADER / NAVIGATION ================= -->
         <header class="site-header">
             <div class="page-inner site-header__nav">
@@ -22,14 +24,14 @@
                 <a href="#" class="site-header__logo">
                     <img src="../assets/img/logo.svg" alt="LexFlow logo" />
                 </a>
-
+        
                 <!-- Simple text navigation -->
                 <nav class="site-header__links">
                     <a href="#features">Features</a>
                     <a href="#how-it-works">How it works</a>
                     <a href="#security">Security</a>
                 </nav>
-
+        
                 <!-- Language selector + login action -->
                 <div class="site-header__actions">
                     <!-- Login dropdown anchor -->
@@ -38,10 +40,10 @@
                             <span>Login</span>
                             <img src="../assets/img/icon-chevron.svg" alt="" class="chevron-icon" />
                         </button>
-
+        
                         <div class="nav-dropdown" id="login-dropdown">
                             <div class="nav-dropdown__label">Continue as</div>
-
+        
                             <!-- Login as Client -->
                             <button type="button" class="nav-dropdown__item" id="login-client-btn">
                                 <img src="../assets/img/icon-consultation.svg" alt="" class="item-icon" />
@@ -50,9 +52,9 @@
                                     <span class="nav-dropdown__item-sub">Book consultations &amp; manage cases</span>
                                 </span>
                             </button>
-
+        
                             <div class="nav-dropdown__divider"></div>
-
+        
                             <!-- Login as Law Firm -->
                             <button type="button" class="nav-dropdown__item" id="login-lawfirm-btn">
                                 <img src="../assets/img/icon-access.svg" alt="" class="item-icon" />
@@ -63,19 +65,19 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Language dropdown anchor 
+        
+                    <!-- Language dropdown anchor -->
                     <div class="nav-dropdown-anchor" id="lang-anchor">
                         <button type="button" class="lang-switch" id="lang-btn">
                             <img src="../assets/img/icon-flag.svg" alt="Language flag" />
                             <span id="lang-label">EN</span>
                             <img src="../assets/img/icon-chevron.svg" alt="Open language menu" class="chevron-icon" />
                         </button>
-
+        
                         <div class="nav-dropdown" id="lang-dropdown">
                             <div class="nav-dropdown__label">Language</div>
-
-                             English 
+        
+                            <!-- English -->
                             <button type="button" class="nav-dropdown__item is-active" id="lang-en-btn" data-lang="en"
                                 data-label="EN">
                                 <span class="nav-dropdown__item-text">
@@ -87,10 +89,9 @@
                                     <polyline points="20 6 9 17 4 12" />
                                 </svg>
                             </button>
-
-                             Hindi
-                            <button type="button" class="nav-dropdown__item" id="lang-hi-btn" data-lang="hi"
-                                data-label="HI">
+        
+                            <!-- Hindi -->
+                            <button type="button" class="nav-dropdown__item" id="lang-hi-btn" data-lang="hi" data-label="HI">
                                 <span class="nav-dropdown__item-text">
                                     <span class="nav-dropdown__item-label">हिन्दी</span>
                                     <span class="nav-dropdown__item-sub">Hindi</span>
@@ -103,11 +104,10 @@
                             </button>
                         </div>
                     </div>
-                -->
                 </div>
             </div>
         </header>
-
+        
         <!-- ================= HERO SECTION ================= -->
         <section class="starting-page">
             <div class="hero-layout">
@@ -117,7 +117,7 @@
                     <div class="hero-pill">
                         UNIFIED LEGAL CONSULTATION PLATFORM
                     </div>
-
+        
                     <h1 class="hero-title">
                         Simplifying Legal<br />
                         Consultations and<br />
@@ -132,7 +132,7 @@
                         Request Consultation
                     </button>
                 </div>
-
+        
                 <div class="hero-visual-wrapper">
                     <!-- Right column: office image card -->
                     <div class="hero-visual-card">
@@ -150,15 +150,17 @@
                             <div class="trusted-badge__value">000+ Law Firms</div>
                         </div>
                     </div>
-
-
+        
+        
                 </div>
-
+        
             </div>
-
-
-
+        
+        
+        
         </section>
+
+        </div>
 
         <!-- ================= FEATURES SECTION ================= -->
         <section id="features" class="comprehensive-legal section-padding">
