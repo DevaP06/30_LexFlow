@@ -5,18 +5,74 @@ let allTasks = [],
     avatar: "SM",
     role: "Lawyer"
   };
+const MOCK_STORAGE_KEY = "lexflow_mock_data",
+  TASKS_STORAGE_KEY = "lexflow_tasks",
+  USERS_STORAGE_KEY = "lexflow_users",
+  MOCK_PATH = "../scripts/client_casemanagement_mock-data.json";
+
+function loadJsonFromStorage(t) {
+  try {
+    const e = localStorage.getItem(t);
+    return e ? JSON.parse(e) : null;
+  } catch (e) {
+    return (console.warn(`Failed to parse ${t}:`, e), null);
+  }
+}
+
+function saveJsonToStorage(t, e) {
+  localStorage.setItem(t, JSON.stringify(e));
+}
+
+function resolveSignedInUser() {
+  const t = loadJsonFromStorage("currentUser") || {};
+  currentUser.name = t.fullName || t.name || currentUser.name;
+}
+
+async function ensureTaskStorage() {
+  let t = loadJsonFromStorage(MOCK_STORAGE_KEY),
+    e = loadJsonFromStorage(TASKS_STORAGE_KEY),
+    n = loadJsonFromStorage(USERS_STORAGE_KEY);
+
+  if (!(t && Array.isArray(t.tasks))) {
+    if (!Array.isArray(e)) {
+      const a = await fetch(MOCK_PATH),
+        s = await a.json();
+      ((t = s),
+        saveJsonToStorage(MOCK_STORAGE_KEY, s),
+        saveJsonToStorage(TASKS_STORAGE_KEY, s.tasks || []),
+        saveJsonToStorage(USERS_STORAGE_KEY, s.users || []));
+    } else {
+      t = { ...(t || {}), tasks: e || [], users: n || [] };
+      saveJsonToStorage(MOCK_STORAGE_KEY, t);
+    }
+  } else {
+    (Array.isArray(e) || saveJsonToStorage(TASKS_STORAGE_KEY, t.tasks || []),
+      Array.isArray(n) || saveJsonToStorage(USERS_STORAGE_KEY, t.users || []));
+  }
+
+  return {
+    tasks: loadJsonFromStorage(TASKS_STORAGE_KEY) || (t && t.tasks) || [],
+    users: loadJsonFromStorage(USERS_STORAGE_KEY) || (t && t.users) || [],
+  };
+}
+
+function saveTasksToAllStores() {
+  const t = loadJsonFromStorage(MOCK_STORAGE_KEY) || {},
+    e = loadJsonFromStorage(TASKS_STORAGE_KEY) || [];
+  (saveJsonToStorage(
+    TASKS_STORAGE_KEY,
+    e
+      .filter((t) => t.assignedUser !== currentUser.name)
+      .concat(allTasks),
+  ),
+    (t.tasks = loadJsonFromStorage(TASKS_STORAGE_KEY) || []),
+    Array.isArray(t.users) || (t.users = loadJsonFromStorage(USERS_STORAGE_KEY) || []),
+    saveJsonToStorage(MOCK_STORAGE_KEY, t));
+}
 async function initTasks() {
   try {
-    let t;
-    const e = localStorage.getItem("lexflow_mock_data");
-    if (e) t = JSON.parse(e);
-    else {
-      const e = await fetch(
-        "../scripts/client_casemanagement_mock-data.json",
-      );
-      ((t = await e.json()),
-        localStorage.setItem("lexflow_mock_data", JSON.stringify(t)));
-    }
+    (resolveSignedInUser());
+    const t = await ensureTaskStorage();
     ((allTasks = (t.tasks || []).filter(
       (t) => t.assignedUser === currentUser.name,
     )),
@@ -27,13 +83,7 @@ async function initTasks() {
   }
 }
 function saveTasks() {
-  const t = localStorage.getItem("lexflow_mock_data");
-  if (t) {
-    let e = JSON.parse(t);
-    const n = e.tasks.filter((t) => t.assignedUser !== currentUser.name);
-    ((e.tasks = [...n, ...allTasks]),
-      localStorage.setItem("lexflow_mock_data", JSON.stringify(e)));
-  }
+  saveTasksToAllStores();
 }
 const TASKS_PER_PAGE = 5;
 let currentPage = 1;

@@ -1,10 +1,14 @@
 let allCases = [],
   filteredCases = [];
+
+// Use shared cases storage utility
+const casesStorage = window.LexFlowCasesStorage;
+
 async function initCases() {
   try {
-    const e = await fetch("../scripts/client_casemanagement_mock-data.json"),
-      t = await e.json();
-    ((allCases = t.cases), (filteredCases = [...allCases]), renderPage(1));
+    allCases = await casesStorage.getCases();
+    filteredCases = [...allCases];
+    renderPage(1);
   } catch (e) {
     console.error("Error loading cases:", e);
   }
@@ -71,6 +75,6 @@ function renderPage(e) {
   document
     .getElementById("btnNewConsultation")
     .addEventListener("click", function () {
-      alert("New Consultation flow coming soon!");
+      window.location.href = "client-law_firm-search.html";
     }),
   initCases());

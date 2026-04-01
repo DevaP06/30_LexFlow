@@ -13,8 +13,9 @@
         
         if (userNameEl && userRoleEl) {
             const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name": "User", "role": "Guest"}');
-            userNameEl.textContent = currentUser.name || 'User';
-            userRoleEl.textContent = currentUser.role || 'Guest';
+            const roleLabels = { client: 'Client', firmAdmin: 'Firm Admin', lawyer: 'Lawyer' };
+            userNameEl.textContent = currentUser.fullName || currentUser.name || 'User';
+            userRoleEl.textContent = roleLabels[currentUser.role] || currentUser.role || 'Guest';
         }
 
         // Setup logout button

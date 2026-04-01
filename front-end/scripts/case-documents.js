@@ -37,19 +37,39 @@
    • Interns only see SHARED documents within their access list
    =================================================== */
 
-// Get userRole from localStorage
-const userRole = localStorage.getItem('userRole') || 'client';
+function safeParse(value, fallback) {
+  try {
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
-// Map role to test user email
+const currentUser = safeParse(localStorage.getItem('currentUser'), null);
+const userRole =
+  (currentUser && currentUser.role) ||
+  localStorage.getItem('userRole') ||
+  'client';
+
+// Fallback role email map used only when currentUser is unavailable.
 const roleToEmailMap = {
-  'client': 'rahul.client@gmail.com',      // client user
-  'firmAdmin': 'mehta@lexflow.in',         // lawyer/admin user
-  'lawyer': 'mehta@lexflow.in',
-  'intern': 'priya.intern@lexflow.in'
+  client: 'rahul.client@gmail.com',
+  firmAdmin: 'mehta@lexflow.in',
+  'firm-admin': 'mehta@lexflow.in',
+  lawfirm_admin: 'admin@lexflow.in',
+  lawyer: 'mehta@lexflow.in',
+  intern: 'priya.intern@lexflow.in',
 };
 
-const CURRENT_USER_EMAIL = roleToEmailMap[userRole] || roleToEmailMap['client'];
-const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
+const CURRENT_USER_EMAIL =
+  (currentUser && currentUser.email) ||
+  roleToEmailMap[userRole] ||
+  roleToEmailMap.client;
+
+const CURRENT_CASE_ID =
+  localStorage.getItem('caseId') ||
+  localStorage.getItem('currentCaseId') ||
+  'CASE-45';
 
 (function () {
   "use strict";
@@ -61,6 +81,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
   const LS_UPLOADS        = "lexflow_uploaded_docs";
   const LS_UPDATES        = "lexflow_updated_docs";
   const LS_ACTIVITY       = "lexflow_activity_log";
+  const LS_DOCS_INDEX     = "lexflow_documents";
   const USERS_JSON_PATH   = "../data/docs.json";
 
   /* ════════════════════════════════════════
@@ -319,33 +340,214 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
   document.head.appendChild(styleEl);
 
   /* ════════════════════════════════════════
-     BOOT — FETCH users.json then initialise
+     WAIT FOR SHARED STORAGE TO LOAD
   ════════════════════════════════════════ */
-  fetch(USERS_JSON_PATH)
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-    .then(db => init(db))
-    .catch(err => {
-      console.error("hrtll.js: failed to load users.json", err);
-      toast("Failed to load document data. Check users.json path.", "error");
+  function waitForCasesStorage(maxWait = 5000) {
+    return new Promise((resolve, reject) => {
+      console.log("⏳ Waiting for cases-storage.js (max", maxWait, "ms)...");
+      const start = Date.now();
+      const checkInterval = setInterval(() => {
+        if (window.LexFlowCasesStorage) {
+          const waited = Date.now() - start;
+          console.log("✓ cases-storage.js found after", waited, "ms");
+          clearInterval(checkInterval);
+          resolve(window.LexFlowCasesStorage);
+        } else if (Date.now() - start > maxWait) {
+          clearInterval(checkInterval);
+          const waited = Date.now() - start;
+          console.error("✗ cases-storage.js NOT found after", waited, "ms (timeout)");
+          reject(new Error("cases-storage.js did not load in time"));
+        }
+      }, 50);
     });
+  }
 
   /* ════════════════════════════════════════
-     MAIN INIT — runs once JSON is loaded
+     BOOT — LOAD FROM STORAGE, THEN INITIALISE
+  ════════════════════════════════════════ */
+  async function bootApp() {
+    console.log("=== bootApp() STARTING ===");
+    try {
+      // Step 1: Wait for shared storage utility, or use direct localStorage
+      console.log("Step 1: Getting users from storage...");
+      let casesStorageUsers = [];
+      try {
+        const casesStorage = await waitForCasesStorage(2000);  // Shorter timeout (2s instead of 5s)
+        console.log("✓ cases-storage.js loaded");
+        casesStorageUsers = await casesStorage.getUsers();
+        console.log("✓ Loaded users from shared storage:", casesStorageUsers.length, "users");
+      } catch (e) {
+        console.warn("Could not use shared storage, falling back to direct localStorage:", e.message);
+        // Fallback: load users directly from localStorage
+        const usersJson = localStorage.getItem('lexflow_users');
+        casesStorageUsers = usersJson ? JSON.parse(usersJson) : [];
+        console.log("✓ Loaded", casesStorageUsers.length, "users from direct localStorage");
+      }
+      
+      // Step 2: Fetch fallback data from docs.json for cases/documents/firms
+      console.log("Step 2: Fetching fallback data from docs.json...");
+      let fullDb = null;
+      try {
+        const resp = await fetch(USERS_JSON_PATH);
+        if (resp.ok) {
+          fullDb = await resp.json();
+          console.log("✓ Loaded fallback data from docs.json");
+        } else {
+          console.warn("docs.json returned status:", resp.status);
+        }
+      } catch (e) {
+        console.warn("Could not fetch docs.json, using storage data only:", e);
+      }
+      
+      // Step 3: Merge users from storage (priority) with fallback JSON users
+      console.log("Step 3: Merging user data...");
+      const mergedUsers = [...casesStorageUsers];
+      console.log("Starting merge with", mergedUsers.length, "storage users");
+      
+      if (fullDb && Array.isArray(fullDb.users)) {
+        const existingEmails = new Set(mergedUsers.map(u => u.email));
+        const newUsersCount = fullDb.users.filter(u => !existingEmails.has(u.email)).length;
+        fullDb.users.forEach(u => {
+          if (!existingEmails.has(u.email)) {
+            mergedUsers.push(u);
+          }
+        });
+        console.log("✓ Merged", newUsersCount, "additional users from JSON. Total:", mergedUsers.length);
+      }
+      
+      // Also add currentUser from localStorage if not already in list
+      const localUser = safeParse(localStorage.getItem('currentUser'), null);
+      if (localUser && localUser.email) {
+        const exists = mergedUsers.find(u => u.email === localUser.email);
+        if (!exists) {
+          console.log("✓ Adding current login user:", localUser.email);
+          mergedUsers.push(localUser);
+        }
+      }
+      
+      console.log("Final merged users:", mergedUsers.map(u => u.email));
+      
+      // Step 4: Build synthetic db with merged data
+      console.log("Step 4: Building database...");
+      const db = {
+        users: mergedUsers,
+        cases: (fullDb && fullDb.cases) || [],
+        documents: (fullDb && fullDb.documents) || [],
+        firms: (fullDb && fullDb.firms) || [],
+      };
+      console.log("✓ Database ready. Users:", db.users.length, "Cases:", db.cases.length);
+      
+      // Step 5: Initialize page with merged data
+      console.log("Step 5: Initializing page...");
+      try {
+        init(db);
+        console.log("=== bootApp() SUCCESS ===");
+      } catch (initErr) {
+        console.error("❌ init() threw an error:", initErr);
+        throw initErr;  // Re-throw to be caught by outer catch
+      }
+    } catch (err) {
+      const errorMsg = err.message || 'Unknown error';
+      const errorDetail = `${err.name}: ${errorMsg}`;
+      
+      console.error("❌ bootApp() FAILED:", {
+        message: errorMsg,
+        stack: err.stack,
+        error: err,
+        casesStorageAvailable: !!window.LexFlowCasesStorage,
+        localStorageUsers: localStorage.getItem('lexflow_users') ? 'present' : 'missing',
+        currentUser: localStorage.getItem('currentUser') ? 'present' : 'missing'
+      });
+      
+      // Show error - use alert as fallback since toast might not be defined yet
+      const hasStorage = !!window.LexFlowCasesStorage ? 'storage OK' : 'storage NOT loaded';
+      const msg = `Failed: ${errorMsg} (${hasStorage})`;
+      
+      // Try to use toast if available, otherwise use alert + console
+      if (typeof toast === 'function') {
+        toast(msg, "error");
+      } else {
+        console.error("⚠️ COULD NOT SHOW ERROR - toast function not defined yet!");
+        console.error("Error message:", msg);
+        // Show alert as user-visible fallback
+        setTimeout(() => {
+          alert("Failed to load documents:\n" + msg + "\n\nCheck browser console (F12) for details.");
+        }, 100);
+      }
+    }
+  }
+  
+  // Boot the app
+  bootApp();
+
+  /* ════════════════════════════════════════
+     MAIN INIT — runs once data is loaded
   ════════════════════════════════════════ */
   function init(db) {
+    console.log("📋 init() CALLED with data:", { users: db.users?.length, cases: db.cases?.length, docs: db.documents?.length, firms: db.firms?.length });
 
     /* ── Validate db structure ── */
     if (!db.users || !db.cases || !db.documents || !db.firms) {
-      toast("users.json is missing required fields (users/cases/documents/firms).", "error");
+      const missing = [];
+      if (!db.users) missing.push("users");
+      if (!db.cases) missing.push("cases");
+      if (!db.documents) missing.push("documents");
+      if (!db.firms) missing.push("firms");
+      console.error("❌ Missing required fields:", missing);
+      const msg = `Document data is missing required fields: ${missing.join(", ")}`;
+      if (typeof toast === 'function') {
+        toast(msg, "error");
+      } else {
+        console.error(msg);
+        alert(msg);
+      }
       return;
     }
 
-    /* ── Resolve current user ── */
-    const CURRENT_USER = db.users.find(u => u.email === CURRENT_USER_EMAIL);
+    /* ── Resolve current user — prioritize localStorage over email lookup ── */
+    console.log("Resolving current user...");
+    let CURRENT_USER = null;
+    
+    // First, check if we have a valid currentUser in localStorage
+    const localUser = safeParse(localStorage.getItem('currentUser'), null);
+    if (localUser && localUser.email) {
+      CURRENT_USER = db.users.find(u => u.email === localUser.email);
+      if (CURRENT_USER) {
+        console.log("✓ Found user from localStorage:", CURRENT_USER.email);
+      }
+    }
+    
+    // Fall back to email-based lookup
     if (!CURRENT_USER) {
-      toast(`User "${CURRENT_USER_EMAIL}" not found in users.json`, "error");
+      CURRENT_USER = db.users.find(u => u.email === CURRENT_USER_EMAIL);
+      if (CURRENT_USER) {
+        console.log("✓ Found user by email lookup:", CURRENT_USER.email);
+      }
+    }
+    
+    // If user not found, show helpful error with available users
+    if (!CURRENT_USER) {
+      const availableEmails = db.users.map(u => u.email).slice(0, 5);
+      const extraInfo = db.users.length > 5 
+        ? ` ... and ${db.users.length - 5} more` 
+        : '';
+      console.error("Available users in system:", db.users.map(u => u.email));
+      console.error("Looking for:", CURRENT_USER_EMAIL);
+      toast(
+        `User "${CURRENT_USER_EMAIL}" not found. ` +
+        `Available: ${availableEmails.join(', ')}${extraInfo}`,
+        "error"
+      );
       return;
     }
+    
+    // Validate required user properties
+    if (!CURRENT_USER.role) {
+      console.error("User found but missing 'role':", CURRENT_USER);
+      toast(`User profile incomplete: missing role. Contact administrator.`, "error");
+      return;
+    }
+    
     const ROLE = CURRENT_USER.role;
 
     /* ── Resolve firm for this user ── */
@@ -376,6 +578,11 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       // Non-clients must either belong to the case's firm OR have explicit access
       const caseFromOtherFirm = CURRENT_FIRM && CURRENT_CASE.firmId !== CURRENT_FIRM.id;
       if (caseFromOtherFirm && !userHasExplicitCaseAccess) {
+        console.warn("Cross-firm access denied:", {
+          userFirm: CURRENT_FIRM?.id,
+          caseFirm: CURRENT_CASE.firmId,
+          hasExplicitAccess: userHasExplicitCaseAccess
+        });
         renderAccessDenied(
           `${CURRENT_CASE_ID} belongs to a different firm and you have not been granted access.`,
           "CROSS_FIRM_VIOLATION"
@@ -386,13 +593,33 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     }
 
     /* ── Check user has per-document access to this case ── */
-    const userCaseDocIds = userHasExplicitCaseAccess
-      ? CURRENT_USER.caseAccess[CURRENT_CASE_ID]
-      : null;
+    let userCaseDocIds = null;
+    
+    // Special rule: lawfirm_admin gets access to ALL documents in their firm's cases
+    if (ROLE === "lawfirm_admin" && CURRENT_FIRM && CURRENT_CASE.firmId === CURRENT_FIRM.id) {
+      // Lawfirm admin gets ALL docs in their firm's cases
+      userCaseDocIds = db.documents
+        .filter(d => d.caseId === CURRENT_CASE_ID)
+        .map(d => d.id);
+      console.log("✓ lawfirm_admin auto-access to", userCaseDocIds.length, "documents in firm case");
+    } else if (userHasExplicitCaseAccess) {
+      // Otherwise use explicit caseAccess
+      userCaseDocIds = CURRENT_USER.caseAccess[CURRENT_CASE_ID];
+    }
 
     if (!userCaseDocIds || userCaseDocIds.length === 0) {
+      console.warn("No document access for case:", {
+        caseId: CURRENT_CASE_ID,
+        userRole: ROLE,
+        userFirmId: CURRENT_USER.firmId,
+        caseFirmId: CURRENT_CASE.firmId,
+        userHasExplicitCaseAccess,
+        userCaseDocIds,
+        caseAccess: CURRENT_USER.caseAccess
+      });
       renderAccessDenied(
-        `You do not have document access to ${CURRENT_CASE_ID}.`,
+        `You do not have document access to ${CURRENT_CASE_ID}. ` +
+        `Contact your firm administrator to request access.`,
         "NO_DOC_ACCESS"
       );
       renderRoleBadge(CURRENT_USER, ROLE, FIRM_NAME);
@@ -569,6 +796,43 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
         .filter(n => !isNaN(n));
       const maxId = allKnownIds.length ? Math.max(...allKnownIds) : 210;
       return "DOC-" + (maxId + 1);
+    }
+
+    function syncSharedDocumentsIndex() {
+      const baseDocs = db.documents
+        .filter(d => !deletedIds.has(d.id))
+        .map(d => updatedMap[d.id] ? { ...d, ...updatedMap[d.id] } : { ...d });
+
+      const uploadDocs = uploadedDocs
+        .filter(d => !deletedIds.has(d.id))
+        .map(d => updatedMap[d.id] ? { ...d, ...updatedMap[d.id] } : { ...d });
+
+      const merged = [...baseDocs];
+      const seen = new Set(merged.map(d => d.id));
+      uploadDocs.forEach((d) => {
+        if (!seen.has(d.id)) {
+          merged.push(d);
+          seen.add(d.id);
+        }
+      });
+
+      const normalized = merged.map((d) => {
+        const caseMeta = db.cases.find((c) => c.id === d.caseId) || {};
+        return {
+          id: d.id,
+          caseId: d.caseId || "",
+          caseCnr: d.caseCnr || d.caseId || "",
+          caseTitle: caseMeta.title || d.caseTitle || "",
+          court: caseMeta.court || d.court || "",
+          name: d.name,
+          type: d.type,
+          date: d.date,
+          status: d.status || "Reviewing",
+          access: d.access || "PRIVATE",
+        };
+      });
+
+      lsSet(LS_DOCS_INDEX, normalized);
     }
 
     /* ════════════════════════════════════════
@@ -774,6 +1038,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
 
         logActivity("deleted", doc);
         docsData.splice(idx, 1);
+        syncSharedDocumentsIndex();
         render();
         toast(`🗑 ${doc.name} deleted`);
       }
@@ -922,6 +1187,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       if (ui !== -1) { uploadedDocs[ui] = { ...uploadedDocs[ui], ...patch }; lsSet(LS_UPLOADS, uploadedDocs); }
 
       logActivity("updated", _updDoc);
+      syncSharedDocumentsIndex();
       closeUpdateModal();
       render();
       toast(`✓ ${_updDoc.name} updated to v${_updDoc.version ?? 1}`);
@@ -1221,6 +1487,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
         docsData.unshift(sessionDoc);
 
         logActivity("uploaded", sessionDoc);
+        syncSharedDocumentsIndex();
 
         closeModal();
         refreshTypeSelect();
@@ -1274,6 +1541,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     ════════════════════════════════════════ */
     refreshTypeSelect();
     syncViewIcons();
+    syncSharedDocumentsIndex();
     render();
     refreshSidePanelActivity();
 

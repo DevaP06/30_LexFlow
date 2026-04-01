@@ -103,9 +103,23 @@
         if (link) link.href = pagePath;
       });
 
-      // Update role label from localStorage
-      const roleLabels = { client: 'Client', firmAdmin: 'Firm Admin' };
-      const userRole = localStorage.getItem('userRole');
+      // Update sidebar user identity from signed-in user data
+      const roleLabels = { client: 'Client', firmAdmin: 'Firm Admin', lawyer: 'Lawyer' };
+      const currentUserRaw = localStorage.getItem('currentUser');
+      let currentUser = null;
+      try {
+        currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
+      } catch {
+        currentUser = null;
+      }
+      const userName = currentUser && (currentUser.fullName || currentUser.name)
+        ? (currentUser.fullName || currentUser.name)
+        : 'User';
+      const userRole = localStorage.getItem('userRole') || (currentUser && currentUser.role) || 'client';
+
+      const nameEl = container.querySelector('.user-name');
+      if (nameEl) nameEl.textContent = userName;
+
       const roleEl = container.querySelector('.user-role');
       if (roleEl && userRole) roleEl.textContent = roleLabels[userRole] ?? 'User';
 
