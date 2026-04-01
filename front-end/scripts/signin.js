@@ -9,6 +9,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const passwordInput = document.getElementById('password');
     const loginBtn = document.querySelector('button[type="submit"]');
 
+
+    const signUpLink = document.querySelector('.signup-note a');
+    const userRole = localStorage.getItem('userRole');
+
+    if (signUpLink) {
+        if (userRole === 'client') {
+            signUpLink.href = 'Client%20Onboarding%20step1.html';
+        } else {
+            signUpLink.href = 'LawFirmOnboardingStep1.html';
+        }
+    }
     if (signInForm) {
         signInForm.addEventListener('submit', async (e) => {
             e.preventDefault();
