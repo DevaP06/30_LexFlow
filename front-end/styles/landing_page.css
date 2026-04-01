@@ -1,5 +1,3 @@
-
-
 /* ----- Page shell ----- */
 
 .landingpage {
@@ -12,6 +10,21 @@
     flex-direction: column;
 }
 
+.first-page {
+    position: relative;
+    width: 100%;
+    margin-bottom: 50px;
+    background: linear-gradient(101deg,
+            rgba(111, 163, 235, 1) 6%,
+            rgba(48, 89, 146, 1) 77%,
+            rgba(31, 58, 95, 1) 100%);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
 /* Constrain content width inside full-width colored sections when needed */
 .page-inner {
     width: 100%;
@@ -22,7 +35,7 @@
 
 /* Utility for section spacing on white background */
 .section-padding {
-    padding: 80px 0;
+    padding: 60px 0;
 }
 
 /* Headings shared across sections */
@@ -52,10 +65,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    background: linear-gradient(101deg,
-                rgba(111, 163, 235, 1) 6%,
-                rgba(48, 89, 146, 1) 77%,
-                rgba(31, 58, 95, 1) 100%);
+    background: transparent;
     padding: 16px 0;
     z-index: 10;
 }
@@ -132,7 +142,7 @@
 .starting-page {
     position: relative;
     width: 100%;
-    height: 1024px;
+    padding-bottom: 50px;
     background: linear-gradient(101deg,
             rgba(111, 163, 235, 1) 6%,
             rgba(48, 89, 146, 1) 77%,
@@ -140,8 +150,7 @@
     overflow: hidden;
     display: flex;
     align-items: flex-start;
-    padding-top: 50px;
-    
+
 }
 
 /* Main hero layout: text on the left, image card on the right */
@@ -150,14 +159,14 @@
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    
+
     gap: 200px;
 
-    
+
     width: 100%;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 32px 32px;
+    padding: 32px 64px;
 }
 
 /* Hero text column */
@@ -206,15 +215,16 @@
 /* Wrapper needs extra bottom space so the overflowing badge is visible */
 .hero-visual-wrapper {
     position: relative;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     padding-bottom: 40px;
 }
 
 /* Hero visual card on the right */
 .hero-visual-card {
-    flex: 0 0 auto;
-    width: 500px;
-    height: 600px;
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 500px;
+    height: 500px;
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
@@ -432,12 +442,12 @@
     padding: 40px 40px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0px; 
+    gap: 0px;
     align-items: center;
 }
 
 .s_and_c {
-    max-width: 500px; 
+    max-width: 500px;
 }
 
 /* Left side: copy and bullets */
@@ -486,7 +496,7 @@
     gap: 30px;
     align-items: stretch;
     padding-left: 0px;
-    padding: 40px 0px; 
+    padding: 40px 0px;
 }
 
 .security-badge {
@@ -894,6 +904,17 @@
     .footer-main {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .trusted-badge {
+        position: static;
+        margin-top: -20px;
+        margin-bottom: 16px;
+        align-self: flex-start;
+    }
+
+    .hero-visual-wrapper {
+        padding-bottom: 0;
+    }
 }
 
 @media (max-width: 768px) {
@@ -908,14 +929,39 @@
 
     .how-it-works__steps {
         flex-direction: column;
+        align-items: center;
+
     }
 
     .hero-title {
         font-size: 42px;
     }
 
+    .security-card {
+        padding: 40px 20px;
+    }
+
+    .security-card__headline-text {
+        font-size: 24px;
+    }
+
     .law-firms-card {
-        padding: 48px 24px;
+        padding: 40px 20px;
+    }
+
+    .law-firms-title {
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
+
+    .law-firms-tag {
+        font-size: 18px;
+
+    }
+
+    .law-firms-body {
+        font-size: 16px;
+        letter-spacing: 0;
     }
 
     .footer-main {
