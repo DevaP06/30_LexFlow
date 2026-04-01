@@ -1,0 +1,15 @@
+{
+    "consultation": {
+        "id": "CONS-882",
+        "lawyerName": "Dr. Julian Voss",
+        "firmName": "Voss & Associates",
+        "status": "WAITING...",
+        "timeElapsed": "00:00"
+    },
+    "chatHistory": [
+        {
+            "sender": "system",
+            "message": "Consultation room created. Please wait for Dr. Julian Voss to join."
+        }
+    ]
+}

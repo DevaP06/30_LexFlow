@@ -1,0 +1,48 @@
+[
+    {
+        "id": "firm-1",
+        "name": "JV Ross Associates",
+        "subtitle": "Corporate & IP • New York, NY",
+        "location": "ny",
+        "practiceArea": "corporate",
+        "description": "Top tier law firm specializing in high-stakes corporate litigation and tech mergers. Rated as Legal500 Tier 1.",
+        "rating": 4.9,
+        "reviews": 230,
+        "price": 200,
+        "availability": "AVAILABLE",
+        "avatar": "https://ui-avatars.com/api/?name=JV+Ross&background=1e3a5f&color=fff",
+        "experience": "12+ Years",
+        "edu": [
+            {"school": "Harvard Law School", "degree": "Juris Doctor (JD), 2011"},
+            {"school": "Columbia University", "degree": "BA in Political Science, 2008"}
+        ],
+        "languages": ["English (Native)", "Spanish (Fluent)"],
+        "bio": "Adv. Julian Vance is a recognized expert in corporate litigation and intellectual property. With over a decade of experience representing Fortune 500 companies and high-growth startups..."
+    },
+    {
+        "id": "firm-2",
+        "name": "Jenkins Family Law",
+        "subtitle": "Family & Divorce • Austin, TX",
+        "location": "tx",
+        "practiceArea": "family",
+        "description": "Compassionate representation for complex family matters, divorce mediation, and custody agreements.",
+        "rating": 4.8,
+        "reviews": 184,
+        "price": 150,
+        "availability": "TODAY",
+        "avatar": "https://ui-avatars.com/api/?name=Jenkins+Family+Law&background=2563eb&color=fff"
+    },
+    {
+        "id": "firm-3",
+        "name": "Rao & Menon Legal",
+        "subtitle": "Criminal Defense • San Francisco, CA",
+        "location": "ca",
+        "practiceArea": "criminal",
+        "description": "Aggressive criminal defense attorneys with a track record of numerous acquittals and reduced sentences.",
+        "rating": 4.7,
+        "reviews": 92,
+        "price": 220,
+        "availability": "BUSY",
+        "avatar": "https://ui-avatars.com/api/?name=Rao+Menon&background=059669&color=fff"
+    }
+]
