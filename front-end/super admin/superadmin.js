@@ -1,40 +1,41 @@
 // LexFlow Super Admin - Mock Database Engine & Interactions
 
 function initDB() {
-    let db = localStorage.getItem('lexflow_db');
-    if (!db) {
-        db = {
-            firms: [
-                { id: 1, name: 'Julian Vance Associates', admin: 1, description: 'Top tier law firm specializing in corporate litigation.', reg_no: '9781473211896', practice: [1, 3] },
-                { id: 2, name: 'Acme Law Corp', admin: 2, description: 'General practice firm.', reg_no: '1234567890123', practice: [2, 4] },
-                { id: 3, name: 'Global Rights Group', admin: 3, description: 'Human rights and international law.', reg_no: '0987654321098', practice: [5] }
-            ],
-            lawyers: [
-                { id: 1, name: 'Erica Vance', email: 'erica@vance.law', phone: '+1 555-019-3829', bar: 'NY-BAR-992384', practice: 'Corporate Law', status: 'pending', date: 'Oct 24, 2023' },
-                { id: 2, name: 'Marcus Jenkins', email: 'marcus@jenkins.law', phone: '+1 555-019-2222', bar: 'TX-BAR-11459', practice: 'Family Law', status: 'pending', date: 'Oct 25, 2023' },
-                { id: 3, name: 'Sarah Connor', email: 'sarah@connor.law', phone: '+1 555-019-3333', bar: 'CA-BAR-592881', practice: 'Criminal Defense', status: 'rejected', date: 'Oct 20, 2023' }
-            ],
-            invoices: [
-                { id: 'INV-2023-0901', firmId: 1, firmName: 'Julian Vance Associates', client: 'Acme Corp', amount: 250, status: 'pending' },
-                { id: 'INV-2023-0902', firmId: 2, firmName: 'Acme Law Corp', client: 'John Doe', amount: 150, status: 'paid' },
-                { id: 'INV-2023-0903', firmId: 3, firmName: 'Global Rights Group', client: 'Jane Smith', amount: 400, status: 'refunded' },
-                { id: 'INV-2023-0904', firmId: 1, firmName: 'Julian Vance Associates', client: 'TechStart', amount: 200, status: 'pending' }
-            ],
-            settings: {
-                commission_rate: 10,
-                support_email: 'support@lexflow.legal',
-                maintenance: false,
-                disable_signup: false,
-                practice_areas: ['Antitrust', 'Corporate Law', 'Cyber Law', 'Criminal Defense', 'Family Law', 'Intellectual Property', 'Real Estate', 'Tax Law']
-            }
+    let db = {
+        firms: JSON.parse(localStorage.getItem('lexflow_law_firms') || '[]'),
+        lawyers: JSON.parse(localStorage.getItem('lexflow_lawyers') || '[]'),
+        consults: JSON.parse(localStorage.getItem('lexflow_consultations') || '[]'),
+        invoices: JSON.parse(localStorage.getItem('lexflow_superadmin_invoices') || '[]'),
+        settings: JSON.parse(localStorage.getItem('lexflow_superadmin_settings') || 'null')
+    };
+
+    if (!db.settings) {
+        db.settings = {
+            commission_rate: 10,
+            support_email: 'support@lexflow.legal',
+            maintenance: false,
+            disable_signup: false,
+            practice_areas: ['Antitrust', 'Corporate Law', 'Cyber Law', 'Criminal Defense', 'Family Law', 'Intellectual Property', 'Real Estate', 'Tax Law']
         };
-        localStorage.setItem('lexflow_db', JSON.stringify(db));
     }
-    return JSON.parse(localStorage.getItem('lexflow_db'));
+    
+    if (db.invoices.length === 0) {
+        db.invoices = [
+            { id: 'INV-2023-0901', firmId: 'firm-1', firmName: 'JV Ross Associates', client: 'Acme Corp', amount: 250, status: 'pending' },
+            { id: 'INV-2023-0902', firmId: 'firm-2', firmName: 'Jenkins Family Law', client: 'John Doe', amount: 150, status: 'paid' }
+        ];
+        localStorage.setItem('lexflow_superadmin_invoices', JSON.stringify(db.invoices));
+    }
+    
+    return db;
 }
 
 function saveDB(db) {
-    localStorage.setItem('lexflow_db', JSON.stringify(db));
+    localStorage.setItem('lexflow_law_firms', JSON.stringify(db.firms));
+    localStorage.setItem('lexflow_lawyers', JSON.stringify(db.lawyers));
+    localStorage.setItem('lexflow_consultations', JSON.stringify(db.consults));
+    localStorage.setItem('lexflow_superadmin_invoices', JSON.stringify(db.invoices));
+    localStorage.setItem('lexflow_superadmin_settings', JSON.stringify(db.settings));
 }
 
 function getQueryParam(param) {
@@ -71,6 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
         initLawyerEdit(db);
     } else if (path.includes('platform-settings.html')) {
         initSettings(db);
+    } else if (path.includes('consultation-list.html')) {
+        initConsultationList(db);
+    } else if (path.includes('consultation-edit.html')) {
+        initConsultationEdit(db);
+    } else if (path.includes('lawyer-list.html')) {
+        initLawyerList(db);
     }
 });
 
@@ -123,7 +130,7 @@ function initFirmList(db) {
     document.getElementById('run-action-btn').addEventListener('click', () => {
         const action = document.getElementById('action-select-dropdown').value;
         if(action === 'delete_selected') {
-            const selectedIds = Array.from(document.querySelectorAll('.action-select:checked')).map(cb => parseInt(cb.value));
+            const selectedIds = Array.from(document.querySelectorAll('.action-select:checked')).map(cb => cb.value);
             if(selectedIds.length === 0) return alert('Select items first.');
             if(confirm(`Are you sure you want to delete ${selectedIds.length} firms?`)) {
                 db.firms = db.firms.filter(f => !selectedIds.includes(f.id));
@@ -135,9 +142,9 @@ function initFirmList(db) {
 }
 
 function initFirmEdit(db) {
-    const firmId = parseInt(getQueryParam('id'));
+    const firmId = getQueryParam('id');
     const form = document.getElementById('firm_form');
-    let isNew = isNaN(firmId);
+    let isNew = !firmId;
     
     if (!isNew) {
         const firm = db.firms.find(f => f.id === firmId);
@@ -167,13 +174,18 @@ function initFirmEdit(db) {
         e.preventDefault();
         const action = e.submitter ? e.submitter.name : '_save';
         
+        let firmOpt = firmId && db.firms.find(f => f.id === firmId);
         const newFirm = {
-            id: isNew ? Date.now() : firmId,
+            id: isNew ? 'firm-' + Date.now() : firmId,
             name: document.getElementById('id_name').value,
-            admin: parseInt(document.getElementById('id_admin_user').value),
+            admin: document.getElementById('id_admin_user').value,
             description: document.getElementById('id_description').value,
             reg_no: document.getElementById('id_reg_no').value,
-            practice: Array.from(document.getElementById('id_practice_area').selectedOptions).map(o => parseInt(o.value))
+            practice: Array.from(document.getElementById('id_practice_area').selectedOptions).map(o => parseInt(o.value)),
+            practiceArea: document.getElementById('id_practice_area').selectedOptions.length ? document.getElementById('id_practice_area').selectedOptions[0].text : 'General',
+            rating: firmOpt ? firmOpt.rating : 5.0,
+            price: firmOpt ? firmOpt.price : 150,
+            availability: 'AVAILABLE'
         };
 
         if(isNew) db.firms.push(newFirm);
@@ -311,10 +323,10 @@ function initLawyerList(db) {
             tr.innerHTML = `
                 <td class="action-checkbox"><input type="checkbox" name="_selected_action" value="${l.id}" class="action-select"></td>
                 <th class="field-title"><a href="lawyer-edit.html?id=${l.id}">${l.name}</a></th>
-                <td>${l.bar}</td>
-                <td>${l.practice}</td>
-                <td>${l.date}</td>
-                <td>${getStatusBadge(l.status)}</td>
+                <td>${l.bar || 'N/A'}</td>
+                <td>${l.practice || (l.specialties ? l.specialties.join(', ') : 'General')}</td>
+                <td>${l.date || 'Pending'}</td>
+                <td>${getStatusBadge(l.status || 'approved')}</td>
                 <td><a href="#" style="color:var(--primary-accent); font-weight:600;">Docs attached</a></td>
             `;
             tbody.appendChild(tr);
@@ -324,7 +336,7 @@ function initLawyerList(db) {
 
     document.getElementById('run-action-btn').addEventListener('click', () => {
         const action = document.getElementById('action-select-dropdown').value;
-        const selectedIds = Array.from(document.querySelectorAll('.action-select:checked')).map(cb => parseInt(cb.value));
+        const selectedIds = Array.from(document.querySelectorAll('.action-select:checked')).map(cb => cb.value);
         if(selectedIds.length === 0) return alert('Select lawyers first.');
         
         if(action === 'approve_selected') {
@@ -338,39 +350,64 @@ function initLawyerList(db) {
 }
 
 function initLawyerEdit(db) {
-    const lwId = parseInt(getQueryParam('id'));
+    const lwId = getQueryParam('id');
+    const isNew = getQueryParam('new');
     const form = document.getElementById('firm_form');
     
     const l = db.lawyers.find(x => x.id === lwId);
-    if(l) {
-        document.getElementById('id_name_display').innerHTML = `${l.name} (${l.email})`;
-        document.getElementById('id_phone_display').textContent = `Phone: ${l.phone}`;
-        document.getElementById('id_practice_display').innerHTML = `Requested Practice Area: <strong>${l.practice}</strong>`;
-        document.getElementById('id_bar_number').value = l.bar;
-        document.getElementById('id_status').value = l.status;
+    if(l && !isNew) {
+        document.getElementById('id_name_display').innerHTML = `${l.name} (${l.email || 'N/A'})`;
+        document.getElementById('id_phone_display').textContent = `Phone: ${l.phone || 'N/A'}`;
+        document.getElementById('id_practice_display').innerHTML = `Requested Practice Area: <strong>${l.practice || (l.specialties ? l.specialties.join(', ') : 'General')}</strong>`;
+        document.getElementById('id_bar_number').value = l.bar || '';
+        document.getElementById('id_status').value = l.status || 'approved';
         document.querySelector('h1').textContent = `Verify Lawyer Credentials: ${l.name}`;
+    } else if (isNew) {
+        document.querySelector('h1').textContent = `Add New Lawyer`;
+        document.getElementById('id_name_display').innerHTML = `<input type="text" id="id_new_name" placeholder="Name" required style="margin-bottom:10px;">`;
+        document.getElementById('id_phone_display').innerHTML = `<input type="text" id="id_new_phone" placeholder="Phone" style="margin-bottom:10px;">`;
+        document.getElementById('id_practice_display').innerHTML = `<input type="text" id="id_new_practice" placeholder="Practice Area" style="margin-bottom:10px;">`;
     }
 
-    form.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', (e) => {
         e.preventDefault();
-        const action = e.submitter ? e.submitter.name : '_save'; // if _save, it means approve
+        const action = e.submitter ? e.submitter.name : '_save'; 
 
-        if(action === '_save') { // Approve btn
-            l.status = 'approved';
-        } else {
-            l.status = document.getElementById('id_status').value;
+        if (isNew) {
+            const newLawyer = {
+                id: 'lawyer-' + Math.floor(Math.random() * 10000),
+                name: document.getElementById('id_new_name').value,
+                phone: document.getElementById('id_new_phone').value,
+                specialties: [document.getElementById('id_new_practice').value],
+                status: 'approved',
+                activeCases: 0,
+                consultationsToday: 0,
+                capacity: 60,
+                avatarColor: 'blue'
+            };
+            db.lawyers.push(newLawyer);
+            saveDB(db);
+            alert(`Lawyer added.`);
+        } else if (l) {
+            if(action === '_save') { 
+                l.status = 'approved';
+            } else {
+                l.status = document.getElementById('id_status').value;
+            }
+            saveDB(db);
+            alert(`Lawyer updated. Status is now: ${l.status}`);
         }
-        saveDB(db);
-        alert(`Lawyer updated. Status is now: ${l.status}`);
-        window.location.href = 'lawyer-verification.html';
+        window.location.href = 'lawyer-list.html';
     });
 
-    document.getElementById('btn-reject').addEventListener('click', (e) => {
+    document.getElementById('btn-reject')?.addEventListener('click', (e) => {
         e.preventDefault();
-        l.status = 'rejected';
-        saveDB(db);
-        alert('Lawyer rejected.');
-        window.location.href = 'lawyer-verification.html';
+        if(l) {
+            l.status = 'rejected';
+            saveDB(db);
+            alert('Lawyer rejected.');
+            window.location.href = 'lawyer-list.html';
+        }
     });
 }
 
@@ -396,3 +433,87 @@ function initSettings(db) {
         alert('Global Platform Settings saved successfully!');
     });
 }
+
+// ==========================================
+// 6. Consultations
+// ==========================================
+function initConsultationList(db) {
+    const tbody = document.querySelector('#result_list tbody');
+    if(!tbody) return;
+    
+    function render() {
+        tbody.innerHTML = '';
+        db.consults.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="action-checkbox"><input type="checkbox" name="_selected_action" value="${c.id}" class="action-select"></td>
+                <th class="field-title"><a href="consultation-edit.html?id=${c.id}">${c.id}</a></th>
+                <td>${c.client || 'Unknown Client'}</td>
+                <td>${c.firmId || 'N/A'}</td>
+                <td>${c.date || 'N/A'}</td>
+                <td><span style="color:#2563eb; font-weight:600;">${c.status || 'upcoming'}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.querySelector('.paginator').textContent = `${db.consults.length} consultations`;
+    }
+    render();
+
+    document.getElementById('run-action-btn')?.addEventListener('click', () => {
+        const action = document.getElementById('action-select-dropdown').value;
+        const selectedIds = Array.from(document.querySelectorAll('.action-select:checked')).map(cb => cb.value);
+        if(selectedIds.length === 0) return alert('Select items first.');
+        
+        if(action === 'delete_selected') {
+            if(confirm(`Are you sure you want to delete ${selectedIds.length} consultations?`)) {
+                db.consults = db.consults.filter(c => !selectedIds.includes(c.id));
+                saveDB(db);
+                render();
+            }
+        }
+    });
+}
+
+function initConsultationEdit(db) {
+    const consId = getQueryParam('id');
+    const form = document.getElementById('firm_form');
+    let isNew = !consId;
+    
+    if (!isNew) {
+        const cons = db.consults.find(c => c.id === consId);
+        if(cons) {
+            document.getElementById('id_name').value = cons.client || '';
+            document.getElementById('id_description').value = cons.status || 'upcoming';
+            document.getElementById('id_reg_no').value = cons.date || '';
+            document.querySelector('h1').textContent = `Change Consultation: ${cons.id}`;
+        }
+    } else {
+        document.querySelector('h1').textContent = `Add Consultation`;
+    }
+
+    form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const action = e.submitter ? e.submitter.name : '_save';
+        
+        const newCons = {
+            id: isNew ? 'CONS-' + Math.floor(Math.random() * 10000) : consId,
+            client: document.getElementById('id_name').value,
+            status: document.getElementById('id_description').value,
+            date: document.getElementById('id_reg_no').value,
+            firmId: 'firm-1', // Default mock assignment
+            lawyerId: 'lawyer-1'
+        };
+
+        if(isNew) db.consults.push(newCons);
+        else {
+            const idx = db.consults.findIndex(c => c.id === consId);
+            db.consults[idx] = newCons;
+        }
+        saveDB(db);
+
+        alert('Consultation saved successfully.');
+        if(action === '_save') window.location.href = 'consultation-list.html';
+        else window.location.reload();
+    });
+}
+

@@ -22,9 +22,9 @@
             </div>
             <div id="user-tools">
                 WELCOME, <strong>SUPERADMIN</strong>. 
-                <a href="#">VIEW SITE</a> / 
-                <a href="#">CHANGE PASSWORD</a> / 
-                <a href="#">LOG OUT</a>
+                <a href="../client-consultation-dashboard.html">VIEW SITE</a> / 
+                <a href="#" onclick="alert('Password reset link sent to admin email'); return false;">CHANGE PASSWORD</a> / 
+                <a href="#" onclick="alert('Logged out successfully'); return false;">LOG OUT</a>
             </div>
         </div>
 
@@ -37,29 +37,7 @@
         <div id="content" class="clearfix">
             <h1>Site administration</h1>
 
-            <!-- KPIs -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <h3>Total Revenue (MTD)</h3>
-                    <div class="kpi-value">$142,500</div>
-                    <div class="kpi-trend positive">↑ 12.5% vs last month</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Active Users</h3>
-                    <div class="kpi-value">3,492</div>
-                    <div class="kpi-trend positive">↑ 8.1% vs last month</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Pending Lawyers</h3>
-                    <div class="kpi-value">24</div>
-                    <div class="kpi-trend">Action required</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Open Disputes</h3>
-                    <div class="kpi-value">3</div>
-                    <div class="kpi-trend negative">Requires attention</div>
-                </div>
-            </div>
+
 
             <!-- Left column models -->
             <div id="content-main" style="float: left; width: 68%;">
@@ -69,15 +47,15 @@
                             <a href="#" class="section">Authentication and Authorization</a>
                         </caption>
                         <tbody>
-                            <tr>
+                            <tr style="display:none;">
                                 <th scope="row"><a href="#">Groups</a></th>
                                 <td><a href="#" class="addlink">Add</a></td>
                                 <td><a href="#" class="changelink">Change</a></td>
                             </tr>
-                            <tr>
-                                <th scope="row"><a href="#">Users</a></th>
-                                <td><a href="#" class="addlink">Add</a></td>
-                                <td><a href="#" class="changelink">Change</a></td>
+                            <tr style="display:none;">
+                                <th scope="row"><a href="user-list.html">Users</a></th>
+                                <td><a href="user-edit.html" class="addlink">Add</a></td>
+                                <td><a href="user-list.html" class="changelink">Change</a></td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="lawyer-verification.html">Lawyer Verification <span id="pending-chip" style="background:#ef4444; color:#fff; border-radius:12px; padding:2px 6px; font-size:11px; margin-left:4px;">3 Pending</span></a></th>
@@ -94,7 +72,7 @@
                             <a href="#" class="section">LexFlow Platform</a>
                         </caption>
                         <tbody>
-                            <tr>
+                            <tr style="display:none;">
                                 <th scope="row"><a href="#">Clients</a></th>
                                 <td><a href="#" class="addlink">Add</a></td>
                                 <td><a href="#" class="changelink">Change</a></td>
@@ -105,14 +83,14 @@
                                 <td><a href="firm-list.html" class="changelink">Change</a></td>
                             </tr>
                             <tr>
-                                <th scope="row"><a href="#">Lawyers</a></th>
-                                <td><a href="#" class="addlink">Add</a></td>
-                                <td><a href="#" class="changelink">Change</a></td>
+                                <th scope="row"><a href="lawyer-list.html">Lawyers</a></th>
+                                <td><a href="lawyer-edit.html?new=1" class="addlink">Add</a></td>
+                                <td><a href="lawyer-verification.html" class="changelink">Change</a></td>
                             </tr>
                             <tr>
-                                <th scope="row"><a href="#">Consultations</a></th>
-                                <td><a href="#" class="addlink">Add</a></td>
-                                <td><a href="#" class="changelink">Change</a></td>
+                                <th scope="row"><a href="consultation-list.html">Consultations / Cases</a></th>
+                                <td><a href="consultation-edit.html" class="addlink">Add</a></td>
+                                <td><a href="consultation-list.html" class="changelink">Change</a></td>
                             </tr>
                             <tr>
                                 <th scope="row"><a href="invoice-list.html">Invoices & Payouts</a></th>
