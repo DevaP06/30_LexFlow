@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document Management</title>
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- YOUR EXISTING CSS -->
+    <link rel="stylesheet" href="../styles/case-documents.css">
+    <link rel="stylesheet" href="../styles/sidebar.css">
+</head>
+
+<body>
+
+
+    <!-- ============ SIDEBAR ============ -->
+    <!-- <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-brand">
+                <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <rect width="24" height="24" rx="6" fill="rgba(255,255,255,0.15)" />
+                    <path d="M7 6h2v12H7V6zm4 4h2v8h-2v-8zm4-2h2v10h-2V8z" fill="#fff" />
+                </svg>
+                <span class="brand-text">LexFlow</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item " id="nav-consultations">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Consultations</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-cases">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Cases</span>
+                </a>
+                <a href="#" class="nav-item active" id="nav-documents">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>Documents</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-billing">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span>Billing</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-profile" id="user-profile">
+                <div class="user-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">John Doe</span>
+                    <span class="user-role">User</span>
+                </div>
+                <button class="logout-btn" id="logout-btn" aria-label="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside> -->
+
+   <div id="sidebar-container"></div>
+
+
+
+    <!-- ================= MAIN ================= -->
+
+
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                Documents > <span>Property Dispute (CASE-45)</span>
+            </div>
+
+            <button class="btn-primary">+ Upload New Document</button>
+        </div>
+
+        <!-- CASE INFO -->
+        <div class="case-header">
+            <div>
+                <h1>Property Dispute <span class="status">ACTIVE</span></h1>
+                <p>Case ID: <strong>CASE-45</strong></p>
+            </div>
+
+            <div class="case-meta">
+                <div><span>CLIENT ID</span>CL-902</div>
+                <div><span>CLIENT NAME</span>Rahul Sharma</div>
+                <div><span>LAWYER</span>Adv. Mehta</div>
+                <div><span>COURT</span>District Court</div>
+            </div>
+        </div>
+
+
+
+        <div class="toolbar">
+
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+
+                <input type="text" placeholder="Search by document name or document ID">
+            </div>
+
+            <select>
+                <option>All Types</option>
+            </select>
+
+            <span class="total">Total Documents: 8</span>
+
+            <div class="view-toggle">
+
+
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path
+                        d="M96 128C83.1 128 71.4 135.8 66.4 147.8C61.4 159.8 64.2 173.5 73.4 182.6L256 365.3L256 480C256 488.5 259.4 496.6 265.4 502.6L329.4 566.6C338.6 575.8 352.3 578.5 364.3 573.5C376.3 568.5 384 556.9 384 544L384 365.3L566.6 182.7C575.8 173.5 578.5 159.8 573.5 147.8C568.5 135.8 556.9 128 544 128L96 128z" />
+                </svg>
+
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path
+                        d="M130.4 268.2C135.4 280.2 147 288 160 288L480 288C492.9 288 504.6 280.2 509.6 268.2C514.6 256.2 511.8 242.5 502.7 233.3L342.7 73.3C330.2 60.8 309.9 60.8 297.4 73.3L137.4 233.3C128.2 242.5 125.5 256.2 130.5 268.2zM130.4 371.7C125.4 383.7 128.2 397.4 137.3 406.6L297.3 566.6C309.8 579.1 330.1 579.1 342.6 566.6L502.6 406.6C511.8 397.4 514.5 383.7 509.5 371.7C504.5 359.7 492.9 352 480 352L160 352C147.1 352 135.4 359.8 130.4 371.8z" />
+                </svg>
+
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path
+                        d="M96 96C78.3 96 64 110.3 64 128L64 256C64 273.7 78.3 288 96 288L224 288C241.7 288 256 273.7 256 256L256 128C256 110.3 241.7 96 224 96L96 96zM416 96C398.3 96 384 110.3 384 128L384 256C384 273.7 398.3 288 416 288L544 288C561.7 288 576 273.7 576 256L576 128C576 110.3 561.7 96 544 96L416 96zM96 352C78.3 352 64 366.3 64 384L64 512C64 529.7 78.3 544 96 544L224 544C241.7 544 256 529.7 256 512L256 384C256 366.3 241.7 352 224 352L96 352zM416 352C398.3 352 384 366.3 384 384L384 512C384 529.7 398.3 544 416 544L544 544C561.7 544 576 529.7 576 512L576 384C576 366.3 561.7 352 544 352L416 352z" />
+                </svg>
+
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path
+                        d="M128 160C128 142.3 142.3 128 160 128C177.7 128 192 142.3 192 160C192 177.7 177.7 192 160 192C142.3 192 128 177.7 128 160zM256 144C256 135.2 263.2 128 272 128L544 128C552.8 128 560 135.2 560 144L560 176C560 184.8 552.8 192 544 192L272 192C263.2 192 256 184.8 256 176L256 144zM128 320C128 302.3 142.3 288 160 288C177.7 288 192 302.3 192 320C192 337.7 177.7 352 160 352C142.3 352 128 337.7 128 320zM256 304C256 295.2 263.2 288 272 288L544 288C552.8 288 560 295.2 560 304L560 336C560 344.8 552.8 352 544 352L272 352C263.2 352 256 344.8 256 336L256 304zM128 480C128 462.3 142.3 448 160 448C177.7 448 192 462.3 192 480C192 497.7 177.7 512 160 512C142.3 512 128 497.7 128 480zM256 464C256 455.2 263.2 448 272 448L544 448C552.8 448 560 455.2 560 464L560 496C560 504.8 552.8 512 544 512L272 512C263.2 512 256 504.8 256 496L256 464z" />
+                </svg>
+            </div>
+        </div>
+
+
+
+        <!-- MAIN GRID -->
+        <div class="layout">
+
+            <!-- LEFT -->
+            <div class="documents-grid">
+
+                <!-- DOC CARD -->
+                <!-- <div class="doc-card">
+                    <div class="doc-header">
+                        <div class="doc-icon green">PDF</div>
+                        <div>
+                            <h3>Property_Agreement.pdf</h3>
+                            <div class="tags">
+                                <span>DOC-203</span>
+                                <span class="green">CONTRACT</span>
+                            </div>
+                        </div>
+                        <span class="badge">PRIVATE</span>
+                    </div>
+
+                    <div class="doc-meta">
+                        <div><span>UPLOADER</span>Adv. Mehta</div>
+                        <div><span>DATE</span>12 Mar 2026</div>
+                        <div><span>VERSION</span>v1</div>
+                    </div>
+
+                    <div class="doc-actions">
+                        <button>View</button>
+                        <button>Download</button>
+                        <button>Update</button>
+                        <button>Delete</button>
+                    </div>
+                </div> -->
+
+                <!-- CARD -->
+                <!-- <div class="doc-card">
+                    <div class="doc-header">
+                        <div class="doc-icon orange">IMG</div>
+                        <div>
+                            <h3>Evidence_Photo_01.jpg</h3>
+                            <div class="tags">
+                                <span>DOC-204</span>
+                                <span class="red">CASE EVIDENCE</span>
+                            </div>
+                        </div>
+                        <span class="badge green">SHARED</span>
+                    </div>
+
+                    <div class="doc-meta">
+                        <div><span>UPLOADER</span>Intern Name</div>
+                        <div><span>DATE</span>14 Mar 2026</div>
+                        <div><span>VERSION</span>v1</div>
+                    </div>
+
+                    <div class="doc-actions">
+                        <button>View</button>
+                        <button>Download</button>
+                        <button>Update</button>
+                        <button>Delete</button>
+                    </div>
+                </div> -->
+
+
+                <!-- CARD -->
+                <!-- <div class="doc-card">
+                    <div class="doc-header">
+                        <div class="doc-icon orange">IMG</div>
+                        <div>
+                            <h3>Evidence_Photo_01.jpg</h3>
+                            <div class="tags">
+                                <span>DOC-204</span>
+                                <span class="red">CASE EVIDENCE</span>
+                            </div>
+                        </div>
+                        <span class="badge green">SHARED</span>
+                    </div>
+
+                    <div class="doc-meta">
+                        <div><span>UPLOADER</span>Intern Name</div>
+                        <div><span>DATE</span>14 Mar 2026</div>
+                        <div><span>VERSION</span>v1</div>
+                    </div>
+
+                    <div class="doc-actions">
+                        <button>View</button>
+                        <button>Download</button>
+                        <button>Update</button>
+                        <button>Delete</button>
+                    </div>
+                </div> -->
+
+
+
+                <!-- CARD -->
+                <!-- <div class="doc-card">
+                    <div class="doc-header">
+                        <div class="doc-icon orange">IMG</div>
+                        <div>
+                            <h3>Evidence_Photo_01.jpg</h3>
+                            <div class="tags">
+                                <span>DOC-204</span>
+                                <span class="red">CASE EVIDENCE</span>
+                            </div>
+                        </div>
+                        <span class="badge green">SHARED</span>
+                    </div>
+
+                    <div class="doc-meta">
+                        <div><span>UPLOADER</span>Intern Name</div>
+                        <div><span>DATE</span>14 Mar 2026</div>
+                        <div><span>VERSION</span>v1</div>
+                    </div>
+
+                    <div class="doc-actions">
+                        <button>View</button>
+                        <button>Download</button>
+                        <button>Update</button>
+                        <button>Delete</button>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="side-panel">
+
+                <!-- ACTIVITY -->
+                <div class="card">
+                    <div class="activity-header">
+
+                        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24"
+                            stroke-linecap="round" stroke-linejoin="round" width="20" height="20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 2h4"></path>
+                            <path d="M12 14v-4"></path>
+                            <path d="M4 13a8 8 0 0 1 8-7 8 8 0 1 1-5.3 14L4 17.6"></path>
+                            <path d="M9 17H4v5"></path>
+                        </svg>
+                        <h3>Activity Log</h3>
+                    </div>
+
+                    <div class="activity">
+                        <p><strong>Intern Name</strong> uploaded Evidence_Photo_01.jpg</p>
+                        <span>14 Mar 2026</span>
+                    </div>
+
+                    <div class="activity">
+                        <p><strong>Adv. Mehta</strong> updated Property_Agreement.pdf</p>
+                        <span>12 Mar 2026</span>
+                    </div>
+
+                    <button class="btn-outline">
+                        <a href="./activity-log.html">
+                    
+                        View All Activity
+                    </a>
+                    </button>
+                </div>
+
+                <!-- NOTE -->
+                <div class="note-card">
+                    <div class="note-header">
+
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="20"
+                            width="20" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 2.5c-3.81 0-6.5 2.743-6.5 6.119 0 1.536.632 2.572 1.425 3.56.172.215.347.422.527.635l.096.112c.21.25.427.508.63.774.404.531.783 1.128.995 1.834a.75.75 0 0 1-1.436.432c-.138-.46-.397-.89-.753-1.357a18.111 18.111 0 0 0-.582-.714l-.092-.11c-.18-.212-.37-.436-.555-.667C4.87 12.016 4 10.651 4 8.618 4 4.363 7.415 1 12 1s8 3.362 8 7.619c0 2.032-.87 3.397-1.755 4.5-.185.23-.375.454-.555.667l-.092.109c-.21.248-.405.481-.582.714-.356.467-.615.898-.753 1.357a.751.751 0 0 1-1.437-.432c.213-.706.592-1.303.997-1.834.202-.266.419-.524.63-.774l.095-.112c.18-.213.355-.42.527-.634.793-.99 1.425-2.025 1.425-3.561C18.5 5.243 15.81 2.5 12 2.5ZM8.75 18h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Zm.75 3.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75Z">
+                            </path>
+                        </svg>
+
+
+                        <h4>Quick Note</h4>
+                    </div>
+                    <p>
+                        The next hearing for CASE-45 is scheduled for 25th March
+                        2026 at the District Court Room 4B.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+<div class="upload-modal">
+  <div class="upload-modal__panel">
+ 
+    <!-- Header -->
+    <div class="upload-modal__header">
+      <div class="upload-modal__title-group">
+        <div class="upload-modal__title-icon">
+          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
+            <path fill="none" stroke-width="2" d="M2.99787498,0.999999992 L17.4999998,0.999999992 L20.9999998,4.50000005 L21,23 L3,23 L2.99787498,0.999999992 Z M16,1 L16,6 L21,6 M12,20 L12,11 M8,14 L12,10 L16,14"></path>
+          </svg>
+        </div>
+        <h2 class="upload-modal__title">Upload New Document</h2>
+      </div>
+      <button class="upload-modal__close">✕</button>
+    </div>
+ 
+    <!-- Body -->
+    <div class="upload-modal__body">
+ 
+      <div class="upload-modal__grid">
+ 
+        <!-- Client Name -->
+        <div class="upload-modal__field">
+          <label class="upload-modal__label">Client Name</label>
+          <div class="upload-modal__input-wrapper">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+              <path fill="none" d="M0 0h24v24H0V0z"></path>
+              <path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m0 10c2.7 0 5.8 1.29 6 2H6c.23-.72 3.31-2 6-2m0-12C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+            </svg>
+            <input class="upload-modal__input" type="text" value="Rahul Sharma">
+          </div>
+        </div>
+ 
+        <!-- Case ID -->
+        <div class="upload-modal__field">
+          <label class="upload-modal__label">Case ID</label>
+          <div class="upload-modal__input-wrapper">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+              <g id="Hashtag">
+                <path d="M20.435,15.506H16.2l.61-7h3.63a.5.5,0,0,0,.5-.5.5.5,0,0,0-.5-.5H16.9l.34-3.87a.509.509,0,0,0-.46-.54.5.5,0,0,0-.54.46l-.35,3.95H8.9l.34-3.87a.509.509,0,0,0-.46-.54.491.491,0,0,0-.54.46l-.35,3.95H3.565a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h4.24l-.62,7H3.565a.5.5,0,0,0-.5.5.5.5,0,0,0,.5.5h3.54l-.34,3.86a.508.508,0,0,0,.45.54h.05a.516.516,0,0,0,.5-.46l.34-3.94h7l-.34,3.86a.508.508,0,0,0,.45.54h.05a.516.516,0,0,0,.5-.46l.34-3.94h4.33a.5.5,0,0,0,.5-.5A.5.5,0,0,0,20.435,15.506Zm-5.25,0H8.2l.61-7h7Z"></path>
+              </g>
+            </svg>
+            <input class="upload-modal__input" type="text" value="CASE-45">
+          </div>
+        </div>
+ 
+        <!-- Document Type -->
+        <div class="upload-modal__field">
+          <label class="upload-modal__label">Document Type</label>
+          <select class="upload-modal__input">
+            <option>Client Proof</option>
+          </select>
+        </div>
+ 
+        <!-- Confidential Level -->
+        <div class="upload-modal__field">
+          <label class="upload-modal__label">Confidential Level</label>
+          <select class="upload-modal__input">
+            <option>Firm Only</option>
+          </select>
+        </div>
+ 
+      </div>
+ 
+      <!-- Uploaded By -->
+      <div class="upload-modal__field upload-modal__field--full">
+        <label class="upload-modal__label">Uploaded By</label>
+        <div class="upload-modal__input-wrapper">
+          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1 117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48zm126.42 327.25a4 4 0 0 1-6.14-.32 124.27 124.27 0 0 0-32.35-29.59C321.37 329 289.11 320 256 320s-65.37 9-90.83 25.34a124.24 124.24 0 0 0-32.35 29.58 4 4 0 0 1-6.14.32A175.32 175.32 0 0 1 80 259c-1.63-97.31 78.22-178.76 175.57-179S432 158.81 432 256a175.32 175.32 0 0 1-46.68 119.25z"></path>
+            <path d="M256 144c-19.72 0-37.55 7.39-50.22 20.82s-19 32-17.57 51.93C191.11 256 221.52 288 256 288s64.83-32 67.79-71.24c1.48-19.74-4.8-38.14-17.68-51.82C293.39 151.44 275.59 144 256 144z"></path>
+          </svg>
+          <input class="upload-modal__input" type="text" value="Alex Wright - Senior Partner">
+        </div>
+      </div>
+ 
+      <!-- Description -->
+      <div class="upload-modal__field upload-modal__field--full">
+        <label class="upload-modal__label">Description</label>
+        <textarea class="upload-modal__textarea" placeholder="Brief overview of the document contents..."></textarea>
+      </div>
+ 
+      <!-- Upload Area -->
+      <div class="upload-modal__dropzone">
+        <div class="upload-modal__drop-icon">
+          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 640 512" height="22" width="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128l-368 0zm79-217c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l39-39L296 392c0 13.3 10.7 24 24 24s24-10.7 24-24l0-134.1 39 39c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0l-80 80z"></path>
+          </svg>
+        </div>
+        <div class="upload-modal__drop-text">Drag & Drop Files Here or Click to Upload</div>
+        <div class="upload-modal__drop-subtext">Supported formats: PDF, DOCX, JPG • Max size: 10MB</div>
+      </div>
+ 
+    </div>
+ 
+    <!-- Footer -->
+    <div class="upload-modal__footer">
+      <button class="upload-modal__btn upload-modal__btn--ghost">Cancel</button>
+      <button class="upload-modal__btn upload-modal__btn--primary">+ Upload New Document</button>
+    </div>
+ 
+  </div>
+</div>
+
+<script src="../scripts/sidebar.js"></script>
+<script src="../scripts/case-documents.js"></script>
+ <!-- <script src="../scripts/case-document.js"></script> -->
+</body>
+</html>

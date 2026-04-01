@@ -14,6 +14,11 @@
     'cases.html':                         'nav-cases',
     'documents.html':                     'nav-documents',
     'billing.html':                       'nav-billing',
+    'client_billing.html':                'nav-billing',
+    'client_billing_pay-now.html':        'nav-billing',
+    'client_billing_view-all-transactions.html': 'nav-billing',
+    'lawyer_casemanagement_billing.html': 'nav-billing',
+    'firm_manager_casemanagement_billing.html': 'nav-billing',
     'client-law_firm-search.html':        'nav-search',
   };
 
@@ -72,6 +77,9 @@
         const consultLink = document.getElementById('nav-consultations');
         if (consultLink) consultLink.href = 'firm-consultation-dashboard.html';
 
+        const billingLink = document.getElementById('nav-billing');
+        if (billingLink) billingLink.href = 'lawyer_casemanagement_billing.html';
+
       } else {
         // default to client behaviour
         const schedLink = document.getElementById('nav-scheduling');
@@ -79,6 +87,9 @@
 
         const consultLink = document.getElementById('nav-consultations');
         if (consultLink) consultLink.href = 'client-consultation-dashboard.html';
+
+        const billingLink = document.getElementById('nav-billing');
+        if (billingLink) billingLink.href = 'client_billing.html';
       }
 
     } catch (err) {
