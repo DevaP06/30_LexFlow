@@ -473,6 +473,12 @@
 
     </main>
     <!-- ============ SCRIPTS ============ -->
+    <script src="../scripts/storageService.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script>
+        // Auth Guard
+        AuthService.requireAuth(['firmAdmin']);
+    </script>
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/firm-consultation-dashboard.js"></script>
     

@@ -999,3 +999,56 @@ textarea {
   align-items: center;
   gap: 8px;
 }
+
+/* --- Toast Notifications --- */
+.lexflow-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1B2B4B;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lexflow-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.lexflow-toast.toast-error {
+  background: #EF4444;
+}
+
+/* --- Loading State --- */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

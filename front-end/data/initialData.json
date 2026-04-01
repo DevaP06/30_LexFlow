@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": 1001,
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "fullName": "Rahul Sharma",
+      "email": "rahul.sharma@example.com",
+      "password": "12345",
+      "phone": "+91 9876543210",
+      "role": "client"
+    },
+    {
+      "id": 1002,
+      "createdAt": "2026-01-20T10:00:00.000Z",
+      "fullName": "Anita Verma",
+      "email": "anita.verma@lexcorp.com",
+      "password": "admin123",
+      "phone": "+91 9123456789",
+      "role": "firmAdmin",
+      "firmName": "LexCorp Associates"
+    }
+  ],
+  "clients": [
+    {
+      "id": 2001,
+      "createdAt": "2026-01-15T10:05:00.000Z",
+      "fullName": "Rahul Sharma",
+      "email": "rahul.sharma@example.com",
+      "phone": "+91 9876543210",
+      "clientType": "individual",
+      "street": "221B MG Road",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "zip": "400001",
+      "caseType": "civil",
+      "courtName": "High Court of Bombay",
+      "cnrNumber": "MH12345678901234",
+      "caseDescription": "Property dispute regarding ownership and transfer of ancestral land.",
+      "preferences": ["10+ Years", "Local Expert"]
+    }
+  ],
+  "lawFirms": [
+    {
+      "id": 3001,
+      "createdAt": "2026-01-20T10:05:00.000Z",
+      "firmName": "LexCorp Associates",
+      "email": "anita.verma@lexcorp.com",
+      "phone": "+91 9123456789",
+      "clientType": "firm",
+      "street": "45 Brigade Road",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "zip": "560001",
+      "primaryEmail": "contact@lexcorp.com",
+      "contactPhone": "+91 9123456789",
+      "website": "https://www.lexcorp.in",
+      "secondaryEmail": "billing@lexcorp.com",
+      "altPhone": "+91 9000000001",
+      "adminName": "Anita Verma",
+      "adminEmail": "anita.verma@lexcorp.com",
+      "adminId": 1002
+    }
+  ]
+}
