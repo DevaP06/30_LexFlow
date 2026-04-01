@@ -91,10 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to log out?')) {
-                // Here you would handle actual logout logic via backend/auth
-                alert('Logging out...');
-            }
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userRole');
+            sessionStorage.removeItem('clientDraft');
+            window.location.href = 'index.html';
         });
     }
 
