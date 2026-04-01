@@ -1,0 +1,62 @@
+[
+    {
+        "id": "CONS-882",
+        "lawyerName": "Dr. Julian Voss",
+        "firmName": "Voss & Associates",
+        "type": "video",
+        "date": "Oct 24, 2023",
+        "time": "10:30 AM - 11:00 AM",
+        "status": "SCHEDULED",
+        "clientName": "John Doe",
+        "avatarClass": "blue"
+    },
+    {
+        "id": "CONS-895",
+        "lawyerName": "Sarah Jenkins",
+        "firmName": "Jenkins Family Law",
+        "type": "inperson",
+        "date": "Oct 26, 2023",
+        "time": "02:00 PM - 03:00 PM",
+        "status": "CONFIRMED",
+        "clientName": "John Doe",
+        "avatarClass": "green"
+    },
+    {
+        "id": "CONS-101",
+        "clientName": "Priya Sharma",
+        "type": "Property Law",
+        "date": "Mar 28, 2026",
+        "time": "11:00 AM",
+        "status": "PENDING",
+        "avatarClass": "orange"
+    },
+    {
+        "id": "CONS-102",
+        "clientName": "TechNova Solutions",
+        "type": "Corporate Law",
+        "date": "Mar 29, 2026",
+        "time": "02:00 PM",
+        "status": "PENDING",
+        "avatarClass": "teal"
+    },
+    {
+        "id": "CONS-204",
+        "lawyerName": "Adv. Rahul Mehta",
+        "firmName": "Property Law Partners",
+        "type": "video",
+        "date": "Mar 14, 2026",
+        "time": "30 min",
+        "status": "COMPLETED",
+        "clientName": "John Doe"
+    },
+    {
+        "id": "CONS-156",
+        "lawyerName": "Elena Rodriguez",
+        "firmName": "Civil Rights Group",
+        "type": "video",
+        "date": "Jan 10, 2026",
+        "time": "-",
+        "status": "CANCELLED",
+        "clientName": "John Doe"
+    }
+]
