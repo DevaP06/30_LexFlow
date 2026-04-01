@@ -8,7 +8,6 @@
 
   // Maps page filename → nav item ID (for active highlighting)
   const PAGE_TO_NAV = {
-    'ScheduleManagement.html':            'nav-scheduling',
     'client-consultation-dashboard.html': 'nav-consultations',
     'firm-consultation-dashboard.html':   'nav-consultations',
     'cases.html':                         'nav-cases',
@@ -29,7 +28,6 @@
   const NAV_TO_PAGE = {
     'nav-consultations': 'client-consultation-dashboard.html',
     'nav-search':        'client-law_firm-search.html',
-    'nav-scheduling':    'ScheduleManagement.html',
     'nav-documents':     'case-documents.html',
     'nav-usermanagement': 'firm_manager_casemanagement_users.html',
   };
@@ -93,9 +91,6 @@
 
       } else {
         // default to client behaviour
-        const schedLink = document.getElementById('nav-scheduling');
-        if (schedLink) schedLink.closest('a').style.display = 'none';
-
         const consultLink = document.getElementById('nav-consultations');
         if (consultLink) consultLink.href = 'client-consultation-dashboard.html';
 
@@ -105,6 +100,17 @@
         // Hide User Management for client
         const userMgmtLink = document.getElementById('nav-usermanagement');
         if (userMgmtLink) userMgmtLink.closest('a').style.display = 'none';
+      }
+
+      // Shared logout behavior for all pages using the common sidebar
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('userRole');
+          sessionStorage.removeItem('clientDraft');
+          window.location.href = 'index.html';
+        });
       }
 
     } catch (err) {

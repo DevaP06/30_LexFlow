@@ -33,7 +33,7 @@
       <h1 class="card-heading" style="margin-bottom:4px;">Primary Contact Details</h1>
       <p class="card-subtitle" style="margin-bottom:32px;">Please provide the primary contact information for your firm's administrative operations.</p>
 
-      <form action="lawfirmonboardingstep3.html">
+      <form action="lawfirmonboardingstep3.html" novalidate>
         <div class="form-grid-2">
           <div class="form-field">
             <label for="primary-email">Primary Email <span style="color:#EF4444;">*</span></label>
@@ -42,6 +42,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </span>
               <input type="email" id="primary-email" class="input-with-icon" placeholder="e.g. contact@firm.com" required />
+                <input type="email" id="primary-email" class="input-with-icon" placeholder="contact@lawfirm.in" required />
             </div>
           </div>
           <div class="form-field">
@@ -50,7 +51,7 @@
               <span class="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               </span>
-              <input type="tel" id="phone" class="input-with-icon" placeholder="+1 (555) 000-0000" required />
+              <input type="tel" id="phone" class="input-with-icon" placeholder="9876543210" inputmode="numeric" maxlength="10" required />
             </div>
           </div>
         </div>
@@ -62,6 +63,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </span>
             <input type="url" id="website" class="input-with-icon" placeholder="https://www.yourfirm.com" />
+              <input type="url" id="website" class="input-with-icon" placeholder="https://www.yourlawfirm.in" />
           </div>
         </div>
 
@@ -76,6 +78,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>
               </span>
               <input type="email" id="secondary-email" class="input-with-icon" placeholder="billing@firm.com" />
+                <input type="email" id="secondary-email" class="input-with-icon" placeholder="billing@lawfirm.in" />
             </div>
           </div>
           <div class="form-field">
@@ -87,7 +90,8 @@
               <span class="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
               </span>
-              <input type="tel" id="alt-phone" class="input-with-icon" placeholder="+1 (555) 111-2222" />
+              <input type="tel" id="alt-phone" class="input-with-icon" placeholder="9876543210" inputmode="numeric" maxlength="10" />
+                <input type="tel" id="alt-phone" class="input-with-icon" placeholder="9876543210" inputmode="numeric" maxlength="10" />
             </div>
           </div>
         </div>
