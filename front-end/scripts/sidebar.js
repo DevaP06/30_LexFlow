@@ -6,11 +6,40 @@
 
 (function () {
 
+  function ensureSidebarStyles() {
+    const href = '../styles/sidebar.css';
+    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .some((link) => (link.getAttribute('href') || '').includes('sidebar.css'));
+
+    if (existing) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  function applySidebarLayout(container) {
+    const sidebar = container.querySelector('.sidebar');
+    if (!sidebar) return;
+
+    const isFixed = getComputedStyle(sidebar).position === 'fixed';
+    if (!isFixed) return;
+
+    const content = document.querySelector('main, .main-content, .cases-main, .details-main, .content');
+    if (!content) return;
+
+    // Reuse shared utility class from sidebar.css to prevent sidebar overlap.
+    content.classList.add('content-with-sidebar');
+  }
+
   // Maps page filename → nav item ID (for active highlighting)
   const PAGE_TO_NAV = {
     'client-consultation-dashboard.html': 'nav-consultations',
     'firm-consultation-dashboard.html':   'nav-consultations',
     'cases.html':                         'nav-cases',
+    'client_casemanagement_cases.html':   'nav-cases',
+    'firm_manager_casemanagement_cases.html': 'nav-cases',
     'documents.html':                     'nav-documents',
     'case-documents.html':                'nav-documents',
     'billing.html':                       'nav-billing',
@@ -27,6 +56,7 @@
   // Add entries here as new pages are built
   const NAV_TO_PAGE = {
     'nav-consultations': 'client-consultation-dashboard.html',
+    'nav-cases':         'client_casemanagement_cases.html',
     'nav-search':        'client-law_firm-search.html',
     'nav-documents':     'case-documents.html',
     'nav-usermanagement': 'firm_manager_casemanagement_users.html',
@@ -35,6 +65,8 @@
   async function loadComponent(selector, url) {
     const container = document.querySelector(selector);
     if (!container) return;
+
+    ensureSidebarStyles();
 
     try {
       const response = await fetch(url);
@@ -48,6 +80,8 @@
       // Extract only what's inside <body>…</body> if this is a full HTML doc
       const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       container.innerHTML = bodyMatch ? bodyMatch[1].trim() : html.trim();
+
+      applySidebarLayout(container);
 
       // Auto-set active nav item based on current page filename
       const page = location.pathname.split('/').pop();
@@ -79,6 +113,9 @@
         const consultLink = document.getElementById('nav-consultations');
         if (consultLink) consultLink.href = 'firm-consultation-dashboard.html';
 
+        const casesLink = document.getElementById('nav-cases');
+        if (casesLink) casesLink.href = 'firm_manager_casemanagement_cases.html';
+
         const billingLink = document.getElementById('nav-billing');
         if (billingLink) billingLink.href = 'lawyer_casemanagement_billing.html';
 
@@ -93,6 +130,9 @@
         // default to client behaviour
         const consultLink = document.getElementById('nav-consultations');
         if (consultLink) consultLink.href = 'client-consultation-dashboard.html';
+
+        const casesLink = document.getElementById('nav-cases');
+        if (casesLink) casesLink.href = 'client_casemanagement_cases.html';
 
         const billingLink = document.getElementById('nav-billing');
         if (billingLink) billingLink.href = 'client_billing.html';
