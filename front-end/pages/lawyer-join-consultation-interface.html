@@ -33,62 +33,12 @@
             <div class="sidebar-search">
                 <div class="search-input-wrapper">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" placeholder="Search or start new chat">
+                    <input type="text" id="sidebar-search" placeholder="Search or start new chat">
                 </div>
             </div>
 
-            <!-- Chat List -->
-            <div class="chat-list">
-                
-                <!-- Active Chat Item -->
-                <div class="chat-item active">
-                    <div class="chat-avatar">
-                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4f8ef7&color=fff" alt="John">
-                    </div>
-                    <div class="chat-item-info">
-                        <div class="chat-item-top">
-                            <span class="chat-name">John Doe</span>
-                            <span class="chat-time">10:30 AM</span>
-                        </div>
-                        <div class="chat-item-bottom">
-                            <span class="chat-snippet">You: Let's discuss the property dispute clauses...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Past Chat Item -->
-                <div class="chat-item">
-                    <div class="chat-avatar">
-                        <img src="https://ui-avatars.com/api/?name=Acme+Corp&background=8b5cf6&color=fff" alt="Acme">
-                    </div>
-                    <div class="chat-item-info">
-                        <div class="chat-item-top">
-                            <span class="chat-name">Acme Corporation (Sarah)</span>
-                            <span class="chat-time">Yesterday</span>
-                        </div>
-                        <div class="chat-item-bottom">
-                            <span class="chat-snippet">Please send the revised drafts.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Past Chat Item -->
-                <div class="chat-item">
-                    <div class="chat-avatar">
-                        <img src="https://ui-avatars.com/api/?name=Michael+Smith&background=f43f5e&color=fff" alt="Michael">
-                    </div>
-                    <div class="chat-item-info">
-                        <div class="chat-item-top">
-                            <span class="chat-name">Michael Smith</span>
-                            <span class="chat-time">Monday</span>
-                        </div>
-                        <div class="chat-item-bottom">
-                            <span class="chat-snippet">Thanks for your help on the custody case!</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+            <!-- Chat List (Populated via JS) -->
+            <div class="chat-list"></div>
         </aside>
 
         <!-- RIGHT MAIN AREA (Active Chat) -->
@@ -153,6 +103,7 @@
         </main>
     </div>
 
+    <script src="../scripts/storage.js"></script>
     <script src="../scripts/lawyer-join-consultation-interface.js"></script>
 </body>
 </html>

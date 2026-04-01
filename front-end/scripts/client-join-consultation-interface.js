@@ -1,107 +1,193 @@
-// ===================================================
-// LexFlow — Consultation Interface Interaction
-// ===================================================
-
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- Media Controls Toggle ---
-    const btnMic = document.getElementById('btn-mic');
-    const btnCam = document.getElementById('btn-cam');
-
-    function toggleControl(btn) {
-        btn.classList.toggle('off');
-        const iconOn = btn.querySelector('.icon-on');
-        const iconOff = btn.querySelector('.icon-off');
-        
-        if (btn.classList.contains('off')) {
-            iconOn.classList.add('hidden');
-            iconOff.classList.remove('hidden');
-        } else {
-            iconOn.classList.remove('hidden');
-            iconOff.classList.add('hidden');
-        }
-    }
-
-    if (btnMic) {
-        btnMic.addEventListener('click', () => toggleControl(btnMic));
-    }
-
-    if (btnCam) {
-        btnCam.addEventListener('click', () => toggleControl(btnCam));
-    }
-
-    // --- Leave Call ---
-    const btnLeave = document.getElementById('btn-leave');
-    if (btnLeave) {
-        btnLeave.addEventListener('click', () => {
-            const confirmed = confirm("Are you sure you want to exit the consultation?");
-            if (confirmed) {
-                // Redirect back to dashboard
-                window.location.href = 'client-consultation-dashboard.html';
-            }
-        });
-    }
-
-    // --- Chat System ---
+    // 1. App State
+    let currentConsId = sessionStorage.getItem('active_cons_id') || 'CONS-882';
+    
+    // 2. DOM Elements
+    const chatListContainer = document.querySelector('.chat-list');
+    const chatMessagesContainer = document.getElementById('chat-messages');
+    const headerName = document.querySelector('.active-chat-text h2');
+    const headerAvatar = document.querySelector('.active-chat-info .chat-avatar img');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
-    const chatMessages = document.getElementById('chat-messages');
+    const sendBtn = document.getElementById('btn-send-msg');
+    const leaveBtn = document.getElementById('btn-leave');
+    const sidebarSearch = document.getElementById('sidebar-search');
 
-    function appendMessage(text, isOutgoing) {
-        const timeValue = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isOutgoing ? 'outgoing' : 'incoming'}`;
-        
-        // Define avatar and author based on who is sending
-        const avatarSrc = isOutgoing ? 'https://ui-avatars.com/api/?name=John+Doe&background=4f8ef7&color=fff&size=32' : 'https://ui-avatars.com/api/?name=Julian+Vance&background=1e2a4a&color=fff&size=32';
-        const authorName = isOutgoing ? 'You' : 'Adv. Julian Vance';
+    // 3. Initialization
+    init();
 
-        messageDiv.innerHTML = `
-            <div class="msg-avatar">
-                <img src="${avatarSrc}" alt="${authorName}">
-            </div>
-            <div class="msg-content">
-                <span class="msg-author">${authorName} <span class="msg-time">${timeValue}</span></span>
-                <div class="msg-bubble">${text}</div>
-            </div>
-        `;
-        
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+    function init() {
+        renderSidebar();
+        loadConsultation(currentConsId);
+        setupEventListeners();
     }
 
-    if (chatForm) {
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = chatInput.value.trim();
-            if (text) {
-                appendMessage(text, true); // True means outgoing
-                chatInput.value = '';
-                
-                // Simulate a fake reply after 1.5 seconds for demo purposes
-                setTimeout(() => {
-                    appendMessage("I completely understand. I will pull up the relevant documents right now.", false);
-                }, 1500);
+    /**
+     * Renders the chat sidebar dynamically from storage
+     */
+    function renderSidebar(filter = '') {
+        if (!chatListContainer) return;
+        const consultations = LexFlowStorage.getConsultations();
+        
+        chatListContainer.innerHTML = '';
+        consultations.forEach(cons => {
+            // Filter by name or firm
+            if (filter && 
+                !cons.lawyerName.toLowerCase().includes(filter.toLowerCase()) && 
+                !cons.firmName.toLowerCase().includes(filter.toLowerCase())) {
+                return;
             }
+
+            const isActive = cons.id === currentConsId;
+            const chatItem = document.createElement('div');
+            chatItem.className = `chat-item ${isActive ? 'active' : ''}`;
+            chatItem.dataset.id = cons.id;
+            
+            chatItem.innerHTML = `
+                <div class="chat-avatar">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(cons.lawyerName)}&background=1e2a4a&color=fff" alt="${cons.lawyerName}">
+                </div>
+                <div class="chat-item-info">
+                    <div class="chat-item-top">
+                        <span class="chat-name">${cons.lawyerName}</span>
+                        <span class="chat-time">${cons.time.split(' - ')[0]}</span>
+                    </div>
+                    <div class="chat-item-bottom">
+                        <span class="chat-snippet">${cons.firmName}</span>
+                    </div>
+                </div>
+            `;
+            
+            chatItem.addEventListener('click', () => {
+                if (currentConsId !== cons.id) {
+                    currentConsId = cons.id;
+                    sessionStorage.setItem('active_cons_id', currentConsId);
+                    renderSidebar();
+                    loadConsultation(currentConsId);
+                }
+            });
+            
+            chatListContainer.appendChild(chatItem);
         });
     }
 
-    // --- Meeting Timer Setup ---
-    const timerElem = document.getElementById('meeting-timer');
-    let seconds = 0;
+    /**
+     * Loads a specific consultation into the main chat area
+     */
+    function loadConsultation(id) {
+        const consultation = LexFlowStorage.getConsultationById(id);
+        if (!consultation) return;
 
-    function formatTime(sec) {
-        const h = Math.floor(sec / 3600).toString().padStart(2, '0');
-        const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
-        const s = (sec % 60).toString().padStart(2, '0');
-        return `${h}:${m}:${s}`;
+        // Update Header
+        if (headerName) headerName.textContent = consultation.lawyerName;
+        if (headerAvatar) {
+            headerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(consultation.lawyerName)}&background=1e2a4a&color=fff`;
+        }
+
+        renderMessages();
     }
 
-    if (timerElem) {
-        setInterval(() => {
-            seconds++;
-            timerElem.textContent = formatTime(seconds);
-        }, 1000);
+    /**
+     * Renders messages for the current consultation
+     */
+    function renderMessages() {
+        if (!chatMessagesContainer) return;
+        
+        const messages = LexFlowStorage.getChatsByConsId(currentConsId);
+        chatMessagesContainer.innerHTML = '<div class="chat-divider"><span>Today</span></div>';
+        
+        if (messages.length === 0) {
+            const welcome = {
+                sender: 'lawyer',
+                text: `Hello! I'm ${LexFlowStorage.getConsultationById(currentConsId)?.lawyerName || 'your lawyer'}. How can I assist you with your case today?`,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            LexFlowStorage.addChatMessage(currentConsId, welcome);
+            appendMessageToUI(welcome);
+        } else {
+            messages.forEach(msg => appendMessageToUI(msg));
+        }
+        
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    /**
+     * Appends a single message to the UI
+     */
+    function appendMessageToUI(msg) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${msg.sender === 'user' ? 'outgoing' : 'incoming'}`;
+        msgDiv.innerHTML = `
+            <div class="msg-bubble">
+                ${msg.text}
+                <span class="msg-time">${msg.time}</span>
+            </div>
+        `;
+        chatMessagesContainer.appendChild(msgDiv);
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    /**
+     * Sends a message from the client
+     */
+    function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        const newMsg = { sender: 'user', text: text };
+        const savedMsg = LexFlowStorage.addChatMessage(currentConsId, newMsg);
+        appendMessageToUI(savedMsg);
+        chatInput.value = '';
+
+        // Mock Lawyer Reply
+        const activeIdAtTimeOfSend = currentConsId;
+        setTimeout(() => {
+            const replies = [
+                "I've received your message. Let's discuss this further.",
+                "Can you provide more details about this?",
+                "I see. I'll look into the legal precedents for this matter.",
+                "Understood. We should prepare the documentation accordingly."
+            ];
+            const randomReply = replies[Math.floor(Math.random() * replies.length)];
+            
+            const reply = {
+                sender: 'lawyer',
+                text: randomReply
+            };
+            
+            LexFlowStorage.addChatMessage(activeIdAtTimeOfSend, reply);
+            
+            // Only update UI if user is still in the same chat
+            if (sessionStorage.getItem('active_cons_id') === activeIdAtTimeOfSend) {
+                appendMessageToUI(reply);
+            }
+        }, 1500);
+    }
+
+    /**
+     * Global input bindings
+     */
+    function setupEventListeners() {
+        if (chatForm) {
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                sendMessage();
+            });
+        }
+        if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+        
+        if (sidebarSearch) {
+            sidebarSearch.addEventListener('input', (e) => {
+                renderSidebar(e.target.value);
+            });
+        }
+
+        if (leaveBtn) {
+            leaveBtn.addEventListener('click', () => {
+                if (confirm('End this consultation session?')) {
+                    window.location.href = 'client-consultation-dashboard.html';
+                }
+            });
+        }
     }
 });
