@@ -1,5 +1,7 @@
 const MOCK_PATH = "../scripts/client_casemanagement_mock-data.json",
-  STORAGE_KEY = "lexflow_mock_data",
+  LEGACY_STORAGE_KEY = "lexflow_mock_data",
+  USERS_STORAGE_KEY = "lexflow_users",
+  LAWYERS_STORAGE_KEY = "lexflow_lawyers",
   ITEMS_PER_PAGE = 8;
 let appData = null,
   allUsers = [],
@@ -8,6 +10,14 @@ let appData = null,
   editingUserId = null,
   formAccountStatus = "active",
   formAvailability = "available";
+const LAWYER_AVATAR_COLORS = [
+  "blue",
+  "indigo",
+  "teal",
+  "green",
+  "orange",
+  "purple",
+];
 function normalizeUser(e) {
   const t = { ...e };
   if (
@@ -63,26 +73,145 @@ function nextFirmUserId(e) {
     `LF-${String(t + 1).padStart(3, "0")}`
   );
 }
+function getLawyerAvatarColor(e = "") {
+  const t = String(e)
+    .split("")
+    .reduce((e, t) => e + t.charCodeAt(0), 0);
+  return LAWYER_AVATAR_COLORS[t % LAWYER_AVATAR_COLORS.length];
+}
+function loadLawyersFromStorage() {
+  try {
+    const e = localStorage.getItem(LAWYERS_STORAGE_KEY);
+    if (!e) return [];
+    const t = JSON.parse(e);
+    return Array.isArray(t) ? t : [];
+  } catch (e) {
+    return (console.warn("Failed to parse lawyers storage:", e), []);
+  }
+}
+function saveLawyersToStorage(e) {
+  localStorage.setItem(LAWYERS_STORAGE_KEY, JSON.stringify(e));
+}
+async function ensureLawyersStorageInitialized() {
+  if (localStorage.getItem(LAWYERS_STORAGE_KEY)) return;
+  try {
+    const e = await fetch("../data/lawyers.json");
+    if (!e.ok) return;
+    const t = await e.json();
+    Array.isArray(t) && saveLawyersToStorage(t);
+  } catch (e) {
+    console.warn("Failed to initialize lawyers storage from seed:", e);
+  }
+}
+function nextLawyerStorageId(e, t = []) {
+  let a = 0;
+  [...e, ...t].forEach((e) => {
+    const t = e.id && String(e.id).match(/^lawyer-(\d+)$/i);
+    t && (a = Math.max(a, parseInt(t[1], 10)));
+  });
+  return `lawyer-${a + 1}`;
+}
+function mapUserToLawyerRecord(e, t, a, n) {
+  const s =
+      t && Array.isArray(t.specialties) && t.specialties.length
+        ? t.specialties
+        : e.specialisation
+          ? [e.specialisation]
+          : ["General Practice"],
+    r = t ? t.id : nextLawyerStorageId(a, n);
+  return {
+    id: r,
+    userId: e.id,
+    name: `Adv. ${e.name}`,
+    email: e.email,
+    specialties: s,
+    activeCases: t && Number.isFinite(t.activeCases) ? t.activeCases : 0,
+    consultationsToday:
+      t && Number.isFinite(t.consultationsToday) ? t.consultationsToday : 0,
+    capacity: t && Number.isFinite(t.capacity) ? t.capacity : 0,
+    avatarColor: (t && t.avatarColor) || getLawyerAvatarColor(e.id),
+  };
+}
+function syncLawyersWithUsers(e) {
+  const t = loadLawyersFromStorage(),
+    a = e.filter(
+      (e) =>
+        ("lawyer" === e.badgeRole || "manager" === e.badgeRole) &&
+        "active" === e.accountStatus,
+    ),
+    n = [],
+    s = [];
+  a.forEach((e) => {
+    const a = t.find(
+      (t) =>
+        t.userId === e.id ||
+        (t.email && e.email &&
+          t.email.toLowerCase().trim() === e.email.toLowerCase().trim()),
+    );
+    (a && n.push(a.id), s.push(mapUserToLawyerRecord(e, a, t, s)));
+  });
+  const r = t.filter((e) => !e.userId && !n.includes(e.id));
+  saveLawyersToStorage([...r, ...s]);
+}
 function loadFromStorage() {
-  const e = localStorage.getItem(STORAGE_KEY);
-  return e ? JSON.parse(e) : null;
+  const e = localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (e) {
+    try {
+      const t = JSON.parse(e);
+      if (t && Array.isArray(t.users)) {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(t.users));
+        return t;
+      }
+    } catch (t) {
+      console.warn("Failed to parse legacy user storage:", t);
+    }
+  }
+
+  const t = localStorage.getItem(USERS_STORAGE_KEY);
+  if (t) {
+    try {
+      const e = JSON.parse(t);
+      if (Array.isArray(e)) return { users: e };
+    } catch (e) {
+      console.warn("Failed to parse users storage:", e);
+    }
+  }
+
+  return null;
 }
 function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(appData.users || []));
+
+  const e = localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (e) {
+    try {
+      const t = JSON.parse(e);
+      if (t && typeof t === "object") {
+        t.users = appData.users || [];
+        localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(t));
+      }
+    } catch (t) {
+      console.warn("Failed syncing users to legacy storage:", t);
+    }
+  }
 }
 async function initUsers() {
   try {
+    await ensureLawyersStorageInitialized();
+
     let e = loadFromStorage();
     if (!e) {
       const t = await fetch(MOCK_PATH);
-      ((e = await t.json()),
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(e)));
+      e = await t.json();
+      localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(e));
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(e.users || []));
     }
     ((appData = e),
       Array.isArray(appData.users) || (appData.users = []),
       (appData.users = appData.users.map((e) => normalizeUser(e))),
       assignMissingFirmUserIds(appData.users),
       appData.users.forEach(syncRoleFromBadge),
+      syncLawyersWithUsers(appData.users),
       saveData(),
       (allUsers = appData.users),
       applyFilters());
@@ -315,7 +444,7 @@ function submitUserForm() {
         );
       },
     },
-    { input: a, validator: LexValidation.validatePhone },
+    { input: a, validator: LexValidation.validateIndianPhone },
     { input: n, validator: (e) => LexValidation.validateSelect(e, "role") },
   ];
   if (!LexValidation.validateForm(r)) {
@@ -376,13 +505,18 @@ function submitUserForm() {
         (e.ongoing = 0)),
       appData.users.push(e));
   }
-  (saveData(), (allUsers = appData.users), closeModal(), applyFilters());
+  (syncLawyersWithUsers(appData.users),
+    saveData(),
+    (allUsers = appData.users),
+    closeModal(),
+    applyFilters());
 }
 function deleteUser(e) {
   const t = allUsers.find((t) => t.id === e);
   t &&
     confirm(`Remove ${t.name} from the firm? This cannot be undone.`) &&
     ((appData.users = appData.users.filter((t) => t.id !== e)),
+    syncLawyersWithUsers(appData.users),
     saveData(),
     (allUsers = appData.users),
     applyFilters());

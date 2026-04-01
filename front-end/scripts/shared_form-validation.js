@@ -41,6 +41,19 @@ const LexValidation = (() => {
         ? null
         : "Invalid phone format (digits, +, -, spaces, parentheses only)";
   }
+  function c(t) {
+    if (!t || !t.trim()) return null;
+
+    let n = t.trim().replace(/[\s\-()]/g, "");
+
+    if (n.startsWith("+91")) n = n.slice(3);
+    else if (n.startsWith("91") && n.length === 12) n = n.slice(2);
+    else if (n.startsWith("0") && n.length === 11) n = n.slice(1);
+
+    return /^[6-9]\d{9}$/.test(n)
+      ? null
+      : "Enter a valid Indian mobile number (e.g. +91 98765 43210)";
+  }
   function i(e) {
     if (!e || !e.trim()) return "Card number is required";
     const t = e.replace(/\s/g, "");
@@ -115,6 +128,7 @@ const LexValidation = (() => {
       },
       validateEmail: r,
       validatePhone: a,
+      validateIndianPhone: c,
       validatePhoneRequired: function (e) {
         return e && e.trim() ? a(e) : "Phone number is required";
       },

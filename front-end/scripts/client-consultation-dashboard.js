@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initial Render
-    renderConsultations();
+    // 1. Ensure storage is initialized
+    if (!localStorage.getItem('lexflow_consultations')) {
+        console.log('[Dashboard] Initializing storage...');
+        initStorage();
+        // Give it a moment to load
+        setTimeout(() => renderConsultations(), 100);
+    } else {
+        // 2. Initial Render
+        renderConsultations();
+    }
 
     // 2. Elements
     const btnBookCons = document.getElementById('btn-book-consultation');
@@ -18,7 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (scheduledGrid) {
             scheduledGrid.innerHTML = '';
-            const activeCons = allCons.filter(c => c.status === 'SCHEDULED' || c.status === 'CONFIRMED' || c.status === 'TODAY');
+            const activeCons = allCons.filter(c =>
+                c.status === 'PENDING' ||
+                c.status === 'SCHEDULED' ||
+                c.status === 'CONFIRMED' ||
+                c.status === 'TODAY'
+            );
             
             if (activeCons.length === 0) {
                 scheduledGrid.innerHTML = '<p class="no-data">No upcoming consultations.</p>';

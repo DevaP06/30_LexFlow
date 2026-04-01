@@ -29,6 +29,10 @@
     const content = document.querySelector('main, .main-content, .cases-main, .details-main, .content');
     if (!content) return;
 
+    // Avoid applying the offset twice when a wrapper already has this class.
+    const hasOffsetAncestor = content.parentElement && content.parentElement.closest('.content-with-sidebar');
+    if (hasOffsetAncestor || content.classList.contains('content-with-sidebar')) return;
+
     // Reuse shared utility class from sidebar.css to prevent sidebar overlap.
     content.classList.add('content-with-sidebar');
   }
@@ -40,6 +44,8 @@
     'cases.html':                         'nav-cases',
     'client_casemanagement_cases.html':   'nav-cases',
     'firm_manager_casemanagement_cases.html': 'nav-cases',
+    'firm_manager_casemanagement_case-details.html': 'nav-cases',
+    'firm_manager_casemanagement_tasks.html': 'nav-cases',
     'documents.html':                     'nav-documents',
     'case-documents.html':                'nav-documents',
     'billing.html':                       'nav-billing',
@@ -98,7 +104,7 @@
       });
 
       // Update role label from localStorage
-      const roleLabels = { client: 'Client', firmAdmin: 'Law Firm' };
+      const roleLabels = { client: 'Client', firmAdmin: 'Firm Admin' };
       const userRole = localStorage.getItem('userRole');
       const roleEl = container.querySelector('.user-role');
       if (roleEl && userRole) roleEl.textContent = roleLabels[userRole] ?? 'User';
@@ -117,7 +123,7 @@
         if (casesLink) casesLink.href = 'firm_manager_casemanagement_cases.html';
 
         const billingLink = document.getElementById('nav-billing');
-        if (billingLink) billingLink.href = 'lawyer_casemanagement_billing.html';
+        if (billingLink) billingLink.href = 'firm_manager_casemanagement_billing.html';
 
         // Show and link User Management for firmAdmin
         const userMgmtLink = document.getElementById('nav-usermanagement');

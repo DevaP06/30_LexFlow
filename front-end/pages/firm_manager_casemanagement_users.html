@@ -11,18 +11,7 @@
 <body style="display: flex; height: 100vh; margin: 0;">
 <div id="sidebar-container"></div>
 <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;" class="content-with-sidebar">
-<div class="topbar">
-<div class="breadcrumb">
-<a href="firm_manager_casemanagement_cases.html" class="breadcrumb-link">Cases</a>
-<span class="breadcrumb-sep">/</span>
-<span class="current">User Management</span>
-</div>
-<div style="display: flex; gap: 12px; align-items: center;">
-<button type="button" class="bell-btn" aria-label="Search">
-<span class="svg-icon-placeholder" data-icon="icon_33"></span>
-</button>
-</div>
-</div>
+
 <main class="cases-main users-main">
 <div class="page-header users-page-header">
 <div>
@@ -131,7 +120,7 @@ Add New User
 </div>
 <div class="form-group">
 <label class="form-label" for="userFormPhone">Phone number</label>
-<input class="form-input" id="userFormPhone" type="tel" placeholder="+1 (555) 000-0000" maxlength="17" autocomplete="tel" pattern="[\+\d\s\-\(\)]{7,17}" title="7-15 digits, may include +, -, spaces, parentheses">
+<input class="form-input" id="userFormPhone" type="tel" placeholder="+91 98765 43210" maxlength="16" autocomplete="tel" pattern="(\+91[\-\s]?)?[6-9][0-9]{9}" title="Enter a valid Indian mobile number (e.g. +91 98765 43210)">
 </div>
 <div class="form-group">
 <label class="form-label" for="userFormBadgeRole">Role</label>

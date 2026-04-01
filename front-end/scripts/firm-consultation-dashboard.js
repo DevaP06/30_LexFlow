@@ -1,8 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initial Render
-    refreshAll();
+    // 1. Ensure storage is initialized
+    if (!localStorage.getItem('lexflow_consultations')) {
+        console.log('[Dashboard] Initializing storage...');
+        initStorage();
+        // Give it a moment to load
+        setTimeout(() => refreshAll(), 100);
+    } else {
+        // 2. Initial Render
+        refreshAll();
+    }
 
-    // 2. Global Event Listeners
+    // 3. Global Event Listeners
     document.addEventListener('click', (e) => {
         const btnJoin = e.target.closest('.btn-join');
         const btnCancel = e.target.closest('.btn-cancel');
