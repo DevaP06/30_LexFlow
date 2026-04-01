@@ -13,6 +13,7 @@
     'firm-consultation-dashboard.html':   'nav-consultations',
     'cases.html':                         'nav-cases',
     'documents.html':                     'nav-documents',
+    'case-documents.html':                'nav-documents',
     'billing.html':                       'nav-billing',
     'client_billing.html':                'nav-billing',
     'client_billing_pay-now.html':        'nav-billing',
@@ -20,6 +21,7 @@
     'lawyer_casemanagement_billing.html': 'nav-billing',
     'firm_manager_casemanagement_billing.html': 'nav-billing',
     'client-law_firm-search.html':        'nav-search',
+    'firm_manager_casemanagement_users.html': 'nav-usermanagement',
   };
 
   // Maps nav item ID → relative page path (for link resolution)
@@ -28,6 +30,8 @@
     'nav-consultations': 'client-consultation-dashboard.html',
     'nav-search':        'client-law_firm-search.html',
     'nav-scheduling':    'ScheduleManagement.html',
+    'nav-documents':     'case-documents.html',
+    'nav-usermanagement': 'firm_manager_casemanagement_users.html',
   };
 
   async function loadComponent(selector, url) {
@@ -80,6 +84,13 @@
         const billingLink = document.getElementById('nav-billing');
         if (billingLink) billingLink.href = 'lawyer_casemanagement_billing.html';
 
+        // Show and link User Management for firmAdmin
+        const userMgmtLink = document.getElementById('nav-usermanagement');
+        if (userMgmtLink) {
+          userMgmtLink.closest('a').style.display = 'flex';
+          userMgmtLink.href = 'firm_manager_casemanagement_users.html';
+        }
+
       } else {
         // default to client behaviour
         const schedLink = document.getElementById('nav-scheduling');
@@ -90,6 +101,10 @@
 
         const billingLink = document.getElementById('nav-billing');
         if (billingLink) billingLink.href = 'client_billing.html';
+
+        // Hide User Management for client
+        const userMgmtLink = document.getElementById('nav-usermanagement');
+        if (userMgmtLink) userMgmtLink.closest('a').style.display = 'none';
       }
 
     } catch (err) {

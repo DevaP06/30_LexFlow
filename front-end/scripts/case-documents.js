@@ -37,8 +37,19 @@
    • Interns only see SHARED documents within their access list
    =================================================== */
 
-const CURRENT_USER_EMAIL = "mehta@lexflow.in";
-const CURRENT_CASE_ID    = "CASE-46";
+// Get userRole from localStorage
+const userRole = localStorage.getItem('userRole') || 'client';
+
+// Map role to test user email
+const roleToEmailMap = {
+  'client': 'rahul.client@gmail.com',      // client user
+  'firmAdmin': 'mehta@lexflow.in',         // lawyer/admin user
+  'lawyer': 'mehta@lexflow.in',
+  'intern': 'priya.intern@lexflow.in'
+};
+
+const CURRENT_USER_EMAIL = roleToEmailMap[userRole] || roleToEmailMap['client'];
+const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
 
 (function () {
   "use strict";
