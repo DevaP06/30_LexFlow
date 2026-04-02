@@ -136,6 +136,103 @@
       "phone": "+91 9000000012",
       "role": "lawfirm_admin",
       "firmName": "Kapoor Legal Partners"
+    },
+
+    {
+      "id": 1020,
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "fullName": "Pooja Gupta",
+      "email": "pooja.gupta@gmail.com",
+      "password": "client123",
+      "phone": "+91 9811001100",
+      "role": "client"
+    },
+    {
+      "id": 1021,
+      "createdAt": "2026-03-02T10:00:00.000Z",
+      "fullName": "Arjun Singh",
+      "email": "arjun.singh@gmail.com",
+      "password": "client123",
+      "phone": "+91 9822002200",
+      "role": "client"
+    },
+    {
+      "id": 1022,
+      "createdAt": "2026-03-03T10:00:00.000Z",
+      "fullName": "Kavita Reddy",
+      "email": "kavita.reddy@gmail.com",
+      "password": "client123",
+      "phone": "+91 9833003300",
+      "role": "client"
+    },
+    {
+      "id": 1023,
+      "createdAt": "2026-03-04T10:00:00.000Z",
+      "fullName": "Suresh Pillai",
+      "email": "suresh.pillai@gmail.com",
+      "password": "client123",
+      "phone": "+91 9844004400",
+      "role": "client"
+    },
+    {
+      "id": 1024,
+      "createdAt": "2026-03-05T10:00:00.000Z",
+      "fullName": "Nisha Joshi",
+      "email": "nisha.joshi@gmail.com",
+      "password": "client123",
+      "phone": "+91 9855005500",
+      "role": "client"
+    },
+
+    {
+      "id": 1025,
+      "createdAt": "2026-03-06T10:00:00.000Z",
+      "fullName": "Priya Sharma",
+      "email": "priya@sharmasonsegal.in",
+      "password": "firm123",
+      "phone": "+91 9866006600",
+      "role": "firmAdmin",
+      "firmName": "Sharma & Sons Legal"
+    },
+    {
+      "id": 1026,
+      "createdAt": "2026-03-07T10:00:00.000Z",
+      "fullName": "Rajan Iyer",
+      "email": "rajan@iyerlawchambers.in",
+      "password": "firm123",
+      "phone": "+91 9877007700",
+      "role": "firmAdmin",
+      "firmName": "Iyer Law Chambers"
+    },
+    {
+      "id": 1027,
+      "createdAt": "2026-03-08T10:00:00.000Z",
+      "fullName": "Subhash Bose",
+      "email": "subhash@bosepartners.in",
+      "password": "firm123",
+      "phone": "+91 9888008800",
+      "role": "firmAdmin",
+      "firmName": "Bose & Partners"
+    },
+    {
+      "id": 1028,
+      "createdAt": "2026-03-09T10:00:00.000Z",
+      "fullName": "Meera Patel",
+      "email": "meera@patellegal.in",
+      "password": "firm123",
+      "phone": "+91 9899009900",
+      "role": "firmAdmin",
+      "firmName": "Patel Legal Group"
+    },
+    {
+      "id": 1029,
+      "createdAt": "2026-03-10T10:00:00.000Z",
+      "fullName": "Arun Nair",
+      "email": "arun@nairassociates.in",
+      "password": "firm123",
+      "phone": "+91 9900110011",
+      "role": "firmAdmin",
+      "firmName": "Nair & Associates"
     }
   ],
 

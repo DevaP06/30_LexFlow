@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const currentUser = AuthService.requireAuth(['client']);
+    if (!currentUser) return;
+
     // 0. Initialize storage if needed
     if (!localStorage.getItem('lexflow_firms') || !localStorage.getItem('lexflow_consultations')) {
         console.log('[Find Firm] Initializing storage...');
@@ -203,6 +206,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
+
+            const activeUser = AuthService.getCurrentUser();
+            if (!activeUser || activeUser.role !== 'client') {
+                window.location.href = 'SignIn.html';
+                return;
+            }
             
             // Get form data
             const firmName = document.getElementById('lawfirm-name').value;
@@ -228,9 +237,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const firmId = sessionStorage.getItem('booking_firm_id');
             const firm = firmId ? LexFlowStorage.getFirmById(firmId) : null;
             
-            // Get current user (or use default)
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"name": "Client User"}');
-            const clientName = currentUser.name || 'Client User';
+            // Use the authenticated client identity only.
+            const clientName = activeUser.fullName || activeUser.name;
+            if (!clientName) {
+                window.location.href = 'SignIn.html';
+                return;
+            }
             
             // Generate unique consultation ID
             const consultationId = 'CONS-' + Date.now();

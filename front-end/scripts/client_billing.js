@@ -2,7 +2,7 @@ const billingStorage = window.LexFlowBillingStorage;
 const normalizeInvoices = billingStorage.normalizeInvoices;
 const normalizePayments = billingStorage.normalizePayments;
 const ensureBillingStorage = billingStorage.ensureBillingStorage;
-const BILLING_TODAY = new Date("2026-04-02T00:00:00");
+const BILLING_TODAY = new Date();
 
 function formatDate(value) {
   return new Date(value).toLocaleDateString("en-IN", {

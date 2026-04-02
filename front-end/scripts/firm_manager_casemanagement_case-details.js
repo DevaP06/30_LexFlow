@@ -77,13 +77,10 @@ async function initCaseDetails() {
     allData = await ensureCaseStorage();
     Array.isArray(loadJsonFromStorage(DOCS_STORAGE_KEY)) ||
       saveJsonToStorage(DOCS_STORAGE_KEY, buildDocumentIndexFromCases(allData.cases || []));
-    let t = new URLSearchParams(window.location.search).get("cnr");
-    if (
-      (!t && allData.cases.length > 0 && (t = allData.cases[0].cnr),
-      (currentCase = allData.cases.find((e) => e.cnr === t)),
-      !currentCase)
-    )
-      return;
+    const t = new URLSearchParams(window.location.search).get("cnr");
+    if (!t) { window.location.href = 'firm_manager_casemanagement_cases.html'; return; }
+    currentCase = allData.cases.find((e) => e.cnr === t);
+    if (!currentCase) { window.location.href = 'firm_manager_casemanagement_cases.html'; return; }
     if (
       (allData.tasks &&
         (currentTasks = allData.tasks.filter(
@@ -362,8 +359,9 @@ function renderEditTeamList() {
       closeModal("documentModal"));
   }),
   (window.deleteDocument = function (e) {
+    if (!currentCase || !Array.isArray(currentCase.documents) || e < 0 || e >= currentCase.documents.length) return;
     confirm("Are you sure you want to delete this document?") &&
-      (currentCase.documents.splice(e, 1), saveData(), renderDocuments());
+      (currentCase.documents.splice(e, 1), saveAllData(), renderDocuments());
   }),
   (window.addTimelineEvent = function () {
     ((document.getElementById("timelineModalTitle").textContent =

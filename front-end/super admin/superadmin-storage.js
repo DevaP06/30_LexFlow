@@ -6,9 +6,9 @@
 
 window.LexFlowSuperAdminStorage = (() => {
     const STORAGE_KEYS = {
-        firms: 'lexflow_firms',
+        firms: 'lexflow_law_firms',
         lawyers: 'lexflow_lawyers',
-        users: 'lexflow_users',
+        users: 'users',
         consultations: 'lexflow_consultations',
         settings: 'lexflow_sa_settings',
         mockDataLoaded: 'lexflow_sa_mock_loaded'
@@ -247,6 +247,8 @@ window.LexFlowSuperAdminStorage = (() => {
 
     const saveUsers = (users) => {
         localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+        // Mirror to lexflow_users so CasesStorage (assign-lawyer dropdown) stays in sync
+        localStorage.setItem('lexflow_users', JSON.stringify(users));
     };
 
     const addUser = (user) => {

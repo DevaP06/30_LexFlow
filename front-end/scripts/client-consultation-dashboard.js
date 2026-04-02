@@ -18,20 +18,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function normalizeValue(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function getCurrentClientUser() {
+        try {
+            return JSON.parse(localStorage.getItem('currentUser') || '{}');
+        } catch {
+            return {};
+        }
+    }
+
+    function isCurrentClientConsultation(cons, currentUser) {
+        if (!currentUser || !currentUser.role) return false;
+
+        const currentNames = [currentUser.fullName, currentUser.name].map(normalizeValue).filter(Boolean);
+        const currentIds = [currentUser.clientId, currentUser.userId, currentUser.id, currentUser.email]
+            .map(normalizeValue)
+            .filter(Boolean);
+
+        if (currentIds.length) {
+            if (cons.clientId && currentIds.includes(normalizeValue(cons.clientId))) return true;
+            if (cons.clientEmail && currentIds.includes(normalizeValue(cons.clientEmail))) return true;
+        }
+
+        if (currentNames.length && currentNames.includes(normalizeValue(cons.clientName))) return true;
+
+        return false;
+    }
+
     // 3. Rendering Functions
     function renderConsultations() {
-        const allCons = LexFlowStorage.getConsultations();
+        const currentUser = getCurrentClientUser();
+        const allCons = LexFlowStorage.getConsultations().filter(c => isCurrentClientConsultation(c, currentUser));
         const scheduledGrid = document.querySelector('.scheduled-grid');
         const pastTableBody = document.querySelector('#past-consultations-table tbody');
-        
+
         if (scheduledGrid) {
             scheduledGrid.innerHTML = '';
             const activeCons = allCons.filter(c =>
                 (c.status === 'PENDING' ||
                 c.status === 'SCHEDULED' ||
                 c.status === 'CONFIRMED' ||
-                c.status === 'TODAY') &&
-                c.lawyerName && c.lawyerName !== 'undefined'
+                c.status === 'TODAY')
             );
             
             if (activeCons.length === 0) {
@@ -75,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (pastTableBody) {
             pastTableBody.innerHTML = '';
-            const pastCons = allCons.filter(c => (c.status === 'COMPLETED' || c.status === 'CANCELLED') && c.lawyerName && c.lawyerName !== 'undefined');
+            const pastCons = allCons.filter(c => c.status === 'COMPLETED' || c.status === 'CANCELLED');
             
             if (pastCons.length === 0) {
                 pastTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No past history found.</td></tr>';

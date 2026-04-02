@@ -1,7 +1,7 @@
 ﻿// LexFlow Super Admin - Unified Interactions
 
 const SA_Storage = window.LexFlowSuperAdminStorage;
-const SA_INVOICE_KEY = 'lexflow_superadmin_invoices';
+const SA_INVOICE_KEY = 'lexflow_invoices'; // shared with billing pages
 
 function initDB() {
     if (!SA_Storage) {
@@ -20,14 +20,7 @@ function initDB() {
         };
     }
 
-    let invoices = JSON.parse(localStorage.getItem(SA_INVOICE_KEY) || '[]');
-    if (invoices.length === 0) {
-        invoices = [
-            { id: 'INV-2023-0901', firmId: 'firm-1', firmName: 'JV Ross Associates', client: 'Acme Corp', amount: 250, status: 'pending' },
-            { id: 'INV-2023-0902', firmId: 'firm-2', firmName: 'Jenkins Family Law', client: 'John Doe', amount: 150, status: 'paid' }
-        ];
-        localStorage.setItem(SA_INVOICE_KEY, JSON.stringify(invoices));
-    }
+    const invoices = JSON.parse(localStorage.getItem(SA_INVOICE_KEY) || '[]');
 
     return {
         firms: SA_Storage.getFirms(),

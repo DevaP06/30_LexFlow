@@ -1,10 +1,16 @@
 let allTasks = [],
-  filteredTasks = [],
-  currentUser = {
-    name: "Sarah Mitchell",
-    avatar: "SM",
-    role: "Firm Admin",
-  };
+  filteredTasks = [];
+
+const currentUser = (() => {
+  try {
+    const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    return {
+      name: u.fullName || u.name || 'Firm Admin',
+      avatar: (u.fullName || u.name || 'FA').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase(),
+      role: u.role || 'firmAdmin',
+    };
+  } catch { return { name: 'Firm Admin', avatar: 'FA', role: 'firmAdmin' }; }
+})();
 const MOCK_STORAGE_KEY = "lexflow_mock_data",
   TASKS_STORAGE_KEY = "lexflow_tasks",
   USERS_STORAGE_KEY = "lexflow_users",
@@ -264,7 +270,8 @@ function getPrioColor(t) {
       o = document.getElementById("taskCaseInput").value,
       i = document.getElementById("taskAssigneeInput").value,
       l = document.getElementById("taskDescInput").value,
-      d = document.getElementById("taskPriorityInput").value,
+      d = (['LOW','MEDIUM','HIGH'].includes(document.getElementById("taskPriorityInput").value)
+        ? document.getElementById("taskPriorityInput").value : 'LOW'),
       r = new Date(e.value).toLocaleDateString(void 0, {
         month: "short",
         day: "numeric",
@@ -290,7 +297,7 @@ function getPrioColor(t) {
         dueDate: r,
         status: "Pending",
         description: l,
-        caseCnr: "",
+        caseCnr: o || "",
       });
     }
     (saveTasks(), applyFilters(), closeModal("taskModal"));

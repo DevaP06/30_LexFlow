@@ -81,11 +81,37 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLawyerAvailability();
     }
 
+    // Get the current firmAdmin's firm name/id for filtering
+    function getCurrentFirm() {
+        try {
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return { firmName: user.firmName || null, firmId: user.firmId || null };
+        } catch { return { firmName: null, firmId: null }; }
+    }
+
+    function normalizeValue(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function isFirmMatch(cons, firm) {
+        if (!firm.firmName && !firm.firmId) return true; // no filter if unlinked
+
+        const consultationFirmId = normalizeValue(cons && cons.firmId);
+        const consultationFirmName = normalizeValue(cons && cons.firmName);
+
+        if (!consultationFirmId && !consultationFirmName) return false;
+        if (firm.firmId && consultationFirmId) return consultationFirmId === normalizeValue(firm.firmId);
+        if (firm.firmName && consultationFirmName) return consultationFirmName === normalizeValue(firm.firmName);
+
+        return false;
+    }
+
     /**
      * Updates the top stats metrics
      */
     function renderStats() {
-        const allCons = LexFlowStorage.getConsultations();
+        const firm = getCurrentFirm();
+        const allCons = LexFlowStorage.getConsultations().filter(c => isFirmMatch(c, firm));
         const pending = allCons.filter(c => c.status === 'PENDING').length;
         const active = allCons.filter(c => ['SCHEDULED', 'CONFIRMED', 'TODAY', 'IN PROGRESS'].includes(c.status)).length;
         const completed = allCons.filter(c => c.status === 'COMPLETED').length;
@@ -106,7 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const requestsGrid = document.querySelector('.requests-grid');
         if (!requestsGrid) return;
 
-        const pending = LexFlowStorage.getConsultations().filter(c => c.status === 'PENDING');
+        const firm = getCurrentFirm();
+        const pending = LexFlowStorage.getConsultations().filter(c => c.status === 'PENDING' && isFirmMatch(c, firm));
         const lawyers = LexFlowStorage.getLawyers();
 
         requestsGrid.innerHTML = '';
@@ -172,7 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableBody = document.querySelector('#active-consultations-table tbody');
         if (!tableBody) return;
 
-        const activeCons = LexFlowStorage.getConsultations().filter(c => ['SCHEDULED', 'CONFIRMED', 'TODAY', 'IN PROGRESS'].includes(c.status));
+        const firm = getCurrentFirm();
+        const activeCons = LexFlowStorage.getConsultations().filter(c => ['SCHEDULED', 'CONFIRMED', 'TODAY', 'IN PROGRESS'].includes(c.status) && isFirmMatch(c, firm));
 
         tableBody.innerHTML = '';
         

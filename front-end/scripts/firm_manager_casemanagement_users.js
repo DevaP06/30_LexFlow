@@ -187,6 +187,11 @@ function importApprovedLawyersIntoUsers(e) {
           n.specialisation || (n.specialisation = r),
           syncRoleFromBadge(n));
       } else {
+        // Email uniqueness guard during import
+        const emailAlreadyExists = e.some(
+          (u) => String(u.email || "").trim().toLowerCase() === a
+        );
+        if (emailAlreadyExists) return;
         const t = normalizeUser({
           id: nextInternalId(e, "lawyer"),
           name: s,

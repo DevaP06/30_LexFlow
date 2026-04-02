@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -rn \"TODO\\\\|FIXME\\\\|BUG\\\\|HACK\" /d/backup_ffsd/30_LexFlow/front-end/scripts/*.js)",
+      "Bash(grep -rn \"deleteTask\\\\|removeTeamMember\\\\|caseCnr\" /d/backup_ffsd/30_LexFlow/front-end/scripts/*.js)"
+    ]
+  }
+}

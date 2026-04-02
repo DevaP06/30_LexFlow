@@ -1,5 +1,6 @@
-let role = "client";
-// can be client, lawyer, admin, intern
+const _docUser = (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}'); } catch { return {}; } })();
+let role = _docUser.role || "client";
+// can be client, lawyer, firmAdmin, superAdmin
 
 
 /* ===================================================
@@ -379,26 +380,53 @@ let role = "client";
   /* ─── Boot ─── */
   syncViewIcons();
   
-  fetch("../data/docs.json")
-    .then(r => r.json())
-    .then(data => {
-      const uMap = {};
-      (data.users || []).forEach(u => { uMap[u.id] = u.name; });
-      casesData = (data.cases || []).map(c => ({
-        id: c.id,
-        client: uMap[c.clientId] || 'Unknown Client',
-        type: 'INDIVIDUAL',
-        status: (c.status === 'ACTIVE') ? 'Active' : 'Closed',
-        caseType: c.title,
-        lawyer: uMap[c.lawyerId] || 'Unknown Lawyer',
-        court: c.court,
-        date: new Date().toISOString() // Fallback since docs.json cases lack explicit dates
-      }));
-      go();
-    })
-    .catch(e => {
+  function loadCasesFromStorage() {
+    // Prefer live localStorage cases (lexflow_cases / lexflow_mock_data) over static JSON
+    try {
+      const liveCases = JSON.parse(localStorage.getItem('lexflow_cases') || 'null');
+      const liveUsers = JSON.parse(localStorage.getItem('lexflow_users') || localStorage.getItem('users') || '[]');
+      if (Array.isArray(liveCases) && liveCases.length > 0) {
+        const uMap = {};
+        liveUsers.forEach(u => { uMap[u.id] = u.name || u.fullName; });
+        casesData = liveCases.map(c => ({
+          id: c.id || c.cnr,
+          client: c.client?.contact || uMap[c.clientId] || 'Unknown Client',
+          type: 'INDIVIDUAL',
+          status: (c.status === 'Active' || c.status === 'ACTIVE') ? 'Active' : 'Closed',
+          caseType: c.title || c.type || 'General',
+          lawyer: uMap[c.assignedAdvocateId] || 'Unassigned',
+          court: c.court || '',
+          date: c.filedDate || new Date().toISOString()
+        }));
+        go();
+        return;
+      }
+    } catch (_) {}
+
+    // Fallback: fetch from static docs.json
+    fetch("../data/docs.json")
+      .then(r => r.json())
+      .then(data => {
+        const uMap = {};
+        (data.users || []).forEach(u => { uMap[u.id] = u.name; });
+        casesData = (data.cases || []).map(c => ({
+          id: c.id,
+          client: uMap[c.clientId] || 'Unknown Client',
+          type: 'INDIVIDUAL',
+          status: (c.status === 'ACTIVE') ? 'Active' : 'Closed',
+          caseType: c.title,
+          lawyer: uMap[c.lawyerId] || 'Unknown Lawyer',
+          court: c.court,
+          date: new Date().toISOString()
+        }));
+        go();
+      })
+      .catch(e => {
         console.error("Failed to load cases", e);
         grid.innerHTML = `<p class="no-results">Failed to load cases data.</p>`;
-    });
+      });
+  }
+
+  loadCasesFromStorage();
 
 })();

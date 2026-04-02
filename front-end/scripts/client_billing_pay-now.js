@@ -3,7 +3,7 @@ const normalizeInvoices = billingStorage.normalizeInvoices;
 const normalizePayments = billingStorage.normalizePayments;
 const ensureBillingStorage = billingStorage.ensureBillingStorage;
 const saveBillingToAllStores = billingStorage.saveBillingToAllStores;
-const BILLING_TODAY = new Date("2026-04-02T00:00:00");
+const BILLING_TODAY = new Date();
 
 function formatLongDate(dateValue) {
   return new Date(dateValue).toLocaleDateString("en-IN", {
@@ -37,6 +37,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!currentInvoice) {
       alert("Invoice not found.");
+      window.location.href = "client_billing.html";
+      return;
+    }
+
+    // Verify invoice belongs to the logged-in client
+    const _payUser = (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}'); } catch { return {}; } })();
+    const _clientName = (_payUser.fullName || _payUser.name || '').trim().toLowerCase();
+    if (_clientName && currentInvoice.client &&
+        currentInvoice.client.trim().toLowerCase() !== _clientName) {
+      alert("You do not have permission to pay this invoice.");
       window.location.href = "client_billing.html";
       return;
     }
@@ -112,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         invoices[invoiceIndex].status = "Paid";
       }
 
-      const paymentDate = "2026-04-02";
+      const paymentDate = new Date().toISOString().split('T')[0];
 
       const existingPaymentIndex = payments.findIndex((payment) => payment.invoiceId === currentInvoice.id);
       const paymentRecord = {

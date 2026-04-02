@@ -3,7 +3,7 @@
   const INVOICES_STORAGE_KEY = "lexflow_invoices";
   const PAYMENTS_STORAGE_KEY = "lexflow_payments";
   const BILLING_MOCK_PATH = "../scripts/client_casemanagement_mock-data.json";
-  const BILLING_REFERENCE_DATE = new Date("2026-04-02T00:00:00");
+  const BILLING_REFERENCE_DATE = new Date();
 
   function loadJsonFromStorage(key) {
     try {

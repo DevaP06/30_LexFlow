@@ -540,8 +540,13 @@
 
     <!-- ============ SCRIPTS ============ -->
     <script src="../scripts/storage.js"></script>
+    <script src="../scripts/storageService.js"></script>
+    <script src="../scripts/auth.js"></script>
     <script src="../scripts/sidebar-utils.js"></script>
     <script>
+        // Auth guard — redirect to sign-in if not logged in as client
+        AuthService.requireAuth(['client']);
+
         // Initialize storage on load
         document.addEventListener('DOMContentLoaded', () => {
             if (!localStorage.getItem('lexflow_consultations')) {

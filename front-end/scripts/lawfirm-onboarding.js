@@ -183,6 +183,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       StorageService.create('lawFirms', firmData);
 
+      // Mirror new firm to lexflow_law_firms so it appears in the client firm-search page
+      try {
+        const existingFirms = JSON.parse(localStorage.getItem('lexflow_law_firms') || '[]');
+        const newFirmEntry = {
+          id: `firm-${Date.now()}`,
+          name: firmData.firmName,
+          subtitle: `${firmData.city || ''}, ${firmData.state || ''}`.trim().replace(/^,|,$/g, ''),
+          location: (firmData.city || '').toLowerCase(),
+          practiceArea: 'general',
+          description: `${firmData.firmName} — a registered law firm on LexFlow.`,
+          rating: 4.0,
+          reviews: 0,
+          price: 100,
+          availability: 'AVAILABLE',
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(firmData.firmName)}&background=1e3a5f&color=fff`
+        };
+        existingFirms.push(newFirmEntry);
+        localStorage.setItem('lexflow_law_firms', JSON.stringify(existingFirms));
+      } catch (_) {}
+
+
+
       const { password: _pw, ...safeUser } = user;
       localStorage.setItem('currentUser', JSON.stringify(safeUser));
 

@@ -41,7 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (result.success) {
                     _showToast('Welcome back, ' + result.user.fullName + '!');
-                    
+                    // Sync userRole to actual role so sidebar renders correctly
+                    localStorage.setItem('userRole', result.user.role);
+
                     setTimeout(() => {
                         if (result.user.role === 'client') {
                             window.location.href = 'client-consultation-dashboard.html';

@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 1. App State
-    let currentConsId = sessionStorage.getItem('active_cons_id') || 'CONS-882';
+    const _activeConsId = sessionStorage.getItem('active_cons_id');
+    if (!_activeConsId) { window.location.href = 'firm-consultation-dashboard.html'; return; }
+    let currentConsId = _activeConsId;
     
     // 2. DOM Elements
     const chatListContainer = document.querySelector('.chat-list');
@@ -27,7 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function renderSidebar(filter = '') {
         if (!chatListContainer) return;
-        const consultations = LexFlowStorage.getConsultations();
+        const _cu = (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}'); } catch { return {}; } })();
+        const _firmName = (_cu.firmName || '').trim().toLowerCase();
+        const consultations = LexFlowStorage.getConsultations().filter(c =>
+            c.status !== 'CANCELLED' &&
+            (_firmName ? (c.firmName || '').trim().toLowerCase() === _firmName : true)
+        );
         
         chatListContainer.innerHTML = '';
         consultations.forEach(cons => {

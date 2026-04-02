@@ -12,6 +12,10 @@ const StorageService = (() => {
 
   function _write(key, arr) {
     localStorage.setItem(key, JSON.stringify(arr));
+    // Mirror users to lexflow_users so CasesStorage (assign-lawyer) stays in sync
+    if (key === 'users') {
+      localStorage.setItem('lexflow_users', JSON.stringify(arr));
+    }
   }
 
   return {
