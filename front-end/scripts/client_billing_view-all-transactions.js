@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       tr.innerHTML = `
         <td style="font-weight:600; color:#1a1a2e;">${tx.id}</td>
-        <td><a href="#" class="dt-id" onclick="window.open('image.png', '_blank'); return false;">${tx.invoiceId}</a></td>
+        <td><span class="dt-id">${tx.invoiceId}</span></td>
         <td style="font-weight:700; color:#1a1a2e;">₹${Number(tx.amount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
         <td style="color:#6b7280;">${formattedDate}</td>
         <td>

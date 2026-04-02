@@ -3,9 +3,10 @@ const normalizeInvoices = billingStorage.normalizeInvoices;
 const normalizePayments = billingStorage.normalizePayments;
 const ensureBillingStorage = billingStorage.ensureBillingStorage;
 const saveBillingToAllStores = billingStorage.saveBillingToAllStores;
+const BILLING_TODAY = new Date("2026-04-02T00:00:00");
 
 function formatLongDate(dateValue) {
-  return new Date(dateValue).toLocaleDateString("en-US", {
+  return new Date(dateValue).toLocaleDateString("en-IN", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -44,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("summaryCaseName").textContent = currentInvoice.caseName || "-";
     document.getElementById("summaryLawFirm").textContent = currentInvoice.lawyerName || "Awaiting Assignment";
 
-    const daysLeft = Math.ceil((new Date(currentInvoice.dueDate) - new Date()) / 86400000);
+    const daysLeft = Math.ceil((new Date(currentInvoice.dueDate) - BILLING_TODAY) / 86400000);
     let dueDateColor = "#1a1a2e";
     if (daysLeft < 0) {
       dueDateColor = "#ef4444";
@@ -111,11 +112,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         invoices[invoiceIndex].status = "Paid";
       }
 
-      const paymentDate = new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      });
+      const paymentDate = "2026-04-02";
 
       const existingPaymentIndex = payments.findIndex((payment) => payment.invoiceId === currentInvoice.id);
       const paymentRecord = {

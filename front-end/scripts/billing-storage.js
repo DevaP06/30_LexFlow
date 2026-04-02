@@ -3,6 +3,7 @@
   const INVOICES_STORAGE_KEY = "lexflow_invoices";
   const PAYMENTS_STORAGE_KEY = "lexflow_payments";
   const BILLING_MOCK_PATH = "../scripts/client_casemanagement_mock-data.json";
+  const BILLING_REFERENCE_DATE = new Date("2026-04-02T00:00:00");
 
   function loadJsonFromStorage(key) {
     try {
@@ -18,6 +19,36 @@
     localStorage.setItem(key, JSON.stringify(value));
   }
 
+  function toIsoDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function normalizeDueDateTo2026(value) {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return "2026-12-31";
+    }
+    parsed.setFullYear(2026);
+    return toIsoDate(parsed);
+  }
+
+  function deriveInvoiceStatus(status, dueDate) {
+    const normalized = String(status || "").toLowerCase().trim();
+    if (normalized === "paid" || normalized === "completed") {
+      return "Paid";
+    }
+
+    const due = new Date(dueDate);
+    if (Number.isNaN(due.getTime())) {
+      return "Pending";
+    }
+
+    return due < BILLING_REFERENCE_DATE ? "Overdue" : "Pending";
+  }
+
   function normalizeInvoices(invoices) {
     if (!Array.isArray(invoices)) {
       return [];
@@ -25,7 +56,8 @@
     return invoices.map((invoice) => ({
       ...invoice,
       amount: Number(invoice.amount) || 0,
-      status: invoice.status || "Pending",
+      dueDate: normalizeDueDateTo2026(invoice.dueDate),
+      status: deriveInvoiceStatus(invoice.status, normalizeDueDateTo2026(invoice.dueDate)),
     }));
   }
 
@@ -78,6 +110,8 @@
       if (!Array.isArray(loadJsonFromStorage(PAYMENTS_STORAGE_KEY))) {
         saveJsonToStorage(PAYMENTS_STORAGE_KEY, normalizePayments(mockData.payments || []));
       }
+      saveJsonToStorage(INVOICES_STORAGE_KEY, normalizeInvoices(loadJsonFromStorage(INVOICES_STORAGE_KEY) || []));
+      saveJsonToStorage(PAYMENTS_STORAGE_KEY, normalizePayments(loadJsonFromStorage(PAYMENTS_STORAGE_KEY) || []));
       syncLegacyBillingFromDedicated();
       return {
         invoices: normalizeInvoices(loadJsonFromStorage(INVOICES_STORAGE_KEY) || []),
@@ -86,6 +120,8 @@
     }
 
     if (hasDedicatedInvoices) {
+      saveJsonToStorage(INVOICES_STORAGE_KEY, normalizeInvoices(loadJsonFromStorage(INVOICES_STORAGE_KEY) || []));
+      saveJsonToStorage(PAYMENTS_STORAGE_KEY, normalizePayments(loadJsonFromStorage(PAYMENTS_STORAGE_KEY) || []));
       syncLegacyBillingFromDedicated();
       return {
         invoices: normalizeInvoices(loadJsonFromStorage(INVOICES_STORAGE_KEY) || []),

@@ -2,9 +2,10 @@ const billingStorage = window.LexFlowBillingStorage;
 const normalizeInvoices = billingStorage.normalizeInvoices;
 const normalizePayments = billingStorage.normalizePayments;
 const ensureBillingStorage = billingStorage.ensureBillingStorage;
+const BILLING_TODAY = new Date("2026-04-02T00:00:00");
 
 function formatDate(value) {
-  return new Date(value).toLocaleDateString("en-US", {
+  return new Date(value).toLocaleDateString("en-IN", {
     month: "short",
     day: "2-digit",
     year: "numeric",
@@ -85,39 +86,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             : "badge-overdue";
       const dueClass = invoice.status === "Paid"
         ? "due-green"
-        : (() => {
-            const days = Math.ceil((new Date(invoice.dueDate) - new Date()) / 86400000);
-            if (days < 0) {
-              return "due-red";
-            }
-            if (days <= 14) {
-              return "due-yellow";
-            }
-            return "due-green";
-          })();
+        : invoice.status === "Overdue"
+          ? "due-red"
+          : (() => {
+              const days = Math.ceil((new Date(invoice.dueDate) - BILLING_TODAY) / 86400000);
+              if (days <= 14) {
+                return "due-yellow";
+              }
+              return "due-green";
+            })();
 
       let actionsHtml = "";
       if (invoice.status !== "Paid") {
         actionsHtml += `<button class="btn-pay-now" onclick="window.location.href='client_billing_pay-now.html?id=${encodeURIComponent(invoice.id)}'">Pay Now</button>`;
       }
 
-      actionsHtml += `
-        <button class="icon-btn" title="View details" onclick="window.open('image.png', '_blank')">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-        </button>
-      `;
-
-      actionsHtml += `
-        <a href="image.png" download="Invoice_${invoice.id}.png" class="icon-btn" title="Download invoice">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        </a>
-      `;
-
       row.innerHTML = `
-        <td><a href="#" class="dt-id" onclick="window.open('image.png', '_blank')">${invoice.id}</a></td>
+        <td><span class="dt-id">${invoice.id}</span></td>
         <td><div style="font-weight:600;">${invoice.caseName || "-"}</div></td>
         <td style="color:#6b7280;">${invoice.lawyerName || "Awaiting Assignment"}</td>
-        <td style="font-weight:700; color:#1a1a2e;">$${invoice.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
+        <td style="font-weight:700; color:#1a1a2e;">${formatCurrency(invoice.amount)}</td>
         <td><span class="badge-status ${badgeClass}">${invoice.status}</span></td>
         <td class="${dueClass}" style="font-weight:600;">${formatDate(invoice.dueDate)}</td>
         <td class="action-cell">${actionsHtml}</td>
@@ -143,8 +131,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       row.innerHTML = `
         <td style="font-weight:600; color:#1a1a2e;">${payment.id}</td>
-        <td><a href="#" class="dt-id" onclick="window.open('image.png', '_blank')">${payment.invoiceId}</a></td>
-        <td style="font-weight:700; color:#1a1a2e;">$${payment.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
+        <td><span class="dt-id">${payment.invoiceId}</span></td>
+        <td style="font-weight:700; color:#1a1a2e;">${formatCurrency(payment.amount)}</td>
         <td style="color:#6b7280;">${formatDate(payment.date)}</td>
         <td><div class="pay-method">${methodIcon} ${payment.method || "Card"}</div></td>
         <td><span class="badge-status badge-completed">${payment.status || "Completed"}</span></td>
