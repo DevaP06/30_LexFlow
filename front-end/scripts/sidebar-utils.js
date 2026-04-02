@@ -27,7 +27,7 @@
                     localStorage.removeItem('userRole');
                     sessionStorage.removeItem('clientDraft');
                     sessionStorage.removeItem('active_cons_id');
-                    window.location.href = 'index.html';
+                    window.location.href = '../index.html';
                 }
             });
         }

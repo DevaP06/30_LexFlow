@@ -169,7 +169,7 @@
           localStorage.removeItem('currentUser');
           localStorage.removeItem('userRole');
           sessionStorage.removeItem('clientDraft');
-          window.location.href = 'index.html';
+          window.location.href = '../index.html';
         });
       }
 
