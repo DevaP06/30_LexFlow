@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     dueDateEl.textContent = formatLongDate(currentInvoice.dueDate);
     dueDateEl.style.color = dueDateColor;
 
-    const formattedAmount = "$" + currentInvoice.amount.toLocaleString("en-US", { minimumFractionDigits: 2 });
+    const formattedAmount = "₹" + currentInvoice.amount.toLocaleString("en-IN", { minimumFractionDigits: 2 });
     document.getElementById("summaryAmount").textContent = formattedAmount;
     document.getElementById("btnPayAmount").textContent = formattedAmount;
   } catch (error) {

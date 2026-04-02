@@ -12,7 +12,7 @@ function formatDate(value) {
 }
 
 function formatCurrency(value) {
-  return "$" + value.toLocaleString("en-US", {
+  return "₹" + value.toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

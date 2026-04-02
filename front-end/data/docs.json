@@ -10,7 +10,7 @@
       "title": "Property Dispute",
       "status": "ACTIVE",
       "firmId": "FIRM-01",
-      "court": "District Court",
+      "court": "District Court, Mumbai",
       "clientId": "USR-005",
       "lawyerId": "USR-001",
       "documents": ["DOC-203", "DOC-204", "DOC-205", "DOC-206"]
@@ -20,7 +20,7 @@
       "title": "Divorce Settlement",
       "status": "ACTIVE",
       "firmId": "FIRM-01",
-      "court": "Family Court",
+      "court": "Family Court, Delhi",
       "clientId": "USR-006",
       "lawyerId": "USR-002",
       "documents": ["DOC-207", "DOC-208"]
@@ -30,7 +30,7 @@
       "title": "Corporate Fraud",
       "status": "ACTIVE",
       "firmId": "FIRM-02",
-      "court": "High Court",
+      "court": "High Court of Bombay",
       "clientId": "USR-010",
       "lawyerId": "USR-008",
       "documents": ["DOC-209", "DOC-210"]
@@ -40,7 +40,7 @@
       "title": "Employment Dispute",
       "status": "ACTIVE",
       "firmId": "FIRM-02",
-      "court": "Labour Court",
+      "court": "Labour Court, Bangalore",
       "clientId": "USR-011",
       "lawyerId": "USR-009",
       "documents": ["DOC-204", "DOC-209"]
