@@ -11,18 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     injectValidationStyles();
     attachBlurValidators();
 
-    const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
-    if (draft.fullName) {
-      _setVal('full-name', draft.fullName);
-      _setVal('email', draft.email);
-      _setVal('phone', draft.phone);
-      _setVal('client-type', draft.clientType);
-      _setVal('street', draft.street);
-      _setVal('city', draft.city);
-      _setVal('state', draft.state);
-      _setVal('zip', draft.zip);
-    }
-
     profileForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -94,15 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
 
       const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
-      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      const profileContext = draft.fullName
-        ? draft
-        : {
-            fullName: currentUser.fullName,
-            email: currentUser.email,
-            phone: currentUser.phone,
-            clientType: currentUser.clientType || 'individual'
-          };
+      const profileContext = draft;
 
       if (!profileContext.fullName || !profileContext.email) {
         _showAlert('case-alert', 'Profile data is missing. Please go back to Step 1.');

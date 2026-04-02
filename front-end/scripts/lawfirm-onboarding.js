@@ -21,17 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     attachStep1Validators();
 
-    const draft = _getDraft();
-    if (draft.fullName) {
-      _setVal('full-name', draft.fullName);
-      _setVal('email', draft.email);
-      _setVal('phone', draft.phone);
-      _setVal('street', draft.street);
-      _setVal('city', draft.city);
-      _setVal('state', draft.state);
-      _setVal('zip', draft.zip);
-    }
-
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       setAlert(null);
@@ -90,14 +79,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const draft = _getDraft();
 
-    if (draft.primaryEmail) {
-      _setVal('primary-email', draft.primaryEmail);
-      _setVal('phone', draft.contactPhone);
-      _setVal('website', draft.website);
-      _setVal('secondary-email', draft.secondaryEmail);
-      _setVal('alt-phone', draft.altPhone);
-    }
-
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       setAlert(null);
@@ -149,11 +130,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     attachStep3Validators();
 
     const draft = _getDraft();
-
-    if (draft.adminName) {
-      _setVal('admin-name', draft.adminName);
-      _setVal('admin-email', draft.adminEmail);
-    }
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
