@@ -41,7 +41,7 @@
   const PAGE_TO_NAV = {
     'client-consultation-dashboard.html': 'nav-consultations',
     'firm-consultation-dashboard.html':   'nav-consultations',
-    'cases.html':                         'nav-cases',
+    'documents-main.html':                'nav-documents',
     'client_casemanagement_cases.html':   'nav-cases',
     'firm_manager_casemanagement_cases.html': 'nav-cases',
     'firm_manager_casemanagement_case-details.html': 'nav-cases',
@@ -64,7 +64,7 @@
     'nav-consultations': 'client-consultation-dashboard.html',
     'nav-cases':         'client_casemanagement_cases.html',
     'nav-search':        'client-law_firm-search.html',
-    'nav-documents':     'case-documents.html',
+    'nav-documents':     'documents-main.html',
     'nav-usermanagement': 'firm_manager_casemanagement_users.html',
   };
 

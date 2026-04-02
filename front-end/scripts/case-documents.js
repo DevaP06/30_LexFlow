@@ -66,7 +66,15 @@ const CURRENT_USER_EMAIL =
   roleToEmailMap[userRole] ||
   roleToEmailMap.client;
 
+const urlParams = new URLSearchParams(window.location.search);
+const urlCaseId = urlParams.get('caseId');
+
+if (urlCaseId) {
+  localStorage.setItem('caseId', urlCaseId);
+}
+
 const CURRENT_CASE_ID =
+  urlCaseId ||
   localStorage.getItem('caseId') ||
   localStorage.getItem('currentCaseId') ||
   'CASE-45';
@@ -724,7 +732,7 @@ const CURRENT_CASE_ID =
     /* ── Update breadcrumb & case header with live data ── */
     const breadcrumb = document.querySelector(".breadcrumb");
     if (breadcrumb) {
-      breadcrumb.innerHTML = `Documents > <span>${CURRENT_CASE.title} (${CURRENT_CASE_ID})</span>`;
+      breadcrumb.innerHTML = `<a href="documents-main.html" style="color: inherit; text-decoration: none;">Documents</a> > <span>${CURRENT_CASE.title} (${CURRENT_CASE_ID})</span>`;
     }
     const caseTitle = document.querySelector(".case-header h1");
     if (caseTitle) {

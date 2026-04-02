@@ -10,15 +10,8 @@ let role = "client";
 (function () {
   "use strict";
 
-  /* ─── Sample Data ─── */
-  const casesData = [
-    { id: "CASE-45", client: "Rahul Sharma",  type: "INDIVIDUAL", status: "Active",  caseType: "Property Dispute", lawyer: "Adv. Mehta",  court: "Bombay High Court", date: "2024-03-12" },
-    { id: "CASE-46", client: "Priya Nair",    type: "INDIVIDUAL", status: "Active",  caseType: "Divorce",          lawyer: "Adv. Sharma", court: "Delhi High Court",  date: "2024-02-20" },
-    { id: "CASE-47", client: "Infosys Ltd.",  type: "CORPORATE",  status: "Closed",  caseType: "Contract Breach",  lawyer: "Adv. Gupta",  court: "Madras High Court", date: "2023-11-05" },
-    { id: "CASE-48", client: "Amit Verma",    type: "INDIVIDUAL", status: "Pending", caseType: "Criminal Defence", lawyer: "Adv. Mehta",  court: "Supreme Court",     date: "2024-01-18" },
-    { id: "CASE-49", client: "TechCorp Pvt.", type: "CORPORATE",  status: "Active",  caseType: "IP Infringement",  lawyer: "Adv. Rao",    court: "Bombay High Court", date: "2024-03-01" },
-    { id: "CASE-50", client: "Sunita Patel",  type: "INDIVIDUAL", status: "Active",  caseType: "Consumer Forum",   lawyer: "Adv. Sharma", court: "District Court",    date: "2024-02-14" },
-  ];
+  /* ─── Dynamic Data ─── */
+  let casesData = [];
 
   /* ─── State ─── */
   const state = {
@@ -187,7 +180,7 @@ let role = "client";
         <p><strong>Lawyer:</strong> ${c.lawyer}</p>
         <p><strong>Court:</strong> ${c.court}</p>
       </div>
-      <button class="btn-primary full"><a href="case-documents.html">Manage Documents →</a></button>`;
+      <button class="btn-primary full"><a href="case-documents.html?caseId=${c.id}" style="color: inherit; text-decoration: none;">Manage Documents →</a></button>`;
     return el;
   }
 
@@ -210,7 +203,7 @@ let role = "client";
       <div class="list-col list-col-lawyer">${c.lawyer}</div>
       <div class="list-col list-col-court">${c.court}</div>
       <div class="list-col"><span class="badge ${statusClass(c.status)}">● ${c.status}</span></div>
-      <div class="list-col"><a href="case-documents.html" class="list-btn">Manage →</a></div>`;
+      <div class="list-col"><a href="case-documents.html?caseId=${c.id}" class="list-btn">Manage →</a></div>`;
     return el;
   }
 
@@ -385,6 +378,27 @@ let role = "client";
 
   /* ─── Boot ─── */
   syncViewIcons();
-  go();
+  
+  fetch("../data/docs.json")
+    .then(r => r.json())
+    .then(data => {
+      const uMap = {};
+      (data.users || []).forEach(u => { uMap[u.id] = u.name; });
+      casesData = (data.cases || []).map(c => ({
+        id: c.id,
+        client: uMap[c.clientId] || 'Unknown Client',
+        type: 'INDIVIDUAL',
+        status: (c.status === 'ACTIVE') ? 'Active' : 'Closed',
+        caseType: c.title,
+        lawyer: uMap[c.lawyerId] || 'Unknown Lawyer',
+        court: c.court,
+        date: new Date().toISOString() // Fallback since docs.json cases lack explicit dates
+      }));
+      go();
+    })
+    .catch(e => {
+        console.error("Failed to load cases", e);
+        grid.innerHTML = `<p class="no-results">Failed to load cases data.</p>`;
+    });
 
 })();
