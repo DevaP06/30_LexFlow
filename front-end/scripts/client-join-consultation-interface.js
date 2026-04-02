@@ -27,16 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function renderSidebar(filter = '') {
         if (!chatListContainer) return;
-        const consultations = LexFlowStorage.getConsultations();
+        const consultations = LexFlowStorage.getConsultations().filter(c => c.status !== 'CANCELLED' && c.lawyerName && c.lawyerName !== 'undefined');
         
         chatListContainer.innerHTML = '';
+        const seenLawyers = new Set();
+        
         consultations.forEach(cons => {
+            const uniqueKey = cons.lawyerId || cons.lawyerName;
+            if (seenLawyers.has(uniqueKey)) return;
+
             // Filter by name or firm
             if (filter && 
-                !cons.lawyerName.toLowerCase().includes(filter.toLowerCase()) && 
-                !cons.firmName.toLowerCase().includes(filter.toLowerCase())) {
+                !(cons.lawyerName || '').toLowerCase().includes(filter.toLowerCase()) && 
+                !(cons.firmName || '').toLowerCase().includes(filter.toLowerCase())) {
                 return;
             }
+            
+            seenLawyers.add(uniqueKey);
 
             const isActive = cons.id === currentConsId;
             const chatItem = document.createElement('div');

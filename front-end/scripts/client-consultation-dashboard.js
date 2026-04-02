@@ -27,10 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (scheduledGrid) {
             scheduledGrid.innerHTML = '';
             const activeCons = allCons.filter(c =>
-                c.status === 'PENDING' ||
+                (c.status === 'PENDING' ||
                 c.status === 'SCHEDULED' ||
                 c.status === 'CONFIRMED' ||
-                c.status === 'TODAY'
+                c.status === 'TODAY') &&
+                c.lawyerName && c.lawyerName !== 'undefined'
             );
             
             if (activeCons.length === 0) {
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (pastTableBody) {
             pastTableBody.innerHTML = '';
-            const pastCons = allCons.filter(c => c.status === 'COMPLETED' || c.status === 'CANCELLED');
+            const pastCons = allCons.filter(c => (c.status === 'COMPLETED' || c.status === 'CANCELLED') && c.lawyerName && c.lawyerName !== 'undefined');
             
             if (pastCons.length === 0) {
                 pastTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No past history found.</td></tr>';
