@@ -4,7 +4,7 @@
       "id": 1001,
       "createdAt": "2026-01-15T10:00:00.000Z",
       "fullName": "Rahul Sharma",
-      "email": "rahul.sharma@example.com",
+      "email": "rahulsharma@example.com",
       "password": "12345",
       "phone": "+91 9876543210",
       "role": "client"

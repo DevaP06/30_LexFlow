@@ -7,7 +7,7 @@
     "incomingRequests": [
         {
             "id": "CONS-902",
-            "clientName": "Rohan Desai",
+            "clientName": "Rahul Sharma",
             "type": "Corporate Litigation",
             "date": "Today, 10:45 AM",
             "status": "PENDING",
@@ -15,7 +15,7 @@
         },
         {
             "id": "CONS-903",
-            "clientName": "Nisha Kulkarni",
+            "clientName": "Rahul Sharma",
             "type": "Visa Consultation",
             "date": "Today, 02:15 PM",
             "status": "PENDING",
@@ -25,7 +25,7 @@
     "activeConsultations": [
         {
             "id": "CONS-882",
-            "clientName": "Priya Sharma",
+            "clientName": "Rahul Sharma",
             "lawyerName": "Adv. Rajesh Mehta",
             "type": "IP Infringement",
             "date": "Oct 24, 2026",
@@ -35,7 +35,7 @@
         },
         {
             "id": "CONS-895",
-            "clientName": "Vikram Singh",
+            "clientName": "Rahul Sharma",
             "lawyerName": "Unassigned",
             "type": "Family Law",
             "date": "Oct 26, 2026",

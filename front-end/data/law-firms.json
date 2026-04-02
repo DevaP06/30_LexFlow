@@ -1,7 +1,7 @@
 [
     {
         "id": "firm-1",
-        "name": "Mehta & Associates",
+        "name": "LexCorp Associates",
         "subtitle": "Corporate & IP • Mumbai, MH",
         "location": "mumbai",
         "practiceArea": "corporate",
@@ -10,14 +10,14 @@
         "reviews": 230,
         "price": 200,
         "availability": "AVAILABLE",
-        "avatar": "https://ui-avatars.com/api/?name=Mehta+Associates&background=1e3a5f&color=fff",
+        "avatar": "https://ui-avatars.com/api/?name=LexCorp+Associates&background=1e3a5f&color=fff",
         "experience": "12+ Years",
         "edu": [
             {"school": "Delhi Law School", "degree": "Juris Doctor (LLM), 2011"},
             {"school": "Delhi University", "degree": "BA in Political Science, 2008"}
         ],
         "languages": ["English (Native)", "Hindi (Fluent)"],
-        "bio": "Adv. Rajesh Mehta is a recognized expert in corporate litigation and intellectual property. With over a decade of experience representing Fortune 500 companies and high-growth startups..."
+        "bio": "Adv. Anita Verma is a recognized expert in corporate litigation and intellectual property. With over a decade of experience representing Fortune 500 companies and high-growth startups..."
     },
     {
         "id": "firm-2",

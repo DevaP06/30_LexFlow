@@ -40,33 +40,45 @@ async function initStorageFromJSON(key, jsonPath, dataTransform = null) {
  * Initializes localStorage with data from JSON files if not already present.
  */
 async function initStorage() {
+    if (window._isInitStorageRunning) return;
+    window._isInitStorageRunning = true;
     try {
         if (!localStorage.getItem(STORAGE_KEYS.FIRMS)) {
+            localStorage.setItem(STORAGE_KEYS.FIRMS, '[]');
             const response = await fetch('../data/law-firms.json');
             const data = await response.json();
-            localStorage.setItem(STORAGE_KEYS.FIRMS, JSON.stringify(data));
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.FIRMS) || '[]');
+            localStorage.setItem(STORAGE_KEYS.FIRMS, JSON.stringify([...data, ...current]));
             console.log('Firms initialized');
         }
         if (!localStorage.getItem(STORAGE_KEYS.CONSULTATIONS)) {
+            localStorage.setItem(STORAGE_KEYS.CONSULTATIONS, '[]');
             const response = await fetch('../data/consultations.json');
             const data = await response.json();
-            localStorage.setItem(STORAGE_KEYS.CONSULTATIONS, JSON.stringify(data));
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONSULTATIONS) || '[]');
+            localStorage.setItem(STORAGE_KEYS.CONSULTATIONS, JSON.stringify([...data, ...current]));
             console.log('Consultations initialized');
         }
         if (!localStorage.getItem(STORAGE_KEYS.CHATS)) {
+            localStorage.setItem(STORAGE_KEYS.CHATS, '{}');
             const response = await fetch('../data/chats.json');
             const data = await response.json();
-            localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify(data));
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHATS) || '{}');
+            localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify({...data, ...current}));
             console.log('Chats initialized');
         }
         if (!localStorage.getItem(STORAGE_KEYS.LAWYERS)) {
+            localStorage.setItem(STORAGE_KEYS.LAWYERS, '[]');
             const response = await fetch('../data/lawyers.json');
             const data = await response.json();
-            localStorage.setItem(STORAGE_KEYS.LAWYERS, JSON.stringify(data));
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.LAWYERS) || '[]');
+            localStorage.setItem(STORAGE_KEYS.LAWYERS, JSON.stringify([...data, ...current]));
             console.log('Lawyers initialized');
         }
     } catch (err) {
         console.error('Failed to initialize storage:', err);
+    } finally {
+        window._isInitStorageRunning = false;
     }
 }
 
