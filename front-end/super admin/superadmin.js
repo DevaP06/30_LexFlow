@@ -53,11 +53,13 @@ function getQueryParam(param) {
     return urlParams.get(param);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     if (!SA_Storage) {
         console.error('SuperAdminStorage not available');
         return;
     }
+
+    await SA_Storage.ensureStorage();
 
     const db = initDB();
     const path = window.location.pathname;

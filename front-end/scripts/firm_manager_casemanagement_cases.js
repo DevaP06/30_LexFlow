@@ -13,7 +13,7 @@ async function initCases() {
     allCases = (await casesStorage.getCases()) || [];
     allTasks = (await casesStorage.getTasks()) || [];
     allLawyers = ((await casesStorage.getUsers()) || []).filter(
-      (u) => u.role === "admin"
+      (u) => u.role === "admin" || u.role === "lawyer" || u.systemRole === "lawyer"
     );
     filteredCases = [...allCases];
     const pendingTasks = allTasks.filter((t) => t.status === "Pending");
@@ -81,7 +81,7 @@ function applyFilters() {
 }
 function renderCaseCard(e) {
   const t = e.nextHearing ? e.nextHearing.date : "TBD",
-    n = (window.allLawyers || [])
+    n = (allLawyers || [])
       .map(
         (t) =>
           `<option value="${t.id}" ${t.id === e.assignedAdvocateId ? "selected" : ""}>Adv. ${t.name}</option>`,

@@ -78,9 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
 
-    caseForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-
+    const handleAccountCreation = (caseData = {}) => {
       const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
       const profileContext = draft;
 
@@ -88,14 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         _showAlert('case-alert', 'Profile data is missing. Please go back to Step 1.');
         return;
       }
-
-      const caseData = {
-        caseType:        _val('case-type'),
-        courtName:       _val('court-name'),
-        cnrNumber:       _val('cnr'),
-        caseDescription: _val('description'),
-        preferences:     _getPreferences()
-      };
 
       const merged = { ...profileContext, ...caseData };
 
@@ -131,7 +121,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => {
         window.location.href = 'client-consultation-dashboard.html';
       }, 800);
+    };
+
+    caseForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleAccountCreation({
+        caseType:        _val('case-type'),
+        courtName:       _val('court-name'),
+        cnrNumber:       _val('cnr'),
+        caseDescription: _val('description'),
+        preferences:     _getPreferences()
+      });
     });
+
+    const skipBtn = document.getElementById('skip-btn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleAccountCreation({});
+      });
+    }
   }
 
   function _val(id) {

@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelBtn = document.querySelector('.btn-ghost');
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
-            window.location.href = 'landing_page.html';
+            window.location.href = '../index.html';
         });
     }
 

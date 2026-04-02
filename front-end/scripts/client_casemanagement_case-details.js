@@ -88,20 +88,27 @@ function getDocumentsForCase(currentCase) {
 function attachDownloadHandlers() {
   document.querySelectorAll(".download-btn").forEach((button) => {
     button.onclick = function () {
-      const fileName = this.dataset.file || "document.pdf";
+      const fileName = this.dataset.file || "document.txt";
+      const safeName = String(fileName).trim() || "document.txt";
+      const fileContent = `LexFlow document download\nFile: ${safeName}\nDownloaded on: ${new Date().toISOString()}`;
+      const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+      const objectUrl = URL.createObjectURL(blob);
+
       const link = document.createElement("a");
-      link.href = "legalheir.pdf";
-      link.download = fileName;
+      link.href = objectUrl;
+      link.download = safeName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      URL.revokeObjectURL(objectUrl);
     };
   });
 }
 
 async function initCaseDetails() {
   try {
-    const data = await ensureCasesStorage();
+    const data = await casesStorage.ensureCasesStorage();
     let cnr = new URLSearchParams(window.location.search).get("cnr");
 
     if (!cnr) {
