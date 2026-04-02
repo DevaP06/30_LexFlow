@@ -18,6 +18,15 @@
       "phone": "+91 9123456789",
       "role": "firmAdmin",
       "firmName": "LexCorp Associates"
+    },
+    {
+      "id": 9001,
+      "createdAt": "2026-01-10T08:00:00.000Z",
+      "fullName": "Lex Admin",
+      "email": "admin@lexflow.legal",
+      "password": "superadmin123",
+      "phone": "+91 9999999999",
+      "role": "superAdmin"
     }
   ],
   "clients": [

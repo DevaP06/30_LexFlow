@@ -28,7 +28,13 @@ const AuthService = (() => {
 
     logout() {
       localStorage.removeItem('currentUser');
-      window.location.href = 'SignIn.html';
+      // Redirect based on current path to avoid breaking navigation
+      const pathname = window.location.pathname;
+      if (pathname.includes('super-admin') || pathname.includes('super admin')) {
+        window.location.href = '../SignIn.html';
+      } else {
+        window.location.href = 'SignIn.html';
+      }
     },
 
     requireAuth(allowedRoles) {

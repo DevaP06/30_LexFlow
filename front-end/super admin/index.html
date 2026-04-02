@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site administration | Django site admin</title>
     <link rel="stylesheet" href="super-admin-global.css">
+    <script src="../scripts/storageService.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/superadmin-auth.js"></script>
+    <script>
+        // Auth check on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await StorageService.seed('../data/initialData.json');
+            const user = SuperAdminAuth.requireSuperAdmin();
+            if (user) {
+              document.getElementById('admin-user-name').textContent = user.fullName;
+            }
+        });
+        
+        // Logout handler
+        function logoutSuperAdmin() {
+            if (confirm('Are you sure you want to logout?')) {
+                SuperAdminAuth.logout();
+            }
+        }
+    </script>
 </head>
 <body class="dashboard">
 
@@ -21,10 +41,9 @@
                 <h1 id="site-name"><a href="index.html">LexFlow Super Admin</a></h1>
             </div>
             <div id="user-tools">
-                WELCOME, <strong>SUPERADMIN</strong>. 
-                <a href="../client-consultation-dashboard.html">VIEW SITE</a> / 
-                <a href="#" onclick="alert('Password reset link sent to admin email'); return false;">CHANGE PASSWORD</a> / 
-                <a href="#" onclick="alert('Logged out successfully'); return false;">LOG OUT</a>
+                WELCOME, <strong><span id="admin-user-name">SUPERADMIN</span></strong>. 
+                <a href="../pages/landing_page.html">VIEW SITE</a> / 
+                <a href="super-admin-login.html" onclick="logoutSuperAdmin(); return false;">LOG OUT</a>
             </div>
         </div>
 
@@ -59,7 +78,7 @@
                             </tr>
                             <tr>
                                 <th scope="row"><a href="lawyer-verification.html">Lawyer Verification <span id="pending-chip" style="background:#ef4444; color:#fff; border-radius:12px; padding:2px 6px; font-size:11px; margin-left:4px;">3 Pending</span></a></th>
-                                <td><a href="#" class="addlink">Review</a></td>
+                                <td><a href="lawyer-verification.html" class="addlink">Review</a></td>
                                 <td><a href="lawyer-verification.html" class="changelink">View</a></td>
                             </tr>
                         </tbody>

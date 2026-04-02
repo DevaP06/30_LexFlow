@@ -55,7 +55,14 @@ const StorageService = (() => {
     },
 
     async seed(jsonPath) {
-      if (localStorage.getItem('lexflow_seeded')) return;
+      // Check if data needs updating (e.g., if superAdmin user is missing)
+      const users = _read('users');
+      const hasSuperAdmin = users.some(u => u.role === 'superAdmin');
+      
+      // If already seeded but superAdmin is missing, force reseed
+      if (localStorage.getItem('lexflow_seeded') && hasSuperAdmin) {
+        return;
+      }
 
       try {
         const resp = await fetch(jsonPath);
@@ -63,12 +70,28 @@ const StorageService = (() => {
         const data = await resp.json();
 
         Object.keys(data).forEach(key => {
-          if (_read(key).length === 0) {
+          const existingData = _read(key);
+          
+          // For users, merge instead of skip to include new roles like superAdmin
+          if (key === 'users') {
+            const newUsers = data[key];
+            const mergedUsers = [...existingData];
+            
+            newUsers.forEach(newUser => {
+              const exists = mergedUsers.find(u => u.id === newUser.id);
+              if (!exists) {
+                mergedUsers.push(newUser);
+              }
+            });
+            
+            _write(key, mergedUsers);
+          } else if (existingData.length === 0) {
             _write(key, data[key]);
           }
         });
 
         localStorage.setItem('lexflow_seeded', 'true');
+        localStorage.setItem('lexflow_seed_version', '2');
         console.log('[StorageService] Seed complete.');
       } catch (err) {
         console.error('[StorageService] Seed failed:', err);

@@ -153,6 +153,57 @@ function syncLawyersWithUsers(e) {
   const r = t.filter((e) => !e.userId && !n.includes(e.id));
   saveLawyersToStorage([...r, ...s]);
 }
+function importApprovedLawyersIntoUsers(e) {
+  const t = loadLawyersFromStorage();
+  if (!Array.isArray(t) || 0 === t.length) return;
+
+  t.filter((e) => {
+    const t = String(e.status || "").toLowerCase().trim();
+    // Include both superAdmin-approved lawyers and lawyer records created from User Management
+    // (those often do not carry an explicit status field).
+    return "approved" === t || "" === t;
+  }).forEach(
+    (t) => {
+      const a = String(t.email || "").trim().toLowerCase();
+      if (!a) return;
+
+      const n = e.find(
+        (e) => String(e.email || "").trim().toLowerCase() === a,
+      );
+      const s =
+        String(t.name || "")
+          .replace(/^Adv\.\s*/i, "")
+          .trim() || "Lawyer";
+      const r =
+        Array.isArray(t.specialties) && t.specialties.length
+          ? t.specialties[0]
+          : "General Practice";
+
+      if (n) {
+        (n.name || (n.name = s),
+          (n.badgeRole = "lawyer"),
+          (n.accountStatus = "active"),
+          (n.availability = n.availability || "available"),
+          n.specialisation || (n.specialisation = r),
+          syncRoleFromBadge(n));
+      } else {
+        const t = normalizeUser({
+          id: nextInternalId(e, "lawyer"),
+          name: s,
+          email: a,
+          password: "changeme123",
+          phone: "",
+          firmUserId: nextFirmUserId(e),
+          badgeRole: "lawyer",
+          accountStatus: "active",
+          availability: "available",
+          specialisation: r,
+        });
+        (syncRoleFromBadge(t), e.push(t));
+      }
+    },
+  );
+}
 function loadFromStorage() {
   const e = localStorage.getItem(LEGACY_STORAGE_KEY);
   if (e) {
@@ -209,6 +260,7 @@ async function initUsers() {
     ((appData = e),
       Array.isArray(appData.users) || (appData.users = []),
       (appData.users = appData.users.map((e) => normalizeUser(e))),
+      importApprovedLawyersIntoUsers(appData.users),
       assignMissingFirmUserIds(appData.users),
       appData.users.forEach(syncRoleFromBadge),
       syncLawyersWithUsers(appData.users),

@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             window.location.href = 'client-consultation-dashboard.html';
                         } else if (result.user.role === 'firmAdmin') {
                             window.location.href = 'firm-consultation-dashboard.html';
+                        } else if (result.user.role === 'superAdmin') {
+                            window.location.href = 'super-admin/index.html';
                         } else {
                             window.location.href = 'landing_page.html';
                         }
