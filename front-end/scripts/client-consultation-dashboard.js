@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="card-actions">
                             <button class="btn btn-primary btn-join" data-id="${cons.id}">Consultation</button>
                             <button class="btn btn-outline" data-id="${cons.id}">View Details</button>
-                            <button class="btn btn-ghost btn-reschedule" data-id="${cons.id}">Reschedule</button>
                             <button class="btn btn-cancel-text btn-cancel" data-id="${cons.id}">Cancel</button>
                         </div>
                     `;
@@ -101,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         const btnJoin = e.target.closest('.btn-join');
         const btnCancel = e.target.closest('.btn-cancel');
-        const btnReschedule = e.target.closest('.btn-reschedule');
 
         if (btnJoin) {
             const id = btnJoin.dataset.id;
@@ -117,10 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (btnReschedule) {
-            const id = btnReschedule.dataset.id;
-            alert('Rescheduling feature coming soon! For now, please cancel and book again.');
-        }
     });
 
     // 5. Modal Logic (re-implementing from original for completeness)
