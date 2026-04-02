@@ -108,7 +108,7 @@ function attachDownloadHandlers() {
 
 async function initCaseDetails() {
   try {
-    const data = await ensureCasesStorage();
+    const data = await casesStorage.ensureCasesStorage();
     let cnr = new URLSearchParams(window.location.search).get("cnr");
 
     if (!cnr) {
