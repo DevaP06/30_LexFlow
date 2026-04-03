@@ -1,6 +1,23 @@
 const StorageService = (() => {
   'use strict';
 
+  let seedInFlight = null;
+
+  function _mergeById(existing, incoming) {
+    const map = new Map();
+    (Array.isArray(existing) ? existing : []).forEach((item) => {
+      if (item && item.id !== undefined && item.id !== null) {
+        map.set(String(item.id), item);
+      }
+    });
+    (Array.isArray(incoming) ? incoming : []).forEach((item) => {
+      if (item && item.id !== undefined && item.id !== null) {
+        map.set(String(item.id), item);
+      }
+    });
+    return Array.from(map.values());
+  }
+
   function _read(key) {
     try {
       const raw = localStorage.getItem(key);
@@ -12,9 +29,14 @@ const StorageService = (() => {
 
   function _write(key, arr) {
     localStorage.setItem(key, JSON.stringify(arr));
-    // Mirror users to lexflow_users so CasesStorage (assign-lawyer) stays in sync
+    // Intentionally keep two keys:
+    // - users: StorageService/Auth workflows
+    // - lexflow_users: CasesStorage/case workflows
+    // Always merge by id into lexflow_users to avoid clobbering users seeded elsewhere.
     if (key === 'users') {
-      localStorage.setItem('lexflow_users', JSON.stringify(arr));
+      const existingMirror = _read('lexflow_users');
+      const mergedMirror = _mergeById(existingMirror, arr);
+      localStorage.setItem('lexflow_users', JSON.stringify(mergedMirror));
     }
   }
 
@@ -59,6 +81,9 @@ const StorageService = (() => {
     },
 
     async seed(jsonPath) {
+      if (seedInFlight) return seedInFlight;
+
+      seedInFlight = (async () => {
       // Check if data needs updating (e.g., if superAdmin user is missing)
       const users = _read('users');
       const hasSuperAdmin = users.some(u => u.role === 'superAdmin');
@@ -99,6 +124,13 @@ const StorageService = (() => {
         console.log('[StorageService] Seed complete.');
       } catch (err) {
         console.error('[StorageService] Seed failed:', err);
+      }
+      })();
+
+      try {
+        await seedInFlight;
+      } finally {
+        seedInFlight = null;
       }
     }
   };

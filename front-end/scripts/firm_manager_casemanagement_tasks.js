@@ -1,5 +1,8 @@
 let allTasks = [],
-  filteredTasks = [];
+  filteredTasks = [],
+  allCases = [];
+
+const casesStorage = window.LexFlowCasesStorage;
 
 const currentUser = (() => {
   try {
@@ -67,6 +70,7 @@ function saveTasksToAllStores() {
 async function initTasks() {
   try {
     const t = await ensureTaskStorage();
+    allCases = ((casesStorage && (await casesStorage.getCases())) || []);
     ((allTasks = t.tasks || []),
       (window.allUsers = t.users || []),
       (filteredTasks = [...allTasks]),
@@ -157,6 +161,17 @@ function getPrioColor(t) {
       ? { bg: "#fef3c7", text: "#d97706" }
       : { bg: "#dcfce3", text: "#166534" };
 }
+
+function resolveCaseFromInput(inputValue) {
+  const v = String(inputValue || "").trim().toLowerCase();
+  if (!v) return null;
+  return allCases.find((c) =>
+    String(c.id || "").toLowerCase() === v ||
+    String(c.cnr || "").toLowerCase() === v ||
+    String(c.title || "").toLowerCase() === v
+  ) || null;
+}
+
 (searchInput.addEventListener("input", applyFilters),
   prioFilter.addEventListener("change", applyFilters),
   statusFilter.addEventListener("change", applyFilters),
@@ -279,15 +294,19 @@ function getPrioColor(t) {
       });
     if (s) {
       const e = allTasks.find((t) => t.id === s);
+      const caseRef = resolveCaseFromInput(o);
       e &&
         ((e.name = t.value.trim()),
         (e.caseTitle = o),
         (e.assignedUser = i),
         (e.dueDate = r),
         (e.description = l),
-        (e.priority = d));
+        (e.priority = d),
+        (e.caseId = caseRef ? caseRef.id : (e.caseId || "")),
+        (e.caseCnr = caseRef ? caseRef.cnr : (e.caseCnr || "")));
     } else {
       const e = "T-" + (1e3 + Math.floor(9e3 * Math.random()));
+      const caseRef = resolveCaseFromInput(o);
       allTasks.unshift({
         id: e,
         name: t.value.trim(),
@@ -297,7 +316,8 @@ function getPrioColor(t) {
         dueDate: r,
         status: "Pending",
         description: l,
-        caseCnr: o || "",
+        caseId: caseRef ? caseRef.id : "",
+        caseCnr: caseRef ? caseRef.cnr : "",
       });
     }
     (saveTasks(), applyFilters(), closeModal("taskModal"));

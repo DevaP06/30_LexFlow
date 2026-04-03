@@ -2,7 +2,7 @@
 // LexFlow Super Admin - Centralized Storage
 // ==========================================
 // Pattern: Unified data access for super admin
-// Storage keys: lexflow_firms, lexflow_lawyers, lexflow_users, lexflow_consultations, lexflow_sa_settings
+// Storage keys: lexflow_law_firms, lexflow_lawyers, users (mirrored to lexflow_users by StorageService), lexflow_consultations, lexflow_sa_settings
 
 window.LexFlowSuperAdminStorage = (() => {
     const STORAGE_KEYS = {

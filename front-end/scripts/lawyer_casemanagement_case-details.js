@@ -56,7 +56,7 @@ async function initCaseDetails() {
       return;
     (allData.tasks &&
       (currentTasks = allData.tasks.filter(
-        (e) => e.caseCnr === currentCase.cnr,
+        (e) => e.caseCnr === currentCase.cnr || e.caseId === currentCase.id,
       )),
       renderHeader(),
       renderOverview(),
@@ -133,8 +133,8 @@ function renderPhases() {
 }
 function renderTeam() {
   let e = "Sarah Mitchell";
-  ("ADM002" === currentCase.assignedAdvocateId && (e = "Vikram Nair"),
-    "ADM003" === currentCase.assignedAdvocateId && (e = "Ananya Iyer"),
+  ("ADM002" === currentCase.lawyerId && (e = "Vikram Nair"),
+    "ADM003" === currentCase.lawyerId && (e = "Ananya Iyer"),
     (teamContainer.innerHTML = `\n        <div style="display: flex; gap: 12px; align-items: center;">\n            <div style="width: 32px; height: 32px; border-radius: 50%; background: #eef2ff; color: #3b5bdb; display: flex; align-items:center; justify-content:center; font-size: 11px; font-weight:700;">${e.substring(0, 2).toUpperCase()}</div>\n            <div style="display:flex; flex-direction:column;">\n                <span style="font-size:13px; font-weight:700; color:#1a1a2e;">${e}</span>\n                <span style="font-size:11px; color:#6b7280;">Lead Attorney</span>\n            </div>\n        </div>\n        <div style="display: flex; gap: 12px; align-items: center;">\n            <div style="width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; color: #6b7280; display: flex; align-items:center; justify-content:center; font-size: 11px; font-weight:700;">DC</div>\n            <div style="display:flex; flex-direction:column;">\n                <span style="font-size:13px; font-weight:700; color:#1a1a2e;">David Chen</span>\n                <span style="font-size:11px; color:#6b7280;">Paralegal</span>\n            </div>\n        </div>\n    `));
 }
 function renderClientInfo() {

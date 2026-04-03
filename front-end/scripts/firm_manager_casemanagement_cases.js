@@ -13,7 +13,7 @@ async function initCases() {
     allCases = (await casesStorage.getCases()) || [];
     allTasks = (await casesStorage.getTasks()) || [];
     allLawyers = ((await casesStorage.getUsers()) || []).filter(
-      (u) => u.role === "admin" || u.role === "lawyer" || u.systemRole === "lawyer"
+      (u) => u.role === "firmAdmin" || u.role === "lawyer" || u.systemRole === "lawyer"
     );
     filteredCases = [...allCases];
     const pendingTasks = allTasks.filter((t) => t.status === "Pending");
@@ -84,7 +84,7 @@ function renderCaseCard(e) {
     n = (allLawyers || [])
       .map(
         (t) =>
-          `<option value="${t.id}" ${t.id === e.assignedAdvocateId ? "selected" : ""}>Adv. ${t.name}</option>`,
+          `<option value="${t.id}" ${t.id === e.lawyerId ? "selected" : ""}>Adv. ${t.fullName || t.name}</option>`,
       )
       .join("");
   return `\n    <div class="case-card page-item" data-title="${e.title.toLowerCase()}" data-cnr="${e.cnr.toLowerCase()}" onclick="window.location.href='firm_manager_casemanagement_case-details.html?cnr=${e.cnr}'" style="display:flex; justify-content:space-between; align-items:center; gap: 24px;">\n      \n      <div class="case-info-left" style="display:flex; align-items:center; gap: 20px; flex: 1; min-width: 0;">\n          <div class="case-icon">\n            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8H3a2 2 0 00-2 2v9a2 2 0 002 2h18a2 2 0 002-2V10a2 2 0 00-2-2zM16 8V6a3 3 0 00-6 0v2M7 13v3m10-3v3"/></svg>\n          </div>\n          <div style="display:flex; flex-direction:column; gap: 6px; min-width: 0; flex: 1;">\n            <div class="meta-row" style="display:flex; align-items:center; gap: 8px;">\n                <span class="badge-active">${e.status}</span>\n                <span style="font-size:11px; color:#6b7280; font-family:monospace; letter-spacing:0.5px;">CNR: ${e.cnr}</span>\n            </div>\n            <div class="case-title" style="margin:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${e.title}</div>\n            <div class="case-meta" style="margin:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\n                <span><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5"/></svg> ${e.type} · ${e.court}</span>\n            </div>\n          </div>\n      </div>\n\n      <div class="case-info-right" style="display:flex; gap: 32px; align-items:center; flex-shrink: 0;">\n          <div style="text-align: right;" onclick="event.stopPropagation()">\n              <div style="font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 4px;">ASSIGNED LAWYER</div>\n              <select class="form-input" style="padding: 4px 8px; font-size: 13px; font-weight: 600; min-width: 160px; border-color: #e5e7eb;" onchange="changeLawyer('${e.cnr}', this.value)">\n                ${n}\n              </select>\n          </div>\n          <div style="text-align: right; white-space: nowrap;">\n              <div style="font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 4px;">NEXT HEARING</div>\n              <div style="font-size:14px; font-weight:600; color:#3b5bdb; display:flex; align-items:center; gap: 4px; justify-content:flex-end;">\n                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>\n                  ${t}\n              </div>\n          </div>\n          <a class="view-details" href="firm_manager_casemanagement_case-details.html?cnr=${e.cnr}">View Details →</a>\n      </div>\n    </div>`;
@@ -96,7 +96,7 @@ async function changeLawyer(cnr, lawyerId) {
   // Guard: only assign if lawyer exists in the loaded list
   if (lawyerId && !allLawyers.some((l) => l.id === lawyerId)) return;
 
-  allCases[caseIndex].assignedAdvocateId = lawyerId;
+  allCases[caseIndex].lawyerId = lawyerId;
   await casesStorage.saveCases(allCases);
   applyFilters();
 }

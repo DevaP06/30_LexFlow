@@ -9,11 +9,11 @@
    Available emails:
      mehta@lexflow.in          → lawyer        (Adv. Mehta)       — CASE-45, CASE-46
      sharma@lexflow.in         → lawyer        (Adv. Sharma)      — CASE-45, CASE-46
-     priya.intern@lexflow.in   → intern        (Intern Priya)     — CASE-45, CASE-46
-     rohan.intern@lexflow.in   → intern        (Intern Rohan)     — CASE-45, CASE-46
-     rahul.client@gmail.com    → client        (Rahul Sharma)     — CASE-45
+    priya.intern@lexflow.in   → lawyer        (Intern Priya)     — CASE-45, CASE-46
+    rohan.intern@lexflow.in   → lawyer        (Intern Rohan)     — CASE-45, CASE-46
+    rahul.sharma@example.com  → client        (Rahul Sharma)     — CASE-45
      anita.client@gmail.com    → client        (Anita Desai)      — CASE-46
-     admin@lexflow.in          → lawfirm_admin (Admin)            — CASE-45, CASE-46
+    admin@lexflow.in          → firmAdmin    (Admin)            — CASE-45, CASE-46
 
    ── FIRM-02 · Kapoor Legal Partners ───────────────
    Available emails:
@@ -21,7 +21,7 @@
      nair@kapoorlegal.in       → lawyer        (Adv. Nair)        — CASE-47, CASE-48
      vikram.client@gmail.com   → client        (Vikram Malhotra)  — CASE-47
      sunita.client@gmail.com   → client        (Sunita Rao)       — CASE-48
-     admin@kapoorlegal.in      → lawfirm_admin (Admin KLP)        — CASE-47, CASE-48
+    admin@kapoorlegal.in      → firmAdmin    (Admin KLP)        — CASE-47, CASE-48
 
    ── Available case IDs ────────────────────────────
      CASE-45  →  Property Dispute     (FIRM-01, client: Rahul Sharma)
@@ -33,8 +33,7 @@
    • A user can ONLY access cases belonging to their own firm
      (or cases explicitly in their caseAccess, for shared clients)
    • Clients are firmless — they can only see cases in their caseAccess
-   • lawfirm_admin can only manage their own firm's cases
-   • Interns only see SHARED documents within their access list
+  • firmAdmin can only manage their own firm's cases
    =================================================== */
 
 function safeParse(value, fallback) {
@@ -53,12 +52,9 @@ const userRole =
 
 // Fallback role email map used only when currentUser is unavailable.
 const roleToEmailMap = {
-  client: 'rahul.client@gmail.com',
+  client: 'rahul.sharma@example.com',
   firmAdmin: 'mehta@lexflow.in',
-  'firm-admin': 'mehta@lexflow.in',
-  lawfirm_admin: 'admin@lexflow.in',
   lawyer: 'mehta@lexflow.in',
-  intern: 'priya.intern@lexflow.in',
 };
 
 const CURRENT_USER_EMAIL =
@@ -603,13 +599,13 @@ const CURRENT_CASE_ID =
     /* ── Check user has per-document access to this case ── */
     let userCaseDocIds = null;
     
-    // Special rule: lawfirm_admin gets access to ALL documents in their firm's cases
-    if (ROLE === "lawfirm_admin" && CURRENT_FIRM && CURRENT_CASE.firmId === CURRENT_FIRM.id) {
-      // Lawfirm admin gets ALL docs in their firm's cases
+    // Special rule: firmAdmin gets access to ALL documents in their firm's cases
+    if (ROLE === "firmAdmin" && CURRENT_FIRM && CURRENT_CASE.firmId === CURRENT_FIRM.id) {
+      // firmAdmin gets ALL docs in their firm's cases
       userCaseDocIds = db.documents
         .filter(d => d.caseId === CURRENT_CASE_ID)
         .map(d => d.id);
-      console.log("✓ lawfirm_admin auto-access to", userCaseDocIds.length, "documents in firm case");
+      console.log("✓ firmAdmin auto-access to", userCaseDocIds.length, "documents in firm case");
     } else if (userHasExplicitCaseAccess) {
       // Otherwise use explicit caseAccess
       userCaseDocIds = CURRENT_USER.caseAccess[CURRENT_CASE_ID];
@@ -672,9 +668,9 @@ const CURRENT_CASE_ID =
     const PERMS = {
       canView:     true,
       canDownload: true,
-      canUpload:   ["client", "lawyer", "lawfirm_admin"].includes(ROLE),
-      canUpdate:   ["lawyer", "lawfirm_admin", "intern"].includes(ROLE),
-      canDelete:   ["lawyer", "lawfirm_admin"].includes(ROLE),
+      canUpload:   ["client", "firmAdmin"].includes(ROLE),
+      canUpdate:   ["lawyer", "firmAdmin"].includes(ROLE),
+      canDelete:   ["lawyer", "firmAdmin"].includes(ROLE),
     };
 
     /* ════════════════════════════════════════
@@ -684,7 +680,7 @@ const CURRENT_CASE_ID =
       const entry = {
         id:      "ACT-" + Date.now(),
         date:    new Date().toISOString(),
-        user:    CURRENT_USER.name,
+        user:    CURRENT_USER.fullName || CURRENT_USER.name,
         email:   CURRENT_USER.email,
         role:    ROLE,
         firmId:  CURRENT_USER.firmId || null,
@@ -747,10 +743,10 @@ const CURRENT_CASE_ID =
       const caseLayer  = db.users.find(u => u.id === CURRENT_CASE.lawyerId);
       const caseClient = db.users.find(u => u.id === CURRENT_CASE.clientId);
       metaDivs[0].innerHTML = `<span>FIRM</span>${FIRM_NAME}`;
-      metaDivs[2].innerHTML = `<span>LAWYER</span>${caseLayer ? caseLayer.name : "—"}`;
+      metaDivs[2].innerHTML = `<span>LAWYER</span>${caseLayer ? (caseLayer.fullName || caseLayer.name) : "—"}`;
       metaDivs[3].innerHTML = `<span>COURT</span>${CURRENT_CASE.court}`;
       if (caseClient) {
-        metaDivs[1].innerHTML = `<span>CLIENT NAME</span>${caseClient.name}`;
+        metaDivs[1].innerHTML = `<span>CLIENT NAME</span>${caseClient.fullName || caseClient.name}`;
       }
     }
 
@@ -1269,14 +1265,6 @@ const CURRENT_CASE_ID =
     function render() {
       let data = [...docsData];
 
-      /* ── INTERN RULE ─────────────────────────────────────────────
-         Interns only see SHARED docs. This is enforced here in the
-         render layer, NOT during data load — so the full list is
-         always available if an intern's role changes mid-session
-         without data corruption.
-      ─────────────────────────────────────────────────────────────*/
-      if (ROLE === "intern") data = data.filter(d => d.access === "SHARED");
-
       const q = uiState.search.toLowerCase().trim();
       if (q) data = data.filter(d =>
         (d.name || "").toLowerCase().includes(q) ||
@@ -1306,9 +1294,7 @@ const CURRENT_CASE_ID =
       grid.className = uiState.view === "grid" ? "documents-grid" : "documents-list";
 
       if (!data.length) {
-        const msg = ROLE === "intern" && docsData.length > 0
-          ? "No shared documents are available for you in this case yet."
-          : "No documents match your criteria.";
+        const msg = "No documents match your criteria.";
         grid.innerHTML = `<p class="no-docs">${msg}</p>`;
         return;
       }
@@ -1466,7 +1452,7 @@ const CURRENT_CASE_ID =
 
         const allSelects  = modal.querySelectorAll("select");
         const typeVal     = allSelects[0] ? allSelects[0].value : "CONTRACT";
-        const uploaderVal = (allTextInputs[2] ? allTextInputs[2].value.trim() : "") || CURRENT_USER.name;
+        const uploaderVal = (allTextInputs[2] ? allTextInputs[2].value.trim() : "") || (CURRENT_USER.fullName || CURRENT_USER.name);
 
         const newDocMeta = {
           id:            nextDocId(),
@@ -1578,9 +1564,8 @@ const CURRENT_CASE_ID =
     if (existing) existing.remove();
     const roleColors = {
       lawyer:        { bg:"#eff6ff", color:"#1d4ed8", border:"#bfdbfe" },
-      intern:        { bg:"#f1f5f9", color:"#475569", border:"#cbd5e1" },
       client:        { bg:"#fefce8", color:"#854d0e", border:"#fde68a" },
-      lawfirm_admin: { bg:"#f0fdf4", color:"#166534", border:"#86efac" },
+      firmAdmin:     { bg:"#f0fdf4", color:"#166534", border:"#86efac" },
     };
     const rc = roleColors[role] || roleColors.lawyer;
     const badge = document.createElement("div");
@@ -1595,7 +1580,7 @@ const CURRENT_CASE_ID =
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     `;
     const firm = firmName ? ` · ${firmName}` : "";
-    badge.textContent = `👤 ${user.name} · ${role.replace("_"," ").toUpperCase()}${firm} · ${CURRENT_CASE_ID}`;
+    badge.textContent = `👤 ${(user.fullName || user.name)} · ${role.replace("_"," ").toUpperCase()}${firm} · ${CURRENT_CASE_ID}`;
     badge.title = badge.textContent;
     document.body.appendChild(badge);
   }

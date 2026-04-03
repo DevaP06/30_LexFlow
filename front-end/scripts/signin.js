@@ -40,20 +40,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const result = AuthService.login(email, password);
 
                 if (result.success) {
-                    _showToast('Welcome back, ' + result.user.fullName + '!');
+                    _showToast('Welcome back, ' + (result.user.fullName || result.user.name || 'User') + '!');
                     // Sync userRole to actual role so sidebar renders correctly
                     localStorage.setItem('userRole', result.user.role);
 
                     setTimeout(() => {
-                        if (result.user.role === 'client') {
-                            window.location.href = 'client-consultation-dashboard.html';
-                        } else if (result.user.role === 'firmAdmin') {
-                            window.location.href = 'firm-consultation-dashboard.html';
-                        } else if (result.user.role === 'superAdmin') {
-                            window.location.href = 'super-admin/index.html';
-                        } else {
-                            window.location.href = 'landing_page.html';
-                        }
+                        const roleRedirects = {
+                            client: 'client-consultation-dashboard.html',
+                            firmAdmin: 'firm-consultation-dashboard.html',
+                            lawyer: 'firm-consultation-dashboard.html',
+                            intern: 'firm-consultation-dashboard.html',
+                            superAdmin: '../super admin/index.html'
+                        };
+
+                        const redirectPath = roleRedirects[result.user.role] || 'SignIn.html';
+                        window.location.href = redirectPath;
                     }, 800);
                 } else {
                     loginBtn.classList.remove('btn-loading');

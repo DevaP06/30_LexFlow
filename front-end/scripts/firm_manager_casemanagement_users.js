@@ -20,10 +20,15 @@ const LAWYER_AVATAR_COLORS = [
 ];
 function normalizeUser(e) {
   const t = { ...e };
+  const displayName = (t.fullName || t.name || "").trim();
+  if (displayName) {
+    t.fullName = t.fullName || displayName;
+    t.name = t.name || displayName;
+  }
   if (
     (t.accountStatus || (t.accountStatus = "active"),
     t.availability || (t.availability = "available"),
-    t.badgeRole || (t.badgeRole = "admin" === t.role ? "lawyer" : "client"),
+    t.badgeRole || (t.badgeRole = "firmAdmin" === t.role ? "manager" : "client"),
     t.phone || (t.phone = ""),
     !t.avatar && t.name)
   ) {
@@ -47,8 +52,9 @@ function assignMissingFirmUserIds(e) {
     }));
 }
 function syncRoleFromBadge(e) {
+  if (e.role === "superAdmin" || e.systemRole === "super-user") return;
   const t = e.badgeRole;
-  e.role = "client" === t ? "end-user" : "admin";
+  e.role = "client" === t ? "client" : ("lawyer" === t ? "lawyer" : "firmAdmin");
 }
 function nextInternalId(e, t) {
   const a = "client" === t ? "USR" : "ADM";
@@ -122,7 +128,7 @@ function mapUserToLawyerRecord(e, t, a, n) {
   return {
     id: r,
     userId: e.id,
-    name: `Adv. ${e.name}`,
+    name: `Adv. ${e.fullName || e.name}`,
     email: e.email,
     specialties: s,
     activeCases: t && Number.isFinite(t.activeCases) ? t.activeCases : 0,
@@ -181,6 +187,7 @@ function importApprovedLawyersIntoUsers(e) {
 
       if (n) {
         (n.name || (n.name = s),
+          (n.fullName = n.fullName || n.name),
           (n.badgeRole = "lawyer"),
           (n.accountStatus = "active"),
           (n.availability = n.availability || "available"),
@@ -522,6 +529,7 @@ function submitUserForm() {
     ((appData.users[e] = {
       ...t,
       name: l,
+      fullName: l,
       email: o,
       phone: i,
       badgeRole: d,
@@ -538,6 +546,7 @@ function submitUserForm() {
     const e = {
       id: nextInternalId(appData.users, d),
       name: l,
+      fullName: l,
       email: o,
       password: "changeme123",
       phone: i,
@@ -552,7 +561,7 @@ function submitUserForm() {
       t.length >= 2
         ? (t[0][0] + t[t.length - 1][0]).toUpperCase()
         : l.slice(0, 2).toUpperCase()),
-      "admin" === e.role &&
+      "firmAdmin" === e.role &&
         ((e.barCouncilId = ""),
         (e.specialisation = ""),
         (e.winRate = 0),

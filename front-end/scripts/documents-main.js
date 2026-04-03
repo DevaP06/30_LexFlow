@@ -384,17 +384,17 @@ let role = _docUser.role || "client";
     // Prefer live localStorage cases (lexflow_cases / lexflow_mock_data) over static JSON
     try {
       const liveCases = JSON.parse(localStorage.getItem('lexflow_cases') || 'null');
-      const liveUsers = JSON.parse(localStorage.getItem('lexflow_users') || localStorage.getItem('users') || '[]');
+      const liveUsers = JSON.parse(localStorage.getItem('lexflow_users') || '[]');
       if (Array.isArray(liveCases) && liveCases.length > 0) {
         const uMap = {};
-        liveUsers.forEach(u => { uMap[u.id] = u.name || u.fullName; });
+        liveUsers.forEach(u => { uMap[u.id] = u.fullName || u.name; });
         casesData = liveCases.map(c => ({
           id: c.id || c.cnr,
           client: c.client?.contact || uMap[c.clientId] || 'Unknown Client',
           type: 'INDIVIDUAL',
           status: (c.status === 'Active' || c.status === 'ACTIVE') ? 'Active' : 'Closed',
           caseType: c.title || c.type || 'General',
-          lawyer: uMap[c.assignedAdvocateId] || 'Unassigned',
+          lawyer: uMap[c.lawyerId] || 'Unassigned',
           court: c.court || '',
           date: c.filedDate || new Date().toISOString()
         }));
@@ -408,7 +408,7 @@ let role = _docUser.role || "client";
       .then(r => r.json())
       .then(data => {
         const uMap = {};
-        (data.users || []).forEach(u => { uMap[u.id] = u.name; });
+        (data.users || []).forEach(u => { uMap[u.id] = u.fullName || u.name; });
         casesData = (data.cases || []).map(c => ({
           id: c.id,
           client: uMap[c.clientId] || 'Unknown Client',

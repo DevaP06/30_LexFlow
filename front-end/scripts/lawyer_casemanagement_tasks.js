@@ -1,5 +1,6 @@
 let allTasks = [],
   filteredTasks = [],
+  allCases = [],
   currentUser = {
     name: "Sarah Mitchell",
     avatar: "SM",
@@ -9,6 +10,8 @@ const MOCK_STORAGE_KEY = "lexflow_mock_data",
   TASKS_STORAGE_KEY = "lexflow_tasks",
   USERS_STORAGE_KEY = "lexflow_users",
   MOCK_PATH = "../scripts/client_casemanagement_mock-data.json";
+
+const casesStorage = window.LexFlowCasesStorage;
 
 function loadJsonFromStorage(t) {
   try {
@@ -73,6 +76,7 @@ async function initTasks() {
   try {
     (resolveSignedInUser());
     const t = await ensureTaskStorage();
+    allCases = ((casesStorage && (await casesStorage.getCases())) || []);
     ((allTasks = (t.tasks || []).filter(
       (t) => t.assignedUser === currentUser.name,
     )),
@@ -164,6 +168,17 @@ function getPrioColor(t) {
       ? { bg: "#fef3c7", text: "#d97706" }
       : { bg: "#dcfce3", text: "#166534" };
 }
+
+function resolveCaseFromInput(inputValue) {
+  const v = String(inputValue || "").trim().toLowerCase();
+  if (!v) return null;
+  return allCases.find((c) =>
+    String(c.id || "").toLowerCase() === v ||
+    String(c.cnr || "").toLowerCase() === v ||
+    String(c.title || "").toLowerCase() === v
+  ) || null;
+}
+
 (searchInput.addEventListener("input", applyFilters),
   prioFilter.addEventListener("change", applyFilters),
   statusFilter.addEventListener("change", applyFilters),
@@ -276,14 +291,18 @@ function getPrioColor(t) {
       });
     if (s) {
       const e = allTasks.find((t) => t.id === s);
+      const caseRef = resolveCaseFromInput(o);
       e &&
         ((e.name = t.value.trim()),
         (e.caseTitle = o),
         (e.dueDate = l),
         (e.description = i),
-        (e.priority = d));
+        (e.priority = d),
+        (e.caseId = caseRef ? caseRef.id : (e.caseId || "")),
+        (e.caseCnr = caseRef ? caseRef.cnr : (e.caseCnr || "")));
     } else {
       const e = "T-" + (1e3 + Math.floor(9e3 * Math.random()));
+      const caseRef = resolveCaseFromInput(o);
       allTasks.unshift({
         id: e,
         name: t.value.trim(),
@@ -293,7 +312,8 @@ function getPrioColor(t) {
         dueDate: l,
         status: "Pending",
         description: i,
-        caseCnr: "",
+        caseId: caseRef ? caseRef.id : "",
+        caseCnr: caseRef ? caseRef.cnr : "",
       });
     }
     (saveTasks(), applyFilters(), closeModal("taskModal"));

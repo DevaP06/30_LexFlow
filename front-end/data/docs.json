@@ -43,7 +43,7 @@
       "court": "Labour Court, Bangalore",
       "clientId": "USR-011",
       "lawyerId": "USR-009",
-      "documents": ["DOC-204", "DOC-209"]
+      "documents": ["DOC-211", "DOC-210"]
     }
   ],
 
@@ -76,7 +76,7 @@
       "id": "USR-003",
       "name": "Intern Priya",
       "email": "priya.intern@lexflow.in",
-      "role": "intern",
+      "role": "lawyer",
       "firmId": "FIRM-01",
       "firmName": "Mehta & Associates",
       "caseAccess": {
@@ -88,11 +88,11 @@
       "id": "USR-004",
       "name": "Intern Rohan",
       "email": "rohan.intern@lexflow.in",
-      "role": "intern",
+      "role": "lawyer",
       "firmId": "FIRM-01",
       "firmName": "Mehta & Associates",
       "caseAccess": {
-        "CASE-45": ["DOC-204"],
+        "CASE-45": ["DOC-204", "DOC-206"],
         "CASE-46": ["DOC-207"]
       }
     },
@@ -122,7 +122,7 @@
       "id": "USR-007",
       "name": "Admin",
       "email": "admin@lexflow.in",
-      "role": "lawfirm_admin",
+      "role": "firmAdmin",
       "firmId": "FIRM-01",
       "firmName": "Mehta & Associates",
       "caseAccess": {
@@ -139,7 +139,7 @@
       "firmName": "Kapoor Legal Partners",
       "caseAccess": {
         "CASE-47": ["DOC-209", "DOC-210"],
-        "CASE-48": ["DOC-209"]
+        "CASE-48": ["DOC-211"]
       }
     },
     {
@@ -151,7 +151,7 @@
       "firmName": "Kapoor Legal Partners",
       "caseAccess": {
         "CASE-47": ["DOC-210"],
-        "CASE-48": ["DOC-209"]
+        "CASE-48": ["DOC-211"]
       }
     },
     {
@@ -173,26 +173,26 @@
       "firmId": null,
       "firmName": null,
       "caseAccess": {
-        "CASE-48": ["DOC-209"]
+        "CASE-48": ["DOC-211"]
       }
     },
     {
       "id": "USR-012",
       "name": "Admin KLP",
       "email": "admin@kapoorlegal.in",
-      "role": "lawfirm_admin",
+      "role": "firmAdmin",
       "firmId": "FIRM-02",
       "firmName": "Kapoor Legal Partners",
       "caseAccess": {
         "CASE-47": ["DOC-209", "DOC-210"],
-        "CASE-48": ["DOC-204", "DOC-209"]
+        "CASE-48": ["DOC-211", "DOC-210"]
       }
     },
     {
       "id": "USR-013",
       "name": "Anita Verma",
-      "email": "anita.verma@lexcorp.com",
-      "role": "lawfirm_admin",
+      "email": "anita.verma@lexflow.in",
+      "role": "firmAdmin",
       "firmId": "FIRM-01",
       "firmName": "Mehta & Associates",
       "caseAccess": {
@@ -205,7 +205,7 @@
   "documents": [
     {
       "id": "DOC-203",
-      "name": "Propery Agreement.pdf",
+      "name": "Property Agreement.pdf",
       "filePath": "../data/docs/Propery Agreement.pdf",
       "caseId": "CASE-45",
       "type": "CONTRACT",
@@ -270,7 +270,7 @@
     },
     {
       "id": "DOC-208",
-      "name": "Survery report.pdf",
+      "name": "Survey report.pdf",
       "filePath": "../data/docs/Survery report.pdf",
       "caseId": "CASE-46",
       "type": "REPORT",
@@ -288,7 +288,20 @@
       "caseId": "CASE-47",
       "type": "CASE EVIDENCE",
       "fileType": "PDF",
-      "uploader": "Intern Rohan",
+      "uploader": "Adv. Kapoor",
+      "date": "2026-03-01",
+      "version": 1,
+      "access": "PRIVATE",
+      "iconColor": "green"
+    },
+    {
+      "id": "DOC-211",
+      "name": "Witness_Statement.pdf",
+      "filePath": "../data/docs/Witness_Statement.pdf",
+      "caseId": "CASE-48",
+      "type": "CASE EVIDENCE",
+      "fileType": "PDF",
+      "uploader": "Adv. Nair",
       "date": "2026-03-01",
       "version": 1,
       "access": "PRIVATE",

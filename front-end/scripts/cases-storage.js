@@ -7,6 +7,7 @@ window.LexFlowCasesStorage = (function () {
   const MOCK_STORAGE_KEY = "lexflow_mock_data";
   const CASES_STORAGE_KEY = "lexflow_cases";
   const TASKS_STORAGE_KEY = "lexflow_tasks";
+  // Intentionally read/write lexflow_users only; StorageService mirrors users -> lexflow_users.
   const USERS_STORAGE_KEY = "lexflow_users";
   const MOCK_PATH = "../scripts/client_casemanagement_mock-data.json";
 
@@ -30,7 +31,12 @@ window.LexFlowCasesStorage = (function () {
    * @returns {object|null} Mock data or null
    */
   function loadMockDataFromStorage() {
-    return safeParse(localStorage.getItem(MOCK_STORAGE_KEY), null);
+    try {
+      return safeParse(localStorage.getItem(MOCK_STORAGE_KEY), null);
+    } catch (e) {
+      console.warn("Storage read failed for key:", MOCK_STORAGE_KEY, e);
+      return null;
+    }
   }
 
   /**
@@ -39,7 +45,12 @@ window.LexFlowCasesStorage = (function () {
    * @returns {*|null} Parsed data or null
    */
   function loadJsonFromStorage(key) {
-    return safeParse(localStorage.getItem(key), null);
+    try {
+      return safeParse(localStorage.getItem(key), null);
+    } catch (e) {
+      console.warn("Storage read failed for key:", key, e);
+      return null;
+    }
   }
 
   /**
@@ -48,7 +59,11 @@ window.LexFlowCasesStorage = (function () {
    * @param {*} value - Value to save
    */
   function saveJsonToStorage(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      console.warn("Storage write failed for key:", key, e);
+    }
   }
 
   /**
@@ -56,7 +71,11 @@ window.LexFlowCasesStorage = (function () {
    * @param {object} mockData - Mock data object
    */
   function saveMockDataToStorage(mockData) {
-    localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(mockData));
+    try {
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(mockData));
+    } catch (e) {
+      console.warn("Storage write failed for key:", MOCK_STORAGE_KEY, e);
+    }
   }
 
   /**

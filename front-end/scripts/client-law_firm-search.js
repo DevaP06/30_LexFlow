@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!currentUser) return;
 
     // 0. Initialize storage if needed
-    if (!localStorage.getItem('lexflow_firms') || !localStorage.getItem('lexflow_consultations')) {
+    if (!localStorage.getItem('lexflow_law_firms') || !localStorage.getItem('lexflow_consultations')) {
         console.log('[Find Firm] Initializing storage...');
         await initStorage();
     }

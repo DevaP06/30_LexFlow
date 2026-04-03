@@ -11,7 +11,7 @@ async function initCases() {
   try {
     allCases =
       (await casesStorage.getCases()).filter(
-        (c) => c.assignedAdvocateId === "ADM001"
+        (c) => c.lawyerId === "ADM001"
       ) || [];
     allTasks = (await casesStorage.getTasks()) || [];
     filteredCases = [...allCases];

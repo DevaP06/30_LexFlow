@@ -1,6 +1,13 @@
 const AuthService = (() => {
   'use strict';
 
+  function getSignInPath() {
+    const pathname = (window.location && window.location.pathname) || '';
+    if (pathname.includes('/super admin/') || pathname.includes('/super%20admin/')) return 'super-admin-login.html';
+    if (pathname.includes('/pages/')) return 'SignIn.html';
+    return 'pages/SignIn.html';
+  }
+
   return {
     getCurrentUser() {
       try {
@@ -28,25 +35,20 @@ const AuthService = (() => {
 
     logout() {
       localStorage.removeItem('currentUser');
-      // Redirect based on current path to avoid breaking navigation
-      const pathname = window.location.pathname;
-      if (pathname.includes('super-admin') || pathname.includes('super admin')) {
-        window.location.href = '../SignIn.html';
-      } else {
-        window.location.href = 'SignIn.html';
-      }
+      // Redirect to the correct login page for the current folder.
+      window.location.href = getSignInPath();
     },
 
     requireAuth(allowedRoles) {
       const user = this.getCurrentUser();
 
       if (!user) {
-        window.location.href = 'SignIn.html';
+        window.location.href = getSignInPath();
         return null;
       }
 
       if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-        window.location.href = 'SignIn.html';
+        window.location.href = getSignInPath();
         return null;
       }
 

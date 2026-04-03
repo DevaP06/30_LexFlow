@@ -57,7 +57,7 @@
       "email": "priya.intern@lexflow.in",
       "password": "pass123",
       "phone": "+91 9000000004",
-      "role": "intern",
+      "role": "lawyer",
       "firmName": "Mehta & Associates"
     },
     {
@@ -67,7 +67,7 @@
       "email": "rohan.intern@lexflow.in",
       "password": "pass123",
       "phone": "+91 9000000005",
-      "role": "intern",
+      "role": "lawyer",
       "firmName": "Mehta & Associates"
     },
     {
@@ -86,7 +86,7 @@
       "email": "admin@lexflow.in",
       "password": "admin123",
       "phone": "+91 9000000007",
-      "role": "lawfirm_admin",
+      "role": "firmAdmin",
       "firmName": "Mehta & Associates"
     },
     {
@@ -134,7 +134,7 @@
       "email": "admin@kapoorlegal.in",
       "password": "admin123",
       "phone": "+91 9000000012",
-      "role": "lawfirm_admin",
+      "role": "firmAdmin",
       "firmName": "Kapoor Legal Partners"
     },
 

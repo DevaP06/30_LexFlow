@@ -129,7 +129,7 @@ async function initCaseDetails() {
       <div class="info-item"><label>CNR Number</label><div class="value">${currentCase.cnr}</div></div>
       <div class="info-item"><label>Case Type</label><div class="value">${currentCase.type}</div></div>
       <div class="info-item"><label>Court</label><div class="value">${currentCase.court}</div></div>
-      <div class="info-item"><label>Assigned Lawyer</label><div class="value link" onclick="window.location.href='client_casemanagement_advocate-profile.html?id=${currentCase.assignedAdvocateId}'">Advocate Details</div></div>
+      <div class="info-item"><label>Assigned Lawyer</label><div class="value link" onclick="window.location.href='client_casemanagement_advocate-profile.html?id=${currentCase.lawyerId}'">Advocate Details</div></div>
       <div class="info-item"><label>Filed Date</label><div class="value">${formatDate(currentCase.filedDate)}</div></div>
       <div class="info-item"><label>Status</label><div class="value"><span class="badge-status">${currentCase.status}</span></div></div>
     `;

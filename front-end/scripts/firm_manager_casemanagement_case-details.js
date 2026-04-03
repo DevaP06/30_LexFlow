@@ -84,7 +84,7 @@ async function initCaseDetails() {
     if (
       (allData.tasks &&
         (currentTasks = allData.tasks.filter(
-          (e) => e.caseCnr === currentCase.cnr,
+          (e) => e.caseCnr === currentCase.cnr || e.caseId === currentCase.id,
         )),
       currentCase.timeline || (currentCase.timeline = []),
       currentCase.documents || (currentCase.documents = []),
@@ -97,12 +97,12 @@ async function initCaseDetails() {
       !currentCase.team)
     ) {
       const e = allData.users.find(
-        (e) => e.id === currentCase.assignedAdvocateId,
+        (e) => e.id === currentCase.lawyerId,
       ) || { name: "Assigned Lawyer" };
       currentCase.team = [
         {
-          id: currentCase.assignedAdvocateId || "ADM001",
-          name: e.name,
+          id: currentCase.lawyerId || "ADM001",
+          name: e.fullName || e.name,
           role: "Lead Counsel",
         },
       ];
@@ -467,7 +467,7 @@ function renderEditTeamList() {
   (window.openEditTeamModal = function () {
     renderEditTeamList();
     ((document.getElementById("addTeamMemberSelect").innerHTML = allData.users
-      .filter((e) => "admin" === e.role || "lawyer" === e.role)
+      .filter((e) => "firmAdmin" === e.role || "lawyer" === e.role)
       .map((e) => `<option value="${e.id}">${e.name}</option>`)
       .join("")),
       openModal("editTeamModal"));
@@ -525,6 +525,7 @@ function renderEditTeamList() {
           year: "numeric",
         }),
         status: "Pending",
+        caseId: currentCase.id,
         caseCnr: currentCase.cnr,
       };
     (allData.tasks.push(l),
