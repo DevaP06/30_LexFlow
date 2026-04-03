@@ -1,29 +1,21 @@
-const _docUser = (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}'); } catch { return {}; } })();
-let role = _docUser.role || "client";
-// can be client, lawyer, firmAdmin, superAdmin
-
-
 /* ===================================================
    LexFlow — Document Management
-   script.js — Search, Filter, Sort, View Toggle
+   documents-main.js — Search, Filter, Sort, View Toggle
    =================================================== */
 
 (function () {
   "use strict";
 
-  /* ─── Dynamic Data ─── */
   let casesData = [];
 
-  /* ─── State ─── */
   const state = {
     view: "grid",
     search: "",
-    sortKey: "date",
-    sortDir: "desc",
+    sortKey: "client",
+    sortDir: "asc",
     activeFilters: [],
   };
 
-  /* ─── DOM refs ─── */
   const grid        = document.querySelector(".cases-grid");
   const searchInput = document.querySelector(".search-wrapper input");
   const icons       = document.querySelectorAll(".section-actions svg");
@@ -32,12 +24,8 @@ let role = _docUser.role || "client";
   const iconGrid    = icons[2];
   const iconList    = icons[3];
 
-  /* ════════════════════════════════════════
-     CSS — injected once
-  ════════════════════════════════════════ */
   const styleEl = document.createElement("style");
   styleEl.textContent = `
-    /* ── List container ── */
     .cases-list {
       display: flex; flex-direction: column;
       background: #fff;
@@ -46,8 +34,6 @@ let role = _docUser.role || "client";
       box-shadow: 0 2px 6px rgba(0,0,0,0.04);
       overflow: hidden;
     }
-
-    /* ── List header ── */
     .list-header-row {
       display: grid;
       grid-template-columns: 2.2fr 1fr 1.4fr 1.2fr 1.6fr 1fr 0.9fr;
@@ -61,8 +47,6 @@ let role = _docUser.role || "client";
       text-transform: uppercase;
       color: var(--text-secondary);
     }
-
-    /* ── List rows ── */
     .case-list-row {
       display: grid;
       grid-template-columns: 2.2fr 1fr 1.4fr 1.2fr 1.6fr 1fr 0.9fr;
@@ -74,12 +58,9 @@ let role = _docUser.role || "client";
     }
     .case-list-row:last-child { border-bottom: none; }
     .case-list-row:hover { background: #f8f9fb; }
-
     .list-col { font-size: 0.82rem; color: var(--text-primary); }
     .list-col-case, .list-col-court, .list-col-lawyer { color: var(--text-secondary); }
-
     .list-col-client { display: flex; align-items: center; gap: 11px; }
-
     .list-avatar {
       width: 34px; height: 34px; border-radius: 50%;
       background: var(--sidebar-bg); color: #fff;
@@ -88,10 +69,9 @@ let role = _docUser.role || "client";
     }
     .list-name { font-weight: 600; font-size: 0.85rem; }
     .list-sub  { font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px; }
-
     .badge.red    { background: #fef2f2; color: #be123c; }
     .badge.orange { background: #fff7ed; color: #c2410c; }
-
+    .badge.grey   { background: #f1f5f9; color: #64748b; }
     .list-btn {
       display: inline-block; padding: 6px 12px;
       border-radius: 6px; background: var(--sidebar-bg);
@@ -100,8 +80,6 @@ let role = _docUser.role || "client";
       transition: background 0.15s;
     }
     .list-btn:hover { background: #162040; }
-
-    /* ── Dropdowns ── */
     .lex-dropdown {
       position: absolute;
       min-width: 190px;
@@ -114,7 +92,6 @@ let role = _docUser.role || "client";
       overflow: hidden;
     }
     .lex-dropdown.open { display: flex; }
-
     .dd-section-header {
       padding: 10px 14px 8px;
       font-size: 0.68rem; font-weight: 700;
@@ -122,7 +99,6 @@ let role = _docUser.role || "client";
       color: var(--text-secondary);
       border-bottom: 1px solid var(--border-light);
     }
-
     .dd-item {
       display: flex; align-items: center; gap: 8px;
       padding: 9px 14px; font-size: 0.84rem;
@@ -132,9 +108,7 @@ let role = _docUser.role || "client";
     .dd-item:hover { background: var(--bg-table-header); }
     .dd-item.is-active { font-weight: 600; color: var(--brand-accent); }
     .dd-item input[type="checkbox"] { accent-color: var(--sidebar-bg); width: 14px; height: 14px; }
-
     .dd-arrow { margin-left: auto; font-size: 0.78rem; color: var(--brand-accent); }
-
     .dd-footer {
       display: flex; gap: 8px; padding: 10px 14px;
       border-top: 1px solid var(--border-light);
@@ -146,24 +120,20 @@ let role = _docUser.role || "client";
     .btn-dd-clear { background: var(--bg-table-header); color: var(--text-secondary); }
     .btn-dd-apply { background: var(--sidebar-bg); color: #fff; }
     .btn-dd-apply:hover { background: #162040; }
-
-    /* ── No results ── */
     .no-results {
       padding: 48px; text-align: center;
       color: var(--text-secondary); font-size: 0.9rem;
       grid-column: 1 / -1;
     }
-
-    /* Icon cursors */
     .section-actions svg { cursor: pointer; transition: fill 0.15s; }
   `;
   document.head.appendChild(styleEl);
 
-  /* ════════════════════════════════════════
-     BUILD CARD (grid view)
-  ════════════════════════════════════════ */
-  function statusClass(s) {
-    return s === "Active" ? "green" : s === "Closed" ? "red" : "orange";
+  function statusBadgeClass(s) {
+    if (s === "Active")  return "green";
+    if (s === "Closed")  return "red";
+    if (s === "Pending") return "orange";
+    return "grey";
   }
 
   function buildCard(c) {
@@ -172,7 +142,7 @@ let role = _docUser.role || "client";
     el.innerHTML = `
       <div class="card-top">
         <span class="badge light">${c.type}</span>
-        <span class="badge ${statusClass(c.status)}">● ${c.status}</span>
+        <span class="badge ${statusBadgeClass(c.status)}">● ${c.status}</span>
       </div>
       <h3>${c.client}</h3>
       <div class="case-meta"><p>${c.id}</p><p>${c.caseType}</p></div>
@@ -181,13 +151,12 @@ let role = _docUser.role || "client";
         <p><strong>Lawyer:</strong> ${c.lawyer}</p>
         <p><strong>Court:</strong> ${c.court}</p>
       </div>
-      <button class="btn-primary full"><a href="case-documents.html?caseId=${c.id}" style="color: inherit; text-decoration: none;">Manage Documents →</a></button>`;
+      <button class="btn-primary full">
+        <a href="case-documents.html?caseId=${c.id}" style="color: inherit; text-decoration: none;">Manage Documents →</a>
+      </button>`;
     return el;
   }
 
-  /* ════════════════════════════════════════
-     BUILD ROW (list view)
-  ════════════════════════════════════════ */
   function buildRow(c) {
     const el = document.createElement("div");
     el.className = "case-list-row";
@@ -203,18 +172,14 @@ let role = _docUser.role || "client";
       <div class="list-col list-col-case">${c.caseType}</div>
       <div class="list-col list-col-lawyer">${c.lawyer}</div>
       <div class="list-col list-col-court">${c.court}</div>
-      <div class="list-col"><span class="badge ${statusClass(c.status)}">● ${c.status}</span></div>
+      <div class="list-col"><span class="badge ${statusBadgeClass(c.status)}">● ${c.status}</span></div>
       <div class="list-col"><a href="case-documents.html?caseId=${c.id}" class="list-btn">Manage →</a></div>`;
     return el;
   }
 
-  /* ════════════════════════════════════════
-     RENDER
-  ════════════════════════════════════════ */
   function go() {
     let data = [...casesData];
 
-    // 1. Search
     const q = state.search.toLowerCase().trim();
     if (q) {
       data = data.filter(c =>
@@ -226,21 +191,19 @@ let role = _docUser.role || "client";
       );
     }
 
-    // 2. Filter
     if (state.activeFilters.length) {
       data = data.filter(c => state.activeFilters.includes(c.status));
     }
 
-    // 3. Sort
+    // FIX: Sort only by client name or case ID (no date sorting)
     data.sort((a, b) => {
-      const va = state.sortKey === "date" ? new Date(a.date) : a[state.sortKey].toLowerCase();
-      const vb = state.sortKey === "date" ? new Date(b.date) : b[state.sortKey].toLowerCase();
+      const va = (a[state.sortKey] || "").toLowerCase();
+      const vb = (b[state.sortKey] || "").toLowerCase();
       if (va < vb) return state.sortDir === "asc" ? -1 : 1;
-      if (va > vb) return state.sortDir === "asc" ? 1 : -1;
+      if (va > vb) return state.sortDir === "asc" ?  1 : -1;
       return 0;
     });
 
-    // 4. Paint
     grid.innerHTML = "";
     grid.className = state.view === "grid" ? "cases-grid" : "cases-list";
 
@@ -260,14 +223,12 @@ let role = _docUser.role || "client";
     data.forEach(c => grid.appendChild(state.view === "grid" ? buildCard(c) : buildRow(c)));
   }
 
-  /* ════════════════════════════════════════
-     FILTER DROPDOWN
-  ════════════════════════════════════════ */
+  // Filter Dropdown
   const filterDD = document.createElement("div");
   filterDD.className = "lex-dropdown";
   filterDD.innerHTML = `
     <div class="dd-section-header">Filter by Status</div>
-    ${["Active","Pending","Closed"].map(s =>
+    ${["Active", "Pending", "Closed"].map(s =>
       `<label class="dd-item"><input type="checkbox" class="filter-cb" value="${s}"> ${s}</label>`
     ).join("")}
     <div class="dd-footer">
@@ -282,23 +243,18 @@ let role = _docUser.role || "client";
     go();
     syncFilterIcon();
   });
-
   filterDD.querySelector(".btn-dd-apply").addEventListener("click", () => {
     state.activeFilters = [...filterDD.querySelectorAll(".filter-cb:checked")].map(cb => cb.value);
     go();
     syncFilterIcon();
     closeAll();
   });
-
   function syncFilterIcon() {
     iconFilter.style.fill = state.activeFilters.length ? "var(--brand-accent)" : "var(--text-secondary)";
   }
 
-  /* ════════════════════════════════════════
-     SORT DROPDOWN
-  ════════════════════════════════════════ */
+  // FIX: Sort dropdown — removed "Date", only Client Name and Case ID
   const sortOpts = [
-    { key: "date",   label: "Date" },
     { key: "client", label: "Client Name" },
     { key: "id",     label: "Case ID" },
   ];
@@ -323,7 +279,6 @@ let role = _docUser.role || "client";
         state.sortKey = key;
         state.sortDir = "asc";
       }
-      // Refresh indicators
       sortDD.querySelectorAll(".sort-opt").forEach(el => {
         const active = el.dataset.key === state.sortKey;
         el.classList.toggle("is-active", active);
@@ -334,9 +289,6 @@ let role = _docUser.role || "client";
     });
   });
 
-  /* ════════════════════════════════════════
-     DROPDOWN POSITIONING
-  ════════════════════════════════════════ */
   function openDD(dd, anchor) {
     const isOpen = dd.classList.contains("open");
     closeAll();
@@ -355,21 +307,13 @@ let role = _docUser.role || "client";
     sortDD.classList.remove("open");
   }
 
-  /* ════════════════════════════════════════
-     EVENT BINDING
-  ════════════════════════════════════════ */
   searchInput.addEventListener("input", e => { state.search = e.target.value; go(); });
-
   iconFilter.addEventListener("click", e => { e.stopPropagation(); openDD(filterDD, iconFilter); });
   iconSort.addEventListener("click",   e => { e.stopPropagation(); openDD(sortDD,   iconSort);   });
-
   iconGrid.addEventListener("click", () => { state.view = "grid"; go(); syncViewIcons(); });
   iconList.addEventListener("click", () => { state.view = "list"; go(); syncViewIcons(); });
-
-  // Stop clicks inside dropdowns from bubbling to document
   filterDD.addEventListener("click", e => e.stopPropagation());
   sortDD.addEventListener("click",   e => e.stopPropagation());
-
   document.addEventListener("click", closeAll);
 
   function syncViewIcons() {
@@ -377,56 +321,37 @@ let role = _docUser.role || "client";
     iconList.style.fill = state.view === "list" ? "var(--brand-accent)" : "var(--text-secondary)";
   }
 
-  /* ─── Boot ─── */
   syncViewIcons();
-  
-  function loadCasesFromStorage() {
-    // Prefer live localStorage cases (lexflow_cases / lexflow_mock_data) over static JSON
-    try {
-      const liveCases = JSON.parse(localStorage.getItem('lexflow_cases') || 'null');
-      const liveUsers = JSON.parse(localStorage.getItem('lexflow_users') || '[]');
-      if (Array.isArray(liveCases) && liveCases.length > 0) {
-        const uMap = {};
-        liveUsers.forEach(u => { uMap[u.id] = u.fullName || u.name; });
-        casesData = liveCases.map(c => ({
-          id: c.id || c.cnr,
-          client: c.client?.contact || uMap[c.clientId] || 'Unknown Client',
-          type: 'INDIVIDUAL',
-          status: (c.status === 'Active' || c.status === 'ACTIVE') ? 'Active' : 'Closed',
-          caseType: c.title || c.type || 'General',
-          lawyer: uMap[c.lawyerId] || 'Unassigned',
-          court: c.court || '',
-          date: c.filedDate || new Date().toISOString()
-        }));
-        go();
-        return;
-      }
-    } catch (_) {}
 
-    // Fallback: fetch from static docs.json
-    fetch("../data/docs.json")
-      .then(r => r.json())
-      .then(data => {
-        const uMap = {};
-        (data.users || []).forEach(u => { uMap[u.id] = u.fullName || u.name; });
-        casesData = (data.cases || []).map(c => ({
-          id: c.id,
-          client: uMap[c.clientId] || 'Unknown Client',
-          type: 'INDIVIDUAL',
-          status: (c.status === 'ACTIVE') ? 'Active' : 'Closed',
-          caseType: c.title,
-          lawyer: uMap[c.lawyerId] || 'Unknown Lawyer',
-          court: c.court,
-          date: new Date().toISOString()
-        }));
-        go();
-      })
-      .catch(e => {
-        console.error("Failed to load cases", e);
-        grid.innerHTML = `<p class="no-results">Failed to load cases data.</p>`;
-      });
+  // FIX: Map status correctly including PENDING and CLOSED
+  function mapStatus(raw) {
+    if (!raw) return "Active";
+    const s = raw.toUpperCase();
+    if (s === "ACTIVE")  return "Active";
+    if (s === "PENDING") return "Pending";
+    if (s === "CLOSED")  return "Closed";
+    return "Active";
   }
 
-  loadCasesFromStorage();
+  fetch("../data/docs.json")
+    .then(r => r.json())
+    .then(data => {
+      const uMap = {};
+      (data.users || []).forEach(u => { uMap[u.id] = u.name; });
+      casesData = (data.cases || []).map(c => ({
+        id: c.id,
+        client: uMap[c.clientId] || 'Unknown Client',
+        type: 'INDIVIDUAL',
+        status: mapStatus(c.status),
+        caseType: c.title,
+        lawyer: uMap[c.lawyerId] || 'Unknown Lawyer',
+        court: c.court,
+      }));
+      go();
+    })
+    .catch(e => {
+      console.error("Failed to load cases", e);
+      grid.innerHTML = `<p class="no-results">Failed to load cases data.</p>`;
+    });
 
 })();
