@@ -48,12 +48,12 @@ const CURRENT_CASE_ID =
 (function () {
   "use strict";
 
-  const LS_DELETED        = "lexflow_deleted_ids";
-  const LS_UPLOADS        = "lexflow_uploaded_docs";
-  const LS_UPDATES        = "lexflow_updated_docs";
-  const LS_ACTIVITY       = "lexflow_activity_log";
-  const LS_DOCS_INDEX     = "lexflow_documents";
-  const USERS_JSON_PATH   = "../data/docs.json";
+  const LS_DELETED = "lexflow_deleted_ids";
+  const LS_UPLOADS = "lexflow_uploaded_docs";
+  const LS_UPDATES = "lexflow_updated_docs";
+  const LS_ACTIVITY = "lexflow_activity_log";
+  const LS_DOCS_INDEX = "lexflow_documents";
+  const USERS_JSON_PATH = "../data/docs.json";
 
   function lsGet(key, fallback) {
     try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -61,13 +61,13 @@ const CURRENT_CASE_ID =
   }
   function lsSet(key, val) {
     try { localStorage.setItem(key, JSON.stringify(val)); }
-    catch(e) { console.warn("LS write failed", e); }
+    catch (e) { console.warn("LS write failed", e); }
   }
 
-  let deletedIds   = new Set(lsGet(LS_DELETED, []));
+  let deletedIds = new Set(lsGet(LS_DELETED, []));
   let uploadedDocs = lsGet(LS_UPLOADS, []);
-  let updatedMap   = lsGet(LS_UPDATES, {});
-  let activityLog  = lsGet(LS_ACTIVITY, []);
+  let updatedMap = lsGet(LS_UPDATES, {});
+  let activityLog = lsGet(LS_ACTIVITY, []);
 
   const styleEl = document.createElement("style");
   styleEl.textContent = `
@@ -497,28 +497,28 @@ const CURRENT_CASE_ID =
     extraUploads.forEach(d => { if (!seen.has(d.id)) { docsData.push(d); seen.add(d.id); } });
 
     const PERMS = {
-      canView:     true,
+      canView: true,
       canDownload: true,
-      canUpload:   ["client", "lawyer", "lawfirm_admin"].includes(ROLE),
-      canUpdate:   ["lawyer", "lawfirm_admin", "intern"].includes(ROLE),
-      canDelete:   ["lawyer", "lawfirm_admin"].includes(ROLE),
+      canUpload: ["client", "lawyer", "lawfirm_admin"].includes(ROLE),
+      canUpdate: ["lawyer", "lawfirm_admin", "intern"].includes(ROLE),
+      canDelete: ["lawyer", "lawfirm_admin"].includes(ROLE),
     };
 
     function logActivity(action, doc) {
       const entry = {
-        id:      "ACT-" + Date.now(),
-        date:    new Date().toISOString(),
-        user:    CURRENT_USER.name,
-        email:   CURRENT_USER.email,
-        role:    ROLE,
-        firmId:  CURRENT_USER.firmId || null,
+        id: "ACT-" + Date.now(),
+        date: new Date().toISOString(),
+        user: CURRENT_USER.name,
+        email: CURRENT_USER.email,
+        role: ROLE,
+        firmId: CURRENT_USER.firmId || null,
         firmName: FIRM_NAME,
-        caseId:  CURRENT_CASE_ID,
+        caseId: CURRENT_CASE_ID,
         action,
-        docId:   doc.id,
+        docId: doc.id,
         docName: doc.name,
         docType: doc.type,
-        access:  doc.access,
+        access: doc.access,
       };
       activityLog.unshift(entry);
       if (activityLog.length > 500) activityLog = activityLog.slice(0, 500);
@@ -528,17 +528,17 @@ const CURRENT_CASE_ID =
 
     renderRoleBadge(CURRENT_USER, ROLE, FIRM_NAME);
 
-    const grid        = document.querySelector(".documents-grid");
+    const grid = document.querySelector(".documents-grid");
     const searchInput = document.querySelector(".search-box input");
-    const typeSelect  = document.querySelector(".toolbar select");
-    const totalEl     = document.querySelector(".total");
-    const viewIcons   = document.querySelectorAll(".view-toggle svg");
-    const filterIcon  = viewIcons[0];
-    const sortIcon    = viewIcons[1];
-    const gridIcon    = viewIcons[2];
-    const listIcon    = viewIcons[3];
-    const uploadBtn   = document.querySelector(".btn-primary");
-    const modal       = document.querySelector(".upload-modal");
+    const typeSelect = document.querySelector(".toolbar select");
+    const totalEl = document.querySelector(".total");
+    const viewIcons = document.querySelectorAll(".view-toggle svg");
+    const filterIcon = viewIcons[0];
+    const sortIcon = viewIcons[1];
+    const gridIcon = viewIcons[2];
+    const listIcon = viewIcons[3];
+    const uploadBtn = document.querySelector(".btn-primary");
+    const modal = document.querySelector(".upload-modal");
 
     if (!grid || !searchInput || !typeSelect || !totalEl || !uploadBtn || !modal) {
       toast("Page structure error — required elements not found.", "error");
@@ -548,7 +548,7 @@ const CURRENT_CASE_ID =
     // Update case meta fields
     const metaDivs = document.querySelectorAll(".case-meta > div");
     if (metaDivs.length >= 4) {
-      const caseLayer  = db.users.find(u => u.id === CURRENT_CASE.lawyerId);
+      const caseLayer = db.users.find(u => u.id === CURRENT_CASE.lawyerId);
       const caseClient = db.users.find(u => u.id === CURRENT_CASE.clientId);
       metaDivs[0].innerHTML = `<span>CLIENT ID</span>${CURRENT_CASE.clientId || "—"}`;
       metaDivs[1].innerHTML = `<span>CLIENT NAME</span>${caseClient ? caseClient.name : "—"}`;
@@ -567,24 +567,24 @@ const CURRENT_CASE_ID =
 
     function tagClass(type) {
       const map = {
-        "CONTRACT":     "contract",
-        "CASE EVIDENCE":"evidence",
-        "COURT ORDER":  "order",
+        "CONTRACT": "contract",
+        "CASE EVIDENCE": "evidence",
+        "COURT ORDER": "order",
         "CLIENT PROOF": "proof",
-        "AFFIDAVIT":    "affidavit",
-        "REPORT":       "report"
+        "AFFIDAVIT": "affidavit",
+        "REPORT": "report"
       };
       return map[(type || "").toUpperCase()] || "default";
     }
     function tagClassLegacy(type) {
-      const map = { "CONTRACT":"","CASE EVIDENCE":"red","COURT ORDER":"green","CLIENT PROOF":"red" };
+      const map = { "CONTRACT": "", "CASE EVIDENCE": "red", "COURT ORDER": "green", "CLIENT PROOF": "red" };
       return map[(type || "").toUpperCase()] ?? "";
     }
     function fmtDate(iso) {
       if (!iso) return "—";
       const d = new Date(iso);
       if (isNaN(d)) return iso;
-      return d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     }
     function isImage(name) {
       return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name || "");
@@ -702,8 +702,8 @@ const CURRENT_CASE_ID =
       el.querySelectorAll("[data-action]").forEach(btn => {
         btn.addEventListener("click", () => {
           switch (btn.dataset.action) {
-            case "view":     openViewModal(d);   break;
-            case "download": downloadDoc(d);     break;
+            case "view": openViewModal(d); break;
+            case "download": downloadDoc(d); break;
             case "update":
               if (!PERMS.canUpdate) { toast("You do not have permission to update documents.", "error"); return; }
               openUpdateModal(d);
@@ -815,7 +815,7 @@ const CURRENT_CASE_ID =
         lsSet(LS_DELETED, [...deletedIds]);
         uploadedDocs = uploadedDocs.filter(d => d.id !== doc.id);
         lsSet(LS_UPLOADS, uploadedDocs);
-        if (doc.blobUrl) { try { URL.revokeObjectURL(doc.blobUrl); } catch(_) {} }
+        if (doc.blobUrl) { try { URL.revokeObjectURL(doc.blobUrl); } catch (_) { } }
         logActivity("deleted", doc);
         docsData.splice(idx, 1);
         syncSharedDocumentsIndex();
@@ -874,7 +874,7 @@ const CURRENT_CASE_ID =
       </div>`;
     document.body.appendChild(updateOverlay);
 
-    const updDZ      = updateOverlay.querySelector("#update-dz");
+    const updDZ = updateOverlay.querySelector("#update-dz");
     const updPreview = updateOverlay.querySelector(".upd-file-preview");
     let _updDoc = null, _updFile = null;
 
@@ -882,7 +882,7 @@ const CURRENT_CASE_ID =
       .forEach(btn => btn.addEventListener("click", closeUpdateModal));
     updateOverlay.addEventListener("click", e => { if (e.target === updateOverlay) closeUpdateModal(); });
 
-    updDZ.addEventListener("dragover",  e => { e.preventDefault(); updDZ.classList.add("drag-over"); });
+    updDZ.addEventListener("dragover", e => { e.preventDefault(); updDZ.classList.add("drag-over"); });
     updDZ.addEventListener("dragleave", () => updDZ.classList.remove("drag-over"));
     updDZ.addEventListener("drop", e => {
       e.preventDefault(); updDZ.classList.remove("drag-over");
@@ -898,6 +898,8 @@ const CURRENT_CASE_ID =
     function setUpdFile(file) {
       if (file.size > 10 * 1024 * 1024) { toast("File exceeds 10 MB limit.", "error"); return; }
       _updFile = file;
+      updDZ.style.borderColor = "";
+      updDZ.style.background = "";
       updPreview.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f1f5f9;border-radius:8px;font-size:0.8rem;";
       updPreview.innerHTML = `
         <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📄 ${sanitize(file.name)}</span>
@@ -909,12 +911,24 @@ const CURRENT_CASE_ID =
       });
     }
 
+    // function openUpdateModal(d) {
+    //   _updDoc = d; _updFile = null;
+    //   updPreview.style.display = "none"; updPreview.innerHTML = "";
+    //   updateOverlay.querySelector(".upd-name").value = d.name;
+    //   updateOverlay.querySelector(".upd-access").value = d.access || "PRIVATE";
+    //   updateOverlay.querySelector(".upd-version-label").textContent = `v${d.version ?? 1}`;
+    //   updateOverlay.classList.add("active");
+    //   document.body.style.overflow = "hidden";
+    // }
+
     function openUpdateModal(d) {
       _updDoc = d; _updFile = null;
       updPreview.style.display = "none"; updPreview.innerHTML = "";
       updateOverlay.querySelector(".upd-name").value = d.name;
       updateOverlay.querySelector(".upd-access").value = d.access || "PRIVATE";
       updateOverlay.querySelector(".upd-version-label").textContent = `v${d.version ?? 1}`;
+      // Reset dropzone error state
+      updDZ.style.borderColor = "";
       updateOverlay.classList.add("active");
       document.body.style.overflow = "hidden";
     }
@@ -924,20 +938,30 @@ const CURRENT_CASE_ID =
       document.body.style.overflow = "";
       _updDoc = _updFile = null;
     }
-
     updateOverlay.querySelector(".upd-save").addEventListener("click", () => {
       if (!_updDoc) return;
       if (!PERMS.canUpdate) { toast("You do not have permission to update documents.", "error"); return; }
-      const newName   = updateOverlay.querySelector(".upd-name").value.trim();
+      const newName = updateOverlay.querySelector(".upd-name").value.trim();
       const newAccess = updateOverlay.querySelector(".upd-access").value;
       if (!newName) { toast("Document name cannot be empty.", "error"); return; }
-      if (_updFile && _updDoc.blobUrl) { try { URL.revokeObjectURL(_updDoc.blobUrl); } catch(_) {} }
-      const patch = { name: newName, access: newAccess, date: new Date().toISOString().split("T")[0] };
-      if (_updFile) {
-        _updDoc.blobUrl  = URL.createObjectURL(_updFile);
-        _updDoc.fileType = (_updFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3);
-        patch.version    = (_updDoc.version || 1) + 1;
+
+      // FILE IS NOW REQUIRED
+      if (!_updFile) {
+        updDZ.style.borderColor = "#be123c";
+        updDZ.style.background = "#fff1f2";
+        toast("Please upload a new file to proceed.", "error");
+        return;
       }
+
+      if (_updDoc.blobUrl) { try { URL.revokeObjectURL(_updDoc.blobUrl); } catch (_) { } }
+      const patch = {
+        name: newName,
+        access: newAccess,
+        date: new Date().toISOString().split("T")[0],
+        blobUrl: URL.createObjectURL(_updFile),
+        fileType: (_updFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3),
+        version: (_updDoc.version || 1) + 1,
+      };
       Object.assign(_updDoc, patch);
       updatedMap[_updDoc.id] = { ...(updatedMap[_updDoc.id] || {}), ...patch };
       lsSet(LS_UPDATES, updatedMap);
@@ -949,18 +973,17 @@ const CURRENT_CASE_ID =
       render();
       toast(`✓ ${_updDoc.name} updated to v${_updDoc.version ?? 1}`);
     });
-
     // Sort Dropdown
     const sortOpts = [
-      { key:"name",     label:"File Name" },
-      { key:"uploader", label:"Uploader" },
+      { key: "name", label: "File Name" },
+      { key: "uploader", label: "Uploader" },
     ];
     const sortDD = document.createElement("div");
     sortDD.className = "lex-dd";
     sortDD.innerHTML = `
       <div class="dd-head">Sort by</div>
       ${sortOpts.map(o =>
-        `<div class="dd-row sort-opt ${uiState.sortKey === o.key ? "on" : ""}" data-key="${o.key}">
+      `<div class="dd-row sort-opt ${uiState.sortKey === o.key ? "on" : ""}" data-key="${o.key}">
           ${o.label}<span class="dd-arrow">${uiState.sortKey === o.key ? (uiState.sortDir === "asc" ? "↑" : "↓") : ""}</span>
          </div>`).join("")}`;
     document.body.appendChild(sortDD);
@@ -985,9 +1008,9 @@ const CURRENT_CASE_ID =
     filterDD.className = "lex-dd";
     filterDD.innerHTML = `
       <div class="dd-head">Filter by Access</div>
-      ${["PRIVATE","SHARED"].map(s =>
-        `<label class="dd-row"><input type="checkbox" class="fcb" value="${s}"> ${s}</label>`
-      ).join("")}
+      ${["PRIVATE", "SHARED"].map(s =>
+      `<label class="dd-row"><input type="checkbox" class="fcb" value="${s}"> ${s}</label>`
+    ).join("")}
       <div class="dd-foot">
         <button class="dd-clear">Clear</button>
         <button class="dd-apply">Apply</button>
@@ -1013,7 +1036,7 @@ const CURRENT_CASE_ID =
       const q = uiState.search.toLowerCase().trim();
       if (q) data = data.filter(d =>
         (d.name || "").toLowerCase().includes(q) ||
-        (d.id   || "").toLowerCase().includes(q) ||
+        (d.id || "").toLowerCase().includes(q) ||
         (d.type || "").toLowerCase().includes(q)
       );
       if (uiState.typeFilter !== "All Types") data = data.filter(d => d.type === uiState.typeFilter);
@@ -1029,7 +1052,7 @@ const CURRENT_CASE_ID =
           vb = (b[uiState.sortKey] || "").toLowerCase();
         }
         if (va < vb) return uiState.sortDir === "asc" ? -1 : 1;
-        if (va > vb) return uiState.sortDir === "asc" ?  1 : -1;
+        if (va > vb) return uiState.sortDir === "asc" ? 1 : -1;
         return 0;
       });
 
@@ -1063,7 +1086,7 @@ const CURRENT_CASE_ID =
       dd.classList.add("open");
       requestAnimationFrame(() => {
         const rect = anchor.getBoundingClientRect();
-        dd.style.top  = (rect.bottom + window.scrollY + 8) + "px";
+        dd.style.top = (rect.bottom + window.scrollY + 8) + "px";
         dd.style.left = Math.max(4, rect.right + window.scrollX - dd.offsetWidth) + "px";
       });
     }
@@ -1080,10 +1103,10 @@ const CURRENT_CASE_ID =
     searchInput.addEventListener("input", e => { uiState.search = e.target.value; render(); });
     typeSelect.addEventListener("change", e => { uiState.typeFilter = e.target.value; render(); });
     if (filterIcon) filterIcon.addEventListener("click", e => { e.stopPropagation(); openDD(filterDD, filterIcon); });
-    if (sortIcon)   sortIcon.addEventListener("click",   e => { e.stopPropagation(); openDD(sortDD,   sortIcon);   });
-    if (gridIcon)   gridIcon.addEventListener("click", () => { uiState.view = "grid"; render(); syncViewIcons(); });
-    if (listIcon)   listIcon.addEventListener("click", () => { uiState.view = "list"; render(); syncViewIcons(); });
-    sortDD.addEventListener("click",   e => e.stopPropagation());
+    if (sortIcon) sortIcon.addEventListener("click", e => { e.stopPropagation(); openDD(sortDD, sortIcon); });
+    if (gridIcon) gridIcon.addEventListener("click", () => { uiState.view = "grid"; render(); syncViewIcons(); });
+    if (listIcon) listIcon.addEventListener("click", () => { uiState.view = "list"; render(); syncViewIcons(); });
+    sortDD.addEventListener("click", e => e.stopPropagation());
     filterDD.addEventListener("click", e => e.stopPropagation());
     document.addEventListener("click", closeAll);
 
@@ -1109,16 +1132,16 @@ const CURRENT_CASE_ID =
       uploadBtn.addEventListener("click", openModal);
     }
 
-    const closeBtn  = modal.querySelector(".upload-modal__close");
+    const closeBtn = modal.querySelector(".upload-modal__close");
     const cancelBtn = modal.querySelector(".upload-modal__btn--ghost");
     const submitBtn = modal.querySelector(".upload-modal__btn--primary");
-    const dropzone  = modal.querySelector(".upload-modal__dropzone");
-    const dropText  = modal.querySelector(".upload-modal__drop-text");
+    const dropzone = modal.querySelector(".upload-modal__dropzone");
+    const dropText = modal.querySelector(".upload-modal__drop-text");
 
     // FIX: Set read-only fields and update with current case/user data
     const caseClientEl = db.users.find(u => u.id === CURRENT_CASE.clientId);
     const clientNameInModal = modal.querySelectorAll('input[type="text"]')[0];
-    const caseIdInModal     = modal.querySelectorAll('input[type="text"]')[1];
+    const caseIdInModal = modal.querySelectorAll('input[type="text"]')[1];
 
     // FIX: Populate with dynamic data from current case
     if (clientNameInModal) {
@@ -1160,15 +1183,15 @@ const CURRENT_CASE_ID =
       }
     }
 
-    function openModal()  { modal.classList.add("active");    document.body.style.overflow = "hidden"; }
+    function openModal() { modal.classList.add("active"); document.body.style.overflow = "hidden"; }
     function closeModal() { modal.classList.remove("active"); document.body.style.overflow = ""; resetFile(); }
 
-    if (closeBtn)  closeBtn.addEventListener("click",  closeModal);
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
     if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
     if (dropzone) {
-      dropzone.addEventListener("dragover",  e => { e.preventDefault(); dropzone.classList.add("drag-over"); });
+      dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("drag-over"); });
       dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
       dropzone.addEventListener("drop", e => {
         e.preventDefault(); dropzone.classList.remove("drag-over");
@@ -1217,21 +1240,21 @@ const CURRENT_CASE_ID =
         const typeVal = allSelects[0] ? allSelects[0].value : "CONTRACT";
 
         const newDocMeta = {
-          id:            nextDocId(),
-          name:          selectedFile.name,
-          filePath:      null,
-          blobUrl:       null,
+          id: nextDocId(),
+          name: selectedFile.name,
+          filePath: null,
+          blobUrl: null,
           // FIX: Use CURRENT_CASE_ID so uploads work for any case, not just CASE-45
-          caseId:        CURRENT_CASE_ID,
-          type:          typeVal.toUpperCase(),
-          fileType:      (selectedFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3),
-          uploader:      CURRENT_USER.name,
+          caseId: CURRENT_CASE_ID,
+          type: typeVal.toUpperCase(),
+          fileType: (selectedFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3),
+          uploader: CURRENT_USER.name,
           uploaderEmail: CURRENT_USER.email,
-          firmId:        CURRENT_USER.firmId || null,
-          date:          new Date().toISOString().split("T")[0],
-          version:       1,
-          access:        "PRIVATE",
-          iconColor:     "green",
+          firmId: CURRENT_USER.firmId || null,
+          date: new Date().toISOString().split("T")[0],
+          version: 1,
+          access: "PRIVATE",
+          iconColor: "green",
         };
 
         uploadedDocs.unshift(newDocMeta);
@@ -1319,10 +1342,10 @@ const CURRENT_CASE_ID =
     const existing = document.getElementById("lex-role-badge");
     if (existing) existing.remove();
     const roleColors = {
-      lawyer:        { bg:"#eff6ff", color:"#1d4ed8", border:"#bfdbfe" },
-      intern:        { bg:"#f1f5f9", color:"#475569", border:"#cbd5e1" },
-      client:        { bg:"#fefce8", color:"#854d0e", border:"#fde68a" },
-      lawfirm_admin: { bg:"#f0fdf4", color:"#166534", border:"#86efac" },
+      lawyer: { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+      intern: { bg: "#f1f5f9", color: "#475569", border: "#cbd5e1" },
+      client: { bg: "#fefce8", color: "#854d0e", border: "#fde68a" },
+      lawfirm_admin: { bg: "#f0fdf4", color: "#166534", border: "#86efac" },
     };
     const rc = roleColors[role] || roleColors.lawyer;
     const badge = document.createElement("div");
@@ -1337,7 +1360,7 @@ const CURRENT_CASE_ID =
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     `;
     const firm = firmName ? ` · ${firmName}` : "";
-    badge.textContent = `👤 ${user.name} · ${role.replace("_"," ").toUpperCase()}${firm} · ${CURRENT_CASE_ID}`;
+    badge.textContent = `👤 ${user.name} · ${role.replace("_", " ").toUpperCase()}${firm} · ${CURRENT_CASE_ID}`;
     badge.title = badge.textContent;
     document.body.appendChild(badge);
   }
