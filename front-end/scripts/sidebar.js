@@ -29,6 +29,10 @@
     const content = document.querySelector('main, .main-content, .cases-main, .details-main, .content');
     if (!content) return;
 
+    // Avoid applying the offset twice when a wrapper already has this class.
+    const hasOffsetAncestor = content.parentElement && content.parentElement.closest('.content-with-sidebar');
+    if (hasOffsetAncestor || content.classList.contains('content-with-sidebar')) return;
+
     // Reuse shared utility class from sidebar.css to prevent sidebar overlap.
     content.classList.add('content-with-sidebar');
   }
@@ -37,9 +41,11 @@
   const PAGE_TO_NAV = {
     'client-consultation-dashboard.html': 'nav-consultations',
     'firm-consultation-dashboard.html':   'nav-consultations',
-    'cases.html':                         'nav-cases',
+    'documents-main.html':                'nav-documents',
     'client_casemanagement_cases.html':   'nav-cases',
     'firm_manager_casemanagement_cases.html': 'nav-cases',
+    'firm_manager_casemanagement_case-details.html': 'nav-cases',
+    'firm_manager_casemanagement_tasks.html': 'nav-cases',
     'documents.html':                     'nav-documents',
     'case-documents.html':                'nav-documents',
     'billing.html':                       'nav-billing',
@@ -58,7 +64,7 @@
     'nav-consultations': 'client-consultation-dashboard.html',
     'nav-cases':         'client_casemanagement_cases.html',
     'nav-search':        'client-law_firm-search.html',
-    'nav-documents':     'case-documents.html',
+    'nav-documents':     'documents-main.html',
     'nav-usermanagement': 'firm_manager_casemanagement_users.html',
   };
 
@@ -97,9 +103,23 @@
         if (link) link.href = pagePath;
       });
 
-      // Update role label from localStorage
-      const roleLabels = { client: 'Client', firmAdmin: 'Law Firm' };
-      const userRole = localStorage.getItem('userRole');
+      // Update sidebar user identity from signed-in user data
+      const roleLabels = { client: 'Client', firmAdmin: 'Firm Admin', lawyer: 'Lawyer' };
+      const currentUserRaw = localStorage.getItem('currentUser');
+      let currentUser = null;
+      try {
+        currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
+      } catch {
+        currentUser = null;
+      }
+      const userName = currentUser && (currentUser.fullName || currentUser.name)
+        ? (currentUser.fullName || currentUser.name)
+        : 'User';
+      const userRole = localStorage.getItem('userRole') || (currentUser && currentUser.role) || 'client';
+
+      const nameEl = container.querySelector('.user-name');
+      if (nameEl) nameEl.textContent = userName;
+
       const roleEl = container.querySelector('.user-role');
       if (roleEl && userRole) roleEl.textContent = roleLabels[userRole] ?? 'User';
 
@@ -117,7 +137,7 @@
         if (casesLink) casesLink.href = 'firm_manager_casemanagement_cases.html';
 
         const billingLink = document.getElementById('nav-billing');
-        if (billingLink) billingLink.href = 'lawyer_casemanagement_billing.html';
+        if (billingLink) billingLink.href = 'firm_manager_casemanagement_billing.html';
 
         // Show and link User Management for firmAdmin
         const userMgmtLink = document.getElementById('nav-usermanagement');
@@ -149,7 +169,7 @@
           localStorage.removeItem('currentUser');
           localStorage.removeItem('userRole');
           sessionStorage.removeItem('clientDraft');
-          window.location.href = 'index.html';
+          window.location.href = '../index.html';
         });
       }
 

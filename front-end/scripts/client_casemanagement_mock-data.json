@@ -5,7 +5,7 @@
       "name": "Alexandra Wright",
       "email": "super.user@lexflow.in",
       "password": "super123",
-      "role": "admin",
+      "role": "firmAdmin",
       "systemRole": "super-user",
       "phone": "+1 555 010 0999",
       "avatar": "AW",
@@ -26,7 +26,7 @@
       "name": "John Doe",
       "email": "john.doe@lexflow.in",
       "password": "user123",
-      "role": "end-user",
+      "role": "client",
       "phone": "+91 98100 12345",
       "avatar": "JD",
       "firmUserId": "LF-001",
@@ -40,7 +40,7 @@
       "name": "Sarah Mitchell",
       "email": "sarah.mitchell@lexflow.in",
       "password": "admin123",
-      "role": "admin",
+      "role": "superAdmin",
       "firmUserId": "LF-002",
       "accountStatus": "active",
       "availability": "available",
@@ -53,14 +53,14 @@
       "won": 37,
       "lost": 3,
       "ongoing": 2,
-      "systemRole": "firm-admin"
+      "systemRole": "firmAdmin"
     },
     {
       "id": "ADM002",
       "name": "Vikram Nair",
       "email": "vikram.nair@lexflow.in",
       "password": "admin123",
-      "role": "admin",
+      "role": "firmAdmin",
       "firmUserId": "LF-003",
       "accountStatus": "active",
       "availability": "available",
@@ -80,7 +80,7 @@
       "name": "Ananya Iyer",
       "email": "ananya.iyer@lexflow.in",
       "password": "admin123",
-      "role": "admin",
+      "role": "firmAdmin",
       "firmUserId": "LF-004",
       "accountStatus": "active",
       "availability": "unavailable",
@@ -106,7 +106,7 @@
       "status": "Ongoing",
       "filedDate": "2023-10-14",
       "progress": 65,
-      "assignedAdvocateId": "ADM001",
+      "lawyerId": "ADM001",
       "nextHearing": {
         "date": "2023-11-24",
         "time": "10:30 AM",
@@ -163,7 +163,7 @@
       "status": "Evidence Stage",
       "filedDate": "2024-01-22",
       "progress": 40,
-      "assignedAdvocateId": "ADM001",
+      "lawyerId": "ADM001",
       "nextHearing": {
         "date": "2024-12-05",
         "time": "2:00 PM",
@@ -215,7 +215,7 @@
       "status": "Active",
       "filedDate": "2023-10-01",
       "progress": 25,
-      "assignedAdvocateId": "ADM001",
+      "lawyerId": "ADM001",
       "nextHearing": {
         "date": "2023-11-12",
         "time": "11:00 AM",
@@ -268,7 +268,7 @@
       "status": "Active",
       "filedDate": "2023-12-10",
       "progress": 10,
-      "assignedAdvocateId": "ADM001",
+      "lawyerId": "ADM001",
       "nextHearing": {
         "date": "2024-01-15",
         "time": "10:00 AM",
@@ -316,7 +316,7 @@
       "status": "Active",
       "filedDate": "2024-01-05",
       "progress": 15,
-      "assignedAdvocateId": "ADM002",
+      "lawyerId": "ADM002",
       "nextHearing": {
         "date": "2024-02-28",
         "time": "2:30 PM",
@@ -364,7 +364,7 @@
       "status": "Active",
       "filedDate": "2024-02-01",
       "progress": 30,
-      "assignedAdvocateId": "ADM003",
+      "lawyerId": "ADM003",
       "nextHearing": {
         "date": "2024-03-10",
         "time": "11:30 AM",
@@ -412,7 +412,7 @@
       "status": "Active",
       "filedDate": "2023-11-20",
       "progress": 20,
-      "assignedAdvocateId": "ADM003",
+      "lawyerId": "ADM003",
       "nextHearing": {
         "date": "2024-04-20",
         "time": "10:00 AM",
@@ -460,7 +460,7 @@
       "status": "Active",
       "filedDate": "2024-02-15",
       "progress": 35,
-      "assignedAdvocateId": "ADM002",
+      "lawyerId": "ADM002",
       "nextHearing": {
         "date": "2024-05-02",
         "time": "3:00 PM",
@@ -508,7 +508,7 @@
       "status": "Active",
       "filedDate": "2024-03-01",
       "progress": 18,
-      "assignedAdvocateId": "ADM003",
+      "lawyerId": "ADM003",
       "nextHearing": {
         "date": "2024-06-18",
         "time": "12:00 PM",
@@ -642,6 +642,7 @@
       "priority": "HIGH",
       "dueDate": "Oct 24, 2023",
       "status": "Pending",
+      "caseId": "CASE001",
       "caseCnr": "DLND010001232023"
     },
     {
@@ -652,6 +653,7 @@
       "priority": "MEDIUM",
       "dueDate": "Oct 28, 2023",
       "status": "Pending",
+      "caseId": "CASE001",
       "caseCnr": "DLND010001232023"
     },
     {
@@ -662,6 +664,7 @@
       "priority": "LOW",
       "dueDate": "Nov 01, 2023",
       "status": "Pending",
+      "caseId": "CASE002",
       "caseCnr": "DLND010005672024"
     },
     {
@@ -672,6 +675,7 @@
       "priority": "HIGH",
       "dueDate": "Oct 12, 2023",
       "status": "Completed",
+      "caseId": "CASE002",
       "caseCnr": "DLND010005672024"
     },
     {
@@ -682,6 +686,7 @@
       "priority": "HIGH",
       "dueDate": "Nov 15, 2023",
       "status": "Pending",
+      "caseId": "CASE007",
       "caseCnr": "MHND010002342023"
     },
     {
@@ -692,6 +697,7 @@
       "priority": "HIGH",
       "dueDate": "Nov 05, 2023",
       "status": "Pending",
+      "caseId": "CASE003",
       "caseCnr": "DLND010003452023"
     },
     {
@@ -702,6 +708,7 @@
       "priority": "HIGH",
       "dueDate": "Aug 24, 2024",
       "status": "Pending",
+      "caseId": "CASE001",
       "caseCnr": "DLND010001232023"
     },
     {
@@ -712,6 +719,7 @@
       "priority": "MEDIUM",
       "dueDate": "Dec 20, 2023",
       "status": "Pending",
+      "caseId": "CASE004",
       "caseCnr": "DLND010007892023"
     },
     {
@@ -722,6 +730,7 @@
       "priority": "LOW",
       "dueDate": "Dec 22, 2023",
       "status": "Pending",
+      "caseId": "CASE004",
       "caseCnr": "DLND010007892023"
     }
   ]

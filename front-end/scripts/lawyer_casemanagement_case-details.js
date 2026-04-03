@@ -1,6 +1,37 @@
 let allData = {},
   currentCase = null,
   currentTasks = [];
+
+// Use shared cases storage utility
+const casesStorage = window.LexFlowCasesStorage;
+
+const MOCK_STORAGE_KEY = "lexflow_mock_data";
+
+function loadJsonFromStorage(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn(`Failed to parse ${key}:`, error);
+    return null;
+  }
+}
+
+function saveJsonToStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+async function ensureCaseStorage() {
+  const data = await casesStorage.ensureCasesStorage();
+  return data;
+}
+
+function saveAllData() {
+  casesStorage.saveCases(allData.cases || []);
+  casesStorage.saveTasks(allData.tasks || []);
+  casesStorage.saveUsers(allData.users || []);
+  saveJsonToStorage(MOCK_STORAGE_KEY, allData);
+}
 const caseTopTitle = document.getElementById("caseTopTitle"),
   caseTopSub = document.getElementById("caseTopSub"),
   caseProgPct = document.getElementById("caseProgPct"),
@@ -15,15 +46,7 @@ const caseTopTitle = document.getElementById("caseTopTitle"),
   documentsTbody = document.getElementById("documentsTbody");
 async function initCaseDetails() {
   try {
-    let e = localStorage.getItem("lexflow_mock_data");
-    if (e) allData = JSON.parse(e);
-    else {
-      const e = await fetch(
-        "../scripts/client_casemanagement_mock-data.json",
-      );
-      ((allData = await e.json()),
-        localStorage.setItem("lexflow_mock_data", JSON.stringify(allData)));
-    }
+    allData = await ensureCaseStorage();
     let t = new URLSearchParams(window.location.search).get("cnr");
     if (
       (!t && allData.cases.length > 0 && (t = allData.cases[0].cnr),
@@ -33,7 +56,7 @@ async function initCaseDetails() {
       return;
     (allData.tasks &&
       (currentTasks = allData.tasks.filter(
-        (e) => e.caseCnr === currentCase.cnr,
+        (e) => e.caseCnr === currentCase.cnr || e.caseId === currentCase.id,
       )),
       renderHeader(),
       renderOverview(),
@@ -110,8 +133,8 @@ function renderPhases() {
 }
 function renderTeam() {
   let e = "Sarah Mitchell";
-  ("ADM002" === currentCase.assignedAdvocateId && (e = "Vikram Nair"),
-    "ADM003" === currentCase.assignedAdvocateId && (e = "Ananya Iyer"),
+  ("ADM002" === currentCase.lawyerId && (e = "Vikram Nair"),
+    "ADM003" === currentCase.lawyerId && (e = "Ananya Iyer"),
     (teamContainer.innerHTML = `\n        <div style="display: flex; gap: 12px; align-items: center;">\n            <div style="width: 32px; height: 32px; border-radius: 50%; background: #eef2ff; color: #3b5bdb; display: flex; align-items:center; justify-content:center; font-size: 11px; font-weight:700;">${e.substring(0, 2).toUpperCase()}</div>\n            <div style="display:flex; flex-direction:column;">\n                <span style="font-size:13px; font-weight:700; color:#1a1a2e;">${e}</span>\n                <span style="font-size:11px; color:#6b7280;">Lead Attorney</span>\n            </div>\n        </div>\n        <div style="display: flex; gap: 12px; align-items: center;">\n            <div style="width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; color: #6b7280; display: flex; align-items:center; justify-content:center; font-size: 11px; font-weight:700;">DC</div>\n            <div style="display:flex; flex-direction:column;">\n                <span style="font-size:13px; font-weight:700; color:#1a1a2e;">David Chen</span>\n                <span style="font-size:11px; color:#6b7280;">Paralegal</span>\n            </div>\n        </div>\n    `));
 }
 function renderClientInfo() {
@@ -158,10 +181,7 @@ function renderPendingTasks() {
             const t = allData.tasks.find((t) => t.id === e);
             t &&
               ((t.status = "Completed"),
-              localStorage.setItem(
-                "lexflow_mock_data",
-                JSON.stringify(allData),
-              ),
+              saveAllData(),
               initCaseDetails());
           }))
       : (pendingTasksContainer.innerHTML =
@@ -197,7 +217,7 @@ function renderDocuments() {
 function saveData() {
   const e = allData.cases.findIndex((e) => e.cnr === currentCase.cnr);
   (-1 !== e && (allData.cases[e] = currentCase),
-    localStorage.setItem("lexflow_mock_data", JSON.stringify(allData)),
+    saveAllData(),
     initCaseDetails());
 }
 ((window.openModal = function (e) {

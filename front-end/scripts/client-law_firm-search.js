@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const currentUser = AuthService.requireAuth(['client']);
+    if (!currentUser) return;
+
+    // 0. Initialize storage if needed
+    if (!localStorage.getItem('lexflow_law_firms') || !localStorage.getItem('lexflow_consultations')) {
+        console.log('[Find Firm] Initializing storage...');
+        await initStorage();
+    }
+    
     // 1. Initial Render
     renderFirms();
 
@@ -105,6 +114,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function openBooking(firmId) {
         const firm = LexFlowStorage.getFirmById(firmId);
         if (firm) {
+            // Store the selected firm ID for later use in booking form
+            sessionStorage.setItem('booking_firm_id', firmId);
+            
             document.getElementById('lawfirm-name').value = firm.name;
             bookingOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -184,6 +196,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             bookingOverlay.classList.remove('active');
             profileOverlay.classList.remove('active');
             document.body.style.overflow = '';
+            // Clear booking session data
+            sessionStorage.removeItem('booking_firm_id');
         });
     });
 
@@ -192,29 +206,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
+
+            const activeUser = AuthService.getCurrentUser();
+            if (!activeUser || activeUser.role !== 'client') {
+                window.location.href = 'SignIn.html';
+                return;
+            }
             
+            // Get form data
             const firmName = document.getElementById('lawfirm-name').value;
             const typeSelect = document.querySelector('.type-option.selected input');
-            const type = typeSelect ? typeSelect.value : 'video';
-            const daySelected = document.querySelector('.cal-day.selected');
-            const day = daySelected ? daySelected.textContent : '3';
-            const timeSelected = document.querySelector('.time-slot.selected');
-            const time = timeSelected ? timeSelected.textContent : '10:30 AM';
+            const consultationType = typeSelect ? typeSelect.value : 'video';
             
-            const newCons = {
-                lawyerName: firmName,
+            // Get selected date
+            const daySelected = document.querySelector('.cal-day.selected');
+            const dayNum = daySelected ? daySelected.textContent : '1';
+            
+            // Get selected time
+            const timeSelected = document.querySelector('.time-slot.selected');
+            const selectedTime = timeSelected ? timeSelected.textContent : '10:00 AM';
+            
+            // Get current date context - format as "MMM DD, YYYY"
+            const now = new Date();
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const currentMonth = monthNames[now.getMonth()];
+            const currentYear = now.getFullYear();
+            const consultationDate = `${currentMonth} ${dayNum}, ${currentYear}`;
+            
+            // Get the firm object to extract better data
+            const firmId = sessionStorage.getItem('booking_firm_id');
+            const firm = firmId ? LexFlowStorage.getFirmById(firmId) : null;
+            
+            // Use the authenticated client identity only.
+            const clientName = activeUser.fullName || activeUser.name;
+            if (!clientName) {
+                window.location.href = 'SignIn.html';
+                return;
+            }
+            
+            // Generate unique consultation ID
+            const consultationId = 'CONS-' + Date.now();
+            
+            // Avatar color classes: blue, green, orange, purple, pink, indigo, teal, etc
+            const avatarColors = ['blue', 'green', 'orange', 'purple', 'pink', 'indigo', 'teal'];
+            const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+            
+            // Create new consultation with all required fields
+            const newConsultation = {
+                id: consultationId,
+                clientName: clientName,
+                lawyerName: 'Awaiting Assignment',
                 firmName: firmName,
-                type: type,
-                date: `Oct ${day}, 2023`,
-                time: time + ' - ' + time, // simplified
-                status: 'SCHEDULED',
-                clientName: 'John Doe',
-                avatarClass: 'blue'
+                type: consultationType, // 'video' or 'inperson'
+                date: consultationDate,
+                time: selectedTime + ' - ' + selectedTime, // Time range
+                status: 'PENDING', // New bookings start as pending for Firm Admin review
+                avatarClass: randomColor, // Random avatar color for visual variety
+                caseType: 'General Consultation', // Default case type
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             };
             
-            LexFlowStorage.addConsultation(newCons);
+            // If we have firm data, add more details
+            if (firm) {
+                newConsultation.firmId = firm.id;
+                newConsultation.firmLocation = firm.location;
+                newConsultation.firmRating = firm.rating;
+                newConsultation.firmReviews = firm.reviews;
+                newConsultation.consultationFee = '$' + firm.price;
+            }
             
-            alert('Consultation booked successfully!');
+            // Save to localStorage via storage API
+            const savedConsultation = LexFlowStorage.addConsultation(newConsultation);
+            
+            console.log('[Find Firm] Consultation booked:', savedConsultation.id);
+            
+            // Show success feedback
+            alert('Consultation request sent successfully! Redirecting to your consultations dashboard...');
+            
+            // Redirect to client dashboard to show the newly created consultation
             window.location.href = 'client-consultation-dashboard.html';
         });
     }

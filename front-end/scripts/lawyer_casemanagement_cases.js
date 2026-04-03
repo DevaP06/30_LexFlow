@@ -3,25 +3,27 @@ let allCases = [],
   allTasks = [],
   filteredTasks = [],
   currentTab = "all";
+
+// Use shared cases storage utility
+const casesStorage = window.LexFlowCasesStorage;
+
 async function initCases() {
   try {
-    let e;
-    const t = localStorage.getItem("lexflow_mock_data");
-    if (t) e = JSON.parse(t);
-    else {
-      const t = await fetch(
-        "../scripts/client_casemanagement_mock-data.json",
-      );
-      ((e = await t.json()),
-        localStorage.setItem("lexflow_mock_data", JSON.stringify(e)));
-    }
-    ((allCases = e.cases.filter((e) => "ADM001" === e.assignedAdvocateId)),
-      (allTasks = e.tasks || []),
-      (filteredCases = [...allCases]));
-    const n = allTasks.filter(
-      (e) => "Pending" === e.status && "Sarah Mitchell" === e.assignedUser,
+    allCases =
+      (await casesStorage.getCases()).filter(
+        (c) => c.lawyerId === "ADM001"
+      ) || [];
+    allTasks = (await casesStorage.getTasks()) || [];
+    filteredCases = [...allCases];
+    const pendingTasks = allTasks.filter(
+      (t) => t.status === "Pending" && t.assignedUser === "Sarah Mitchell"
     );
-    ((document.getElementById("pendingTasksCount").textContent = n.length),
+    document.getElementById("pendingTasksCount").textContent = pendingTasks.length;
+    renderPage(1);
+  } catch (e) {
+    console.error("Error loading cases:", e);
+  }
+}
       renderPage(1));
   } catch (e) {
     console.error("Error loading cases:", e);

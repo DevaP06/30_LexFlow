@@ -3,8 +3,8 @@
         {
             "id": "CONS-882",
             "status": "SCHEDULED",
-            "lawyerName": "Dr. Julian Voss",
-            "firmName": "Voss & Associates",
+            "lawyerName": "Adv. Rajesh Mehta",
+            "firmName": "LexCorp Associates",
             "type": "video",
             "date": "Oct 24, 2026",
             "time": "10:30 AM - 11:00 AM",
@@ -13,8 +13,8 @@
         {
             "id": "CONS-895",
             "status": "CONFIRMED",
-            "lawyerName": "Sarah Jenkins",
-            "firmName": "Jenkins Family Law",
+            "lawyerName": "Adv. Priya Kapoor",
+            "firmName": "LexCorp Associates",
             "type": "in-person",
             "date": "Oct 26, 2026",
             "time": "02:00 PM - 03:00 PM",
@@ -32,7 +32,7 @@
         },
         {
             "id": "CONS-156",
-            "lawyerName": "Elena Rodriguez",
+            "lawyerName": "Adv. Arjun Rao",
             "type": "Civil Law",
             "date": "Jan 10, 2026",
             "time": "-",

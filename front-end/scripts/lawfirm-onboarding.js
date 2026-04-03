@@ -21,17 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     attachStep1Validators();
 
-    const draft = _getDraft();
-    if (draft.fullName) {
-      _setVal('full-name', draft.fullName);
-      _setVal('email', draft.email);
-      _setVal('phone', draft.phone);
-      _setVal('street', draft.street);
-      _setVal('city', draft.city);
-      _setVal('state', draft.state);
-      _setVal('zip', draft.zip);
-    }
-
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       setAlert(null);
@@ -90,14 +79,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const draft = _getDraft();
 
-    if (draft.primaryEmail) {
-      _setVal('primary-email', draft.primaryEmail);
-      _setVal('phone', draft.contactPhone);
-      _setVal('website', draft.website);
-      _setVal('secondary-email', draft.secondaryEmail);
-      _setVal('alt-phone', draft.altPhone);
-    }
-
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       setAlert(null);
@@ -150,11 +131,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const draft = _getDraft();
 
-    if (draft.adminName) {
-      _setVal('admin-name', draft.adminName);
-      _setVal('admin-email', draft.adminEmail);
-    }
-
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       setAlert(null);
@@ -206,6 +182,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
 
       StorageService.create('lawFirms', firmData);
+
+      // Mirror new firm to lexflow_law_firms so it appears in the client firm-search page
+      try {
+        const existingFirms = JSON.parse(localStorage.getItem('lexflow_law_firms') || '[]');
+        const newFirmEntry = {
+          id: `firm-${Date.now()}`,
+          name: firmData.firmName,
+          subtitle: `${firmData.city || ''}, ${firmData.state || ''}`.trim().replace(/^,|,$/g, ''),
+          location: (firmData.city || '').toLowerCase(),
+          practiceArea: 'general',
+          description: `${firmData.firmName} — a registered law firm on LexFlow.`,
+          rating: 4.0,
+          reviews: 0,
+          price: 100,
+          availability: 'AVAILABLE',
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(firmData.firmName)}&background=1e3a5f&color=fff`
+        };
+        existingFirms.push(newFirmEntry);
+        localStorage.setItem('lexflow_law_firms', JSON.stringify(existingFirms));
+      } catch (_) {}
+
+
 
       const { password: _pw, ...safeUser } = user;
       localStorage.setItem('currentUser', JSON.stringify(safeUser));

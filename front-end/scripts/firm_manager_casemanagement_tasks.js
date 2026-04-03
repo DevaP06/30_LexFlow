@@ -1,22 +1,76 @@
 let allTasks = [],
   filteredTasks = [],
-  currentUser = {
-    name: "Sarah Mitchell",
-    avatar: "SM",
-    role: "Firm Admin",
+  allCases = [];
+
+const casesStorage = window.LexFlowCasesStorage;
+
+const currentUser = (() => {
+  try {
+    const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    return {
+      name: u.fullName || u.name || 'Firm Admin',
+      avatar: (u.fullName || u.name || 'FA').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase(),
+      role: u.role || 'firmAdmin',
+    };
+  } catch { return { name: 'Firm Admin', avatar: 'FA', role: 'firmAdmin' }; }
+})();
+const MOCK_STORAGE_KEY = "lexflow_mock_data",
+  TASKS_STORAGE_KEY = "lexflow_tasks",
+  USERS_STORAGE_KEY = "lexflow_users",
+  MOCK_PATH = "../scripts/client_casemanagement_mock-data.json";
+
+function loadJsonFromStorage(t) {
+  try {
+    const e = localStorage.getItem(t);
+    return e ? JSON.parse(e) : null;
+  } catch (e) {
+    return (console.warn(`Failed to parse ${t}:`, e), null);
+  }
+}
+
+function saveJsonToStorage(t, e) {
+  localStorage.setItem(t, JSON.stringify(e));
+}
+
+async function ensureTaskStorage() {
+  let t = loadJsonFromStorage(MOCK_STORAGE_KEY),
+    e = loadJsonFromStorage(TASKS_STORAGE_KEY),
+    n = loadJsonFromStorage(USERS_STORAGE_KEY);
+
+  if (!(t && Array.isArray(t.tasks))) {
+    if (!Array.isArray(e)) {
+      const a = await fetch(MOCK_PATH),
+        s = await a.json();
+      ((t = s),
+        saveJsonToStorage(MOCK_STORAGE_KEY, s),
+        saveJsonToStorage(TASKS_STORAGE_KEY, s.tasks || []),
+        saveJsonToStorage(USERS_STORAGE_KEY, s.users || []));
+    } else {
+      t = { ...(t || {}), tasks: e || [], users: n || [] };
+      saveJsonToStorage(MOCK_STORAGE_KEY, t);
+    }
+  } else {
+    (Array.isArray(e) || saveJsonToStorage(TASKS_STORAGE_KEY, t.tasks || []),
+      Array.isArray(n) || saveJsonToStorage(USERS_STORAGE_KEY, t.users || []));
+  }
+
+  return {
+    tasks: loadJsonFromStorage(TASKS_STORAGE_KEY) || (t && t.tasks) || [],
+    users: loadJsonFromStorage(USERS_STORAGE_KEY) || (t && t.users) || [],
   };
+}
+
+function saveTasksToAllStores() {
+  const t = loadJsonFromStorage(MOCK_STORAGE_KEY) || {};
+  ((t.tasks = allTasks),
+    Array.isArray(t.users) || (t.users = loadJsonFromStorage(USERS_STORAGE_KEY) || []),
+    saveJsonToStorage(TASKS_STORAGE_KEY, allTasks),
+    saveJsonToStorage(MOCK_STORAGE_KEY, t));
+}
 async function initTasks() {
   try {
-    let t;
-    const e = localStorage.getItem("lexflow_mock_data");
-    if (e) t = JSON.parse(e);
-    else {
-      const e = await fetch(
-        "../scripts/client_casemanagement_mock-data.json",
-      );
-      ((t = await e.json()),
-        localStorage.setItem("lexflow_mock_data", JSON.stringify(t)));
-    }
+    const t = await ensureTaskStorage();
+    allCases = ((casesStorage && (await casesStorage.getCases())) || []);
     ((allTasks = t.tasks || []),
       (window.allUsers = t.users || []),
       (filteredTasks = [...allTasks]),
@@ -26,12 +80,7 @@ async function initTasks() {
   }
 }
 function saveTasks() {
-  const t = localStorage.getItem("lexflow_mock_data");
-  if (t) {
-    let e = JSON.parse(t);
-    ((e.tasks = allTasks),
-      localStorage.setItem("lexflow_mock_data", JSON.stringify(e)));
-  }
+  saveTasksToAllStores();
 }
 const TASKS_PER_PAGE = 5;
 let currentPage = 1;
@@ -112,6 +161,17 @@ function getPrioColor(t) {
       ? { bg: "#fef3c7", text: "#d97706" }
       : { bg: "#dcfce3", text: "#166534" };
 }
+
+function resolveCaseFromInput(inputValue) {
+  const v = String(inputValue || "").trim().toLowerCase();
+  if (!v) return null;
+  return allCases.find((c) =>
+    String(c.id || "").toLowerCase() === v ||
+    String(c.cnr || "").toLowerCase() === v ||
+    String(c.title || "").toLowerCase() === v
+  ) || null;
+}
+
 (searchInput.addEventListener("input", applyFilters),
   prioFilter.addEventListener("change", applyFilters),
   statusFilter.addEventListener("change", applyFilters),
@@ -225,7 +285,8 @@ function getPrioColor(t) {
       o = document.getElementById("taskCaseInput").value,
       i = document.getElementById("taskAssigneeInput").value,
       l = document.getElementById("taskDescInput").value,
-      d = document.getElementById("taskPriorityInput").value,
+      d = (['LOW','MEDIUM','HIGH'].includes(document.getElementById("taskPriorityInput").value)
+        ? document.getElementById("taskPriorityInput").value : 'LOW'),
       r = new Date(e.value).toLocaleDateString(void 0, {
         month: "short",
         day: "numeric",
@@ -233,15 +294,19 @@ function getPrioColor(t) {
       });
     if (s) {
       const e = allTasks.find((t) => t.id === s);
+      const caseRef = resolveCaseFromInput(o);
       e &&
         ((e.name = t.value.trim()),
         (e.caseTitle = o),
         (e.assignedUser = i),
         (e.dueDate = r),
         (e.description = l),
-        (e.priority = d));
+        (e.priority = d),
+        (e.caseId = caseRef ? caseRef.id : (e.caseId || "")),
+        (e.caseCnr = caseRef ? caseRef.cnr : (e.caseCnr || "")));
     } else {
       const e = "T-" + (1e3 + Math.floor(9e3 * Math.random()));
+      const caseRef = resolveCaseFromInput(o);
       allTasks.unshift({
         id: e,
         name: t.value.trim(),
@@ -251,7 +316,8 @@ function getPrioColor(t) {
         dueDate: r,
         status: "Pending",
         description: l,
-        caseCnr: "",
+        caseId: caseRef ? caseRef.id : "",
+        caseCnr: caseRef ? caseRef.cnr : "",
       });
     }
     (saveTasks(), applyFilters(), closeModal("taskModal"));

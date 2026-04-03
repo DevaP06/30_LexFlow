@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initial Render
-    renderConsultations();
+    // 1. Ensure storage is initialized
+    if (!localStorage.getItem('lexflow_consultations')) {
+        console.log('[Dashboard] Initializing storage...');
+        initStorage();
+        // Give it a moment to load
+        setTimeout(() => renderConsultations(), 100);
+    } else {
+        // 2. Initial Render
+        renderConsultations();
+    }
 
     // 2. Elements
     const btnBookCons = document.getElementById('btn-book-consultation');
@@ -10,15 +18,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function normalizeValue(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function getCurrentClientUser() {
+        try {
+            return JSON.parse(localStorage.getItem('currentUser') || '{}');
+        } catch {
+            return {};
+        }
+    }
+
+    function isCurrentClientConsultation(cons, currentUser) {
+        if (!currentUser || !currentUser.role) return false;
+
+        const currentNames = [currentUser.fullName, currentUser.name].map(normalizeValue).filter(Boolean);
+        const currentIds = [currentUser.clientId, currentUser.userId, currentUser.id, currentUser.email]
+            .map(normalizeValue)
+            .filter(Boolean);
+
+        if (currentIds.length) {
+            if (cons.clientId && currentIds.includes(normalizeValue(cons.clientId))) return true;
+            if (cons.clientEmail && currentIds.includes(normalizeValue(cons.clientEmail))) return true;
+        }
+
+        if (currentNames.length && currentNames.includes(normalizeValue(cons.clientName))) return true;
+
+        return false;
+    }
+
     // 3. Rendering Functions
     function renderConsultations() {
-        const allCons = LexFlowStorage.getConsultations();
+        const currentUser = getCurrentClientUser();
+        const allCons = LexFlowStorage.getConsultations().filter(c => isCurrentClientConsultation(c, currentUser));
         const scheduledGrid = document.querySelector('.scheduled-grid');
         const pastTableBody = document.querySelector('#past-consultations-table tbody');
-        
+
         if (scheduledGrid) {
             scheduledGrid.innerHTML = '';
-            const activeCons = allCons.filter(c => c.status === 'SCHEDULED' || c.status === 'CONFIRMED' || c.status === 'TODAY');
+            const activeCons = allCons.filter(c =>
+                (c.status === 'PENDING' ||
+                c.status === 'SCHEDULED' ||
+                c.status === 'CONFIRMED' ||
+                c.status === 'TODAY')
+            );
             
             if (activeCons.length === 0) {
                 scheduledGrid.innerHTML = '<p class="no-data">No upcoming consultations.</p>';
@@ -51,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="card-actions">
                             <button class="btn btn-primary btn-join" data-id="${cons.id}">Consultation</button>
                             <button class="btn btn-outline" data-id="${cons.id}">View Details</button>
-                            <button class="btn btn-ghost btn-reschedule" data-id="${cons.id}">Reschedule</button>
                             <button class="btn btn-cancel-text btn-cancel" data-id="${cons.id}">Cancel</button>
                         </div>
                     `;
@@ -88,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         const btnJoin = e.target.closest('.btn-join');
         const btnCancel = e.target.closest('.btn-cancel');
-        const btnReschedule = e.target.closest('.btn-reschedule');
 
         if (btnJoin) {
             const id = btnJoin.dataset.id;
@@ -104,10 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (btnReschedule) {
-            const id = btnReschedule.dataset.id;
-            alert('Rescheduling feature coming soon! For now, please cancel and book again.');
-        }
     });
 
     // 5. Modal Logic (re-implementing from original for completeness)

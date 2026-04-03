@@ -5,6 +5,10 @@
 (function () {
   'use strict';
 
+  function getSignInPath() {
+    return window.location.pathname.includes('/pages/') ? './SignIn.html' : './pages/SignIn.html';
+  }
+
   /* ---- Helper: generic dropdown toggle ---- */
   function makeDropdown(btnId, dropdownId, anchorId) {
     const btn      = document.getElementById(btnId);
@@ -60,7 +64,7 @@
     loginClientBtn.addEventListener('click', function () {
       localStorage.setItem('userRole', 'client');
       login.close();
-      window.location.href = '../pages/SignIn.html';
+      window.location.href = getSignInPath();
     });
   }
 
@@ -68,7 +72,26 @@
     loginLawfirmBtn.addEventListener('click', function () {
       localStorage.setItem('userRole', 'firmAdmin');
       login.close();
-      window.location.href = '../pages/SignIn.html';
+      window.location.href = getSignInPath();
+    });
+  }
+
+  /* ================================================================
+     3. REQUEST CONSULTATION CTA (LOGIN REQUIRED)
+     ================================================================ */
+  const requestConsultationBtn = document.getElementById('request-consultation-btn');
+  if (requestConsultationBtn) {
+    requestConsultationBtn.addEventListener('click', function () {
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        window.location.href = './pages/client-consultation-dashboard.html';
+        return;
+      }
+
+      const shouldLogin = window.confirm('Please login first to request a consultation. Go to Sign In now?');
+      if (shouldLogin) {
+        window.location.href = getSignInPath();
+      }
     });
   }
 

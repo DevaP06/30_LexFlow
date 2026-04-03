@@ -33,7 +33,7 @@ async function initProfile() {
           ".perf-grid .perf-item:nth-child(4) .perf-value",
         ).textContent = a.ongoing));
     }
-    const o = t.cases.filter((e) => e.assignedAdvocateId === n),
+    const o = t.cases.filter((e) => e.lawyerId === n),
       r = document.querySelector(".advocate-cases-list");
     (r &&
       (0 === o.length

@@ -352,6 +352,7 @@ table {
     width: 44px;
     height: 44px;
     border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     display: grid;
     place-items: center;
     flex-shrink: 0;
@@ -363,6 +364,26 @@ table {
 
 .card-avatar.green {
     background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.card-avatar.orange {
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+}
+
+.card-avatar.purple {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+
+.card-avatar.pink {
+    background: linear-gradient(135deg, #f472b6, #db2777);
+}
+
+.card-avatar.indigo {
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+}
+
+.card-avatar.teal {
+    background: linear-gradient(135deg, #2dd4bf, #0f766e);
 }
 
 .card-info {

@@ -1,6 +1,65 @@
 let allData = {},
   currentCase = null,
   currentTasks = [];
+
+// Use shared cases storage utility
+const casesStorage = window.LexFlowCasesStorage;
+
+const DOCS_STORAGE_KEY = "lexflow_documents",
+  MOCK_STORAGE_KEY = "lexflow_mock_data";
+
+function buildDocumentIndexFromCases(cases) {
+  if (!Array.isArray(cases)) {
+    return [];
+  }
+
+  const docs = [];
+  cases.forEach((caseItem) => {
+    const caseDocs = Array.isArray(caseItem.documents) ? caseItem.documents : [];
+    caseDocs.forEach((doc, idx) => {
+      docs.push({
+        id: doc.id || `${caseItem.cnr || caseItem.id || "CASE"}-DOC-${idx + 1}`,
+        caseCnr: caseItem.cnr || "",
+        caseId: caseItem.id || caseItem.cnr || "",
+        caseTitle: caseItem.title || "",
+        court: caseItem.court || "",
+        name: doc.name || "Untitled Document",
+        type: doc.type || "DOC",
+        date: doc.date || "",
+        status: doc.status || "Reviewing",
+      });
+    });
+  });
+
+  return docs;
+}
+
+function loadJsonFromStorage(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn(`Failed to parse ${key}:`, error);
+    return null;
+  }
+}
+
+function saveJsonToStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+async function ensureCaseStorage() {
+  const data = await casesStorage.ensureCasesStorage();
+  return data;
+}
+
+function saveAllData() {
+  casesStorage.saveCases(allData.cases || []);
+  casesStorage.saveTasks(allData.tasks || []);
+  casesStorage.saveUsers(allData.users || []);
+  saveJsonToStorage(DOCS_STORAGE_KEY, buildDocumentIndexFromCases(allData.cases || []));
+  saveJsonToStorage(MOCK_STORAGE_KEY, allData);
+}
 const caseTopTitle = document.getElementById("caseTopTitle"),
   caseTopSub = document.getElementById("caseTopSub"),
   caseProgPct = document.getElementById("caseProgPct"),
@@ -15,26 +74,17 @@ const caseTopTitle = document.getElementById("caseTopTitle"),
   documentsTbody = document.getElementById("documentsTbody");
 async function initCaseDetails() {
   try {
-    let e = localStorage.getItem("lexflow_mock_data");
-    if (e) allData = JSON.parse(e);
-    else {
-      const e = await fetch(
-        "../scripts/client_casemanagement_mock-data.json",
-      );
-      ((allData = await e.json()),
-        localStorage.setItem("lexflow_mock_data", JSON.stringify(allData)));
-    }
-    let t = new URLSearchParams(window.location.search).get("cnr");
-    if (
-      (!t && allData.cases.length > 0 && (t = allData.cases[0].cnr),
-      (currentCase = allData.cases.find((e) => e.cnr === t)),
-      !currentCase)
-    )
-      return;
+    allData = await ensureCaseStorage();
+    Array.isArray(loadJsonFromStorage(DOCS_STORAGE_KEY)) ||
+      saveJsonToStorage(DOCS_STORAGE_KEY, buildDocumentIndexFromCases(allData.cases || []));
+    const t = new URLSearchParams(window.location.search).get("cnr");
+    if (!t) { window.location.href = 'firm_manager_casemanagement_cases.html'; return; }
+    currentCase = allData.cases.find((e) => e.cnr === t);
+    if (!currentCase) { window.location.href = 'firm_manager_casemanagement_cases.html'; return; }
     if (
       (allData.tasks &&
         (currentTasks = allData.tasks.filter(
-          (e) => e.caseCnr === currentCase.cnr,
+          (e) => e.caseCnr === currentCase.cnr || e.caseId === currentCase.id,
         )),
       currentCase.timeline || (currentCase.timeline = []),
       currentCase.documents || (currentCase.documents = []),
@@ -47,12 +97,12 @@ async function initCaseDetails() {
       !currentCase.team)
     ) {
       const e = allData.users.find(
-        (e) => e.id === currentCase.assignedAdvocateId,
+        (e) => e.id === currentCase.lawyerId,
       ) || { name: "Assigned Lawyer" };
       currentCase.team = [
         {
-          id: currentCase.assignedAdvocateId || "ADM001",
-          name: e.name,
+          id: currentCase.lawyerId || "ADM001",
+          name: e.fullName || e.name,
           role: "Lead Counsel",
         },
       ];
@@ -179,10 +229,7 @@ function renderPendingTasks() {
             const t = allData.tasks.find((t) => t.id === e);
             t &&
               ((t.status = "Completed"),
-              localStorage.setItem(
-                "lexflow_mock_data",
-                JSON.stringify(allData),
-              ),
+              saveAllData(),
               initCaseDetails());
           }))
       : (pendingTasksContainer.innerHTML =
@@ -218,7 +265,7 @@ function renderDocuments() {
 function saveData() {
   const e = allData.cases.findIndex((e) => e.cnr === currentCase.cnr);
   (-1 !== e && (allData.cases[e] = currentCase),
-    localStorage.setItem("lexflow_mock_data", JSON.stringify(allData)),
+    saveAllData(),
     initCaseDetails());
 }
 function renderEditTeamList() {
@@ -312,8 +359,9 @@ function renderEditTeamList() {
       closeModal("documentModal"));
   }),
   (window.deleteDocument = function (e) {
+    if (!currentCase || !Array.isArray(currentCase.documents) || e < 0 || e >= currentCase.documents.length) return;
     confirm("Are you sure you want to delete this document?") &&
-      (currentCase.documents.splice(e, 1), saveData(), renderDocuments());
+      (currentCase.documents.splice(e, 1), saveAllData(), renderDocuments());
   }),
   (window.addTimelineEvent = function () {
     ((document.getElementById("timelineModalTitle").textContent =
@@ -419,7 +467,7 @@ function renderEditTeamList() {
   (window.openEditTeamModal = function () {
     renderEditTeamList();
     ((document.getElementById("addTeamMemberSelect").innerHTML = allData.users
-      .filter((e) => "admin" === e.role || "lawyer" === e.role)
+      .filter((e) => "firmAdmin" === e.role || "lawyer" === e.role)
       .map((e) => `<option value="${e.id}">${e.name}</option>`)
       .join("")),
       openModal("editTeamModal"));
@@ -477,10 +525,11 @@ function renderEditTeamList() {
           year: "numeric",
         }),
         status: "Pending",
+        caseId: currentCase.id,
         caseCnr: currentCase.cnr,
       };
     (allData.tasks.push(l),
-      localStorage.setItem("lexflow_mock_data", JSON.stringify(allData)),
+      saveAllData(),
       currentTasks.push(l),
       saveData(),
       closeModal("addTaskModal"));

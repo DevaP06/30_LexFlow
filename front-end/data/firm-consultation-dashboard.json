@@ -7,7 +7,7 @@
     "incomingRequests": [
         {
             "id": "CONS-902",
-            "clientName": "David Chen",
+            "clientName": "Rahul Sharma",
             "type": "Corporate Litigation",
             "date": "Today, 10:45 AM",
             "status": "PENDING",
@@ -15,7 +15,7 @@
         },
         {
             "id": "CONS-903",
-            "clientName": "Maria Garcia",
+            "clientName": "Rahul Sharma",
             "type": "Visa Consultation",
             "date": "Today, 02:15 PM",
             "status": "PENDING",
@@ -25,8 +25,8 @@
     "activeConsultations": [
         {
             "id": "CONS-882",
-            "clientName": "Emily Williams",
-            "lawyerName": "Julian Vance",
+            "clientName": "Rahul Sharma",
+            "lawyerName": "Adv. Rajesh Mehta",
             "type": "IP Infringement",
             "date": "Oct 24, 2026",
             "time": "10:30 AM",
@@ -35,7 +35,7 @@
         },
         {
             "id": "CONS-895",
-            "clientName": "Michael Brown",
+            "clientName": "Rahul Sharma",
             "lawyerName": "Unassigned",
             "type": "Family Law",
             "date": "Oct 26, 2026",
@@ -47,7 +47,7 @@
     "lawyers": [
         {
             "id": "adv-1",
-            "name": "Dr. Julian Voss",
+            "name": "Adv. Rajesh Mehta",
             "specialties": ["Corporate", "IP Law"],
             "activeCases": 45,
             "consultationsToday": 3,
@@ -55,7 +55,7 @@
         },
         {
             "id": "adv-2",
-            "name": "Sarah Jenkins",
+            "name": "Adv. Priya Kapoor",
             "specialties": ["Family", "Divorce"],
             "activeCases": 28,
             "consultationsToday": 1,

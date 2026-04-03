@@ -1,3 +1,9 @@
+const billingStorage = window.LexFlowBillingStorage;
+const normalizeInvoices = billingStorage.normalizeInvoices;
+const normalizePayments = billingStorage.normalizePayments;
+const ensureBillingStorage = billingStorage.ensureBillingStorage;
+const saveInvoicesToAllStores = billingStorage.saveInvoicesToAllStores;
+
 document.addEventListener("DOMContentLoaded", async () => {
   let invoices = [];
   let payments = [];
@@ -8,13 +14,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   const searchInput = document.getElementById("searchInvoiceInput");
   const filterBtns = document.querySelectorAll(".filter-btn");
 
-  // Fetch data from JSON
+  function generateInvoiceId() {
+    const randomPart = Math.floor(1000 + Math.random() * 9000);
+    return `#INV-${randomPart}`;
+  }
+
+  function refreshStorageAndUI() {
+    saveInvoicesToAllStores(invoices);
+    updateSummaries();
+    renderInvoices();
+    renderPaymentHistory();
+  }
+
+  // Fetch data from storage with seed fallback
   async function fetchData() {
     try {
-      const response = await fetch("../scripts/client_casemanagement_mock-data.json");
-      const data = await response.json();
-      invoices = data.invoices || [];
-      payments = data.payments || [];
+      const data = await ensureBillingStorage();
+      invoices = normalizeInvoices(data.invoices || []);
+      payments = normalizePayments(data.payments || []);
       
       updateSummaries();
       renderInvoices();
@@ -131,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    const newId = "INV-" + Math.floor(1000 + Math.random() * 9000);
+    const newId = generateInvoiceId();
     
     invoices.unshift({
         id: newId,
@@ -142,8 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         dueDate: dueDate
     });
 
-    updateSummaries();
-    renderInvoices();
+      refreshStorageAndUI();
     closeCreateModal();
   };
 
@@ -177,8 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         invoices[invIndex].status = document.getElementById("editInvStatus").value;
         invoices[invIndex].dueDate = document.getElementById("editInvDueDate").value;
 
-        updateSummaries();
-        renderInvoices();
+        refreshStorageAndUI();
         closeEditModal();
     }
   };

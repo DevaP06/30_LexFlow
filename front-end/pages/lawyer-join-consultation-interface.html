@@ -104,6 +104,17 @@
     </div>
 
     <script src="../scripts/storage.js"></script>
+    <script src="../scripts/sidebar-utils.js"></script>
+    <script>
+        // Initialize storage on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('lexflow_consultations')) {
+                initStorage().then(() => {
+                    console.log('[Chat] Storage initialized');
+                });
+            }
+        });
+    </script>
     <script src="../scripts/lawyer-join-consultation-interface.js"></script>
 </body>
 </html>

@@ -1,96 +1,78 @@
 /* ===================================================
    LexFlow — Case Documents
-   hrtll.js — Case-centric, Multi-user, Multi-firm, Role-based
-   ===================================================
-   🔧 TO SWITCH USER: change CURRENT_USER_EMAIL below
-   🔧 TO SWITCH CASE: change CURRENT_CASE_ID below
-
-   ── FIRM-01 · Mehta & Associates ──────────────────
-   Available emails:
-     mehta@lexflow.in          → lawyer        (Adv. Mehta)       — CASE-45, CASE-46
-     sharma@lexflow.in         → lawyer        (Adv. Sharma)      — CASE-45, CASE-46
-     priya.intern@lexflow.in   → intern        (Intern Priya)     — CASE-45, CASE-46
-     rohan.intern@lexflow.in   → intern        (Intern Rohan)     — CASE-45, CASE-46
-     rahul.client@gmail.com    → client        (Rahul Sharma)     — CASE-45
-     anita.client@gmail.com    → client        (Anita Desai)      — CASE-46
-     admin@lexflow.in          → lawfirm_admin (Admin)            — CASE-45, CASE-46
-
-   ── FIRM-02 · Kapoor Legal Partners ───────────────
-   Available emails:
-     kapoor@kapoorlegal.in     → lawyer        (Adv. Kapoor)      — CASE-47, CASE-48
-     nair@kapoorlegal.in       → lawyer        (Adv. Nair)        — CASE-47, CASE-48
-     vikram.client@gmail.com   → client        (Vikram Malhotra)  — CASE-47
-     sunita.client@gmail.com   → client        (Sunita Rao)       — CASE-48
-     admin@kapoorlegal.in      → lawfirm_admin (Admin KLP)        — CASE-47, CASE-48
-
-   ── Available case IDs ────────────────────────────
-     CASE-45  →  Property Dispute     (FIRM-01, client: Rahul Sharma)
-     CASE-46  →  Divorce Settlement   (FIRM-01, client: Anita Desai)
-     CASE-47  →  Corporate Fraud      (FIRM-02, client: Vikram Malhotra)
-     CASE-48  →  Employment Dispute   (FIRM-02, client: Sunita Rao)
-
-   ── Cross-firm rules ──────────────────────────────
-   • A user can ONLY access cases belonging to their own firm
-     (or cases explicitly in their caseAccess, for shared clients)
-   • Clients are firmless — they can only see cases in their caseAccess
-   • lawfirm_admin can only manage their own firm's cases
-   • Interns only see SHARED documents within their access list
+   case-documents.js — Case-centric, Multi-user, Multi-firm, Role-based
    =================================================== */
 
-// Get userRole from localStorage
-const userRole = localStorage.getItem('userRole') || 'client';
+function safeParse(value, fallback) {
+  try {
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
-// Map role to test user email
+const currentUser = safeParse(localStorage.getItem('currentUser'), null);
+const userRole =
+  (currentUser && currentUser.role) ||
+  localStorage.getItem('userRole') ||
+  'client';
+
 const roleToEmailMap = {
-  'client': 'rahul.client@gmail.com',      // client user
-  'firmAdmin': 'mehta@lexflow.in',         // lawyer/admin user
-  'lawyer': 'mehta@lexflow.in',
-  'intern': 'priya.intern@lexflow.in'
+  client: 'rahulsharma@example.com',
+  firmAdmin: 'mehta@lexflow.in',
+  'firm-admin': 'mehta@lexflow.in',
+  lawfirm_admin: 'admin@lexflow.in',
+  lawyer: 'mehta@lexflow.in',
+  intern: 'priya.intern@lexflow.in',
 };
 
-const CURRENT_USER_EMAIL = roleToEmailMap[userRole] || roleToEmailMap['client'];
-const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
+const CURRENT_USER_EMAIL =
+  (currentUser && currentUser.email) ||
+  roleToEmailMap[userRole] ||
+  roleToEmailMap.client;
+
+// FIX: Always read caseId from URL params first
+const urlParams = new URLSearchParams(window.location.search);
+const urlCaseId = urlParams.get('caseId');
+
+if (urlCaseId) {
+  localStorage.setItem('caseId', urlCaseId);
+}
+
+const CURRENT_CASE_ID =
+  urlCaseId ||
+  localStorage.getItem('caseId') ||
+  localStorage.getItem('currentCaseId') ||
+  'CASE-45';
 
 (function () {
   "use strict";
 
-  /* ════════════════════════════════════════
-     LOCAL STORAGE KEYS
-  ════════════════════════════════════════ */
-  const LS_DELETED        = "lexflow_deleted_ids";
-  const LS_UPLOADS        = "lexflow_uploaded_docs";
-  const LS_UPDATES        = "lexflow_updated_docs";
-  const LS_ACTIVITY       = "lexflow_activity_log";
-  const USERS_JSON_PATH   = "../data/docs.json";
+  const LS_DELETED = "lexflow_deleted_ids";
+  const LS_UPLOADS = "lexflow_uploaded_docs";
+  const LS_UPDATES = "lexflow_updated_docs";
+  const LS_ACTIVITY = "lexflow_activity_log";
+  const LS_DOCS_INDEX = "lexflow_documents";
+  const USERS_JSON_PATH = "../data/docs.json";
 
-  /* ════════════════════════════════════════
-     LOCAL STORAGE HELPERS
-  ════════════════════════════════════════ */
   function lsGet(key, fallback) {
     try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
     catch { return fallback; }
   }
   function lsSet(key, val) {
     try { localStorage.setItem(key, JSON.stringify(val)); }
-    catch(e) { console.warn("LS write failed", e); }
+    catch (e) { console.warn("LS write failed", e); }
   }
 
-  /* ════════════════════════════════════════
-     PERSISTENT STATE (loaded before fetch)
-  ════════════════════════════════════════ */
-  let deletedIds   = new Set(lsGet(LS_DELETED, []));
+  let deletedIds = new Set(lsGet(LS_DELETED, []));
   let uploadedDocs = lsGet(LS_UPLOADS, []);
-  let updatedMap   = lsGet(LS_UPDATES, {});
-  let activityLog  = lsGet(LS_ACTIVITY, []);
+  let updatedMap = lsGet(LS_UPDATES, {});
+  let activityLog = lsGet(LS_ACTIVITY, []);
 
-  /* ════════════════════════════════════════
-     INJECT CSS
-  ════════════════════════════════════════ */
   const styleEl = document.createElement("style");
   styleEl.textContent = `
     .view-toggle svg { cursor: pointer; transition: fill 0.15s; }
 
-    /* ── List view ── */
     .documents-list {
       width: 100%; display: flex; flex-direction: column;
       background: #fff; border-radius: 12px;
@@ -140,7 +122,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .doc-list-actions button.danger { color: #be123c; border-color: #fecdd3; }
     .doc-list-actions button.danger:hover { background: #fff1f2; }
 
-    /* ── Tags / Badges ── */
     .tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; font-weight: 600; }
     .tag.contract   { background: var(--blue-bg);   color: var(--blue-text); }
     .tag.evidence   { background: var(--red-bg);    color: var(--red-text); }
@@ -153,7 +134,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .access-badge.private { background: #f1f5f9; color: #64748b; }
     .access-badge.shared  { background: var(--green-bg); color: var(--green-text); }
 
-    /* ── Sort/Filter Dropdowns ── */
     .lex-dd {
       position: absolute; min-width: 190px; background: #fff;
       border: 1px solid var(--border-light); border-radius: var(--radius-md);
@@ -181,10 +161,8 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .dd-clear { background: var(--bg-table-header); color: var(--text-secondary); }
     .dd-apply { background: var(--sidebar-bg); color: #fff; }
 
-    /* ── No results ── */
     .no-docs { padding: 48px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
 
-    /* ── Upload modal ── */
     .upload-modal.active { display: flex; }
     .upload-modal__drop-icon svg { display: block; margin: 0 auto; }
     .upload-modal__dropzone.drag-over { border-color: var(--brand-accent); background: #eff6ff; }
@@ -199,7 +177,15 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .file-preview button { background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 1rem; padding: 0 4px; }
     .file-preview button:hover { color: #be123c; }
 
-    /* ── View Modal ── */
+    /* FIX: Read-only modal inputs */
+    .upload-modal__input[readonly],
+    .upload-modal__input:disabled {
+      background: #f8f9fb !important;
+      color: var(--text-secondary) !important;
+      cursor: not-allowed !important;
+      border-color: #e2e8f0 !important;
+    }
+
     .view-modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
       z-index: 10000; display: none; align-items: center; justify-content: center;
@@ -241,7 +227,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .view-modal-footer button.primary { background: var(--sidebar-bg); color: #fff; border-color: transparent; }
     .view-modal-footer button.primary:hover { opacity: 0.9; }
 
-    /* ── Update Modal ── */
     .update-modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.55);
       z-index: 10000; display: none; align-items: center; justify-content: center;
@@ -276,7 +261,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .update-modal-footer button.primary { background: var(--sidebar-bg); color: #fff; border-color: transparent; }
     .update-modal-footer button.primary:hover { opacity: 0.88; }
 
-    /* ── Delete confirm ── */
     .del-confirm-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5);
       z-index: 10001; display: none; align-items: center; justify-content: center;
@@ -296,7 +280,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .del-confirm-actions button.delete-btn { background: #be123c; color: #fff; border-color: #be123c; }
     .del-confirm-actions button.delete-btn:hover { background: #9f1239; }
 
-    /* ── Toast ── */
     .lex-toast {
       position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
       border-radius: 8px; font-size: 0.85rem; font-weight: 600; z-index: 99999;
@@ -307,7 +290,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     .lex-toast.warn    { background: #92400e; color: #fff; }
     @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ── Access denied banner ── */
     .no-case-access {
       padding: 60px 24px; text-align: center; background: #fff;
       border-radius: 12px; border: 1px solid #fecdd3; margin: 24px 0;
@@ -318,43 +300,110 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
   `;
   document.head.appendChild(styleEl);
 
-  /* ════════════════════════════════════════
-     BOOT — FETCH users.json then initialise
-  ════════════════════════════════════════ */
-  fetch(USERS_JSON_PATH)
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-    .then(db => init(db))
-    .catch(err => {
-      console.error("hrtll.js: failed to load users.json", err);
-      toast("Failed to load document data. Check users.json path.", "error");
+  function waitForCasesStorage(maxWait = 5000) {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const checkInterval = setInterval(() => {
+        if (window.LexFlowCasesStorage) {
+          clearInterval(checkInterval);
+          resolve(window.LexFlowCasesStorage);
+        } else if (Date.now() - start > maxWait) {
+          clearInterval(checkInterval);
+          reject(new Error("cases-storage.js did not load in time"));
+        }
+      }, 50);
     });
+  }
 
-  /* ════════════════════════════════════════
-     MAIN INIT — runs once JSON is loaded
-  ════════════════════════════════════════ */
+  async function bootApp() {
+    try {
+      let casesStorageUsers = [];
+      try {
+        const casesStorage = await waitForCasesStorage(2000);
+        casesStorageUsers = await casesStorage.getUsers();
+      } catch (e) {
+        const usersJson = localStorage.getItem('lexflow_users');
+        casesStorageUsers = usersJson ? JSON.parse(usersJson) : [];
+      }
+
+      let fullDb = null;
+      try {
+        const resp = await fetch(USERS_JSON_PATH);
+        if (resp.ok) fullDb = await resp.json();
+      } catch (e) {
+        console.warn("Could not fetch docs.json:", e);
+      }
+
+      const mergedUsers = [...casesStorageUsers];
+      if (fullDb && Array.isArray(fullDb.users)) {
+        const existingEmails = new Set(mergedUsers.map(u => u.email));
+        fullDb.users.forEach(u => {
+          if (!existingEmails.has(u.email)) mergedUsers.push(u);
+        });
+      }
+
+      const localUser = safeParse(localStorage.getItem('currentUser'), null);
+      if (localUser && localUser.email) {
+        const exists = mergedUsers.find(u => u.email === localUser.email);
+        if (!exists) mergedUsers.push(localUser);
+      }
+
+      const db = {
+        users: mergedUsers,
+        cases: (fullDb && fullDb.cases) || [],
+        documents: (fullDb && fullDb.documents) || [],
+        firms: (fullDb && fullDb.firms) || [],
+      };
+
+      init(db);
+    } catch (err) {
+      console.error("bootApp() FAILED:", err);
+      if (typeof toast === 'function') {
+        toast(`Failed: ${err.message}`, "error");
+      } else {
+        setTimeout(() => alert("Failed to load documents:\n" + err.message), 100);
+      }
+    }
+  }
+
+  bootApp();
+
   function init(db) {
-
-    /* ── Validate db structure ── */
     if (!db.users || !db.cases || !db.documents || !db.firms) {
-      toast("users.json is missing required fields (users/cases/documents/firms).", "error");
+      toast("Document data is missing required fields.", "error");
       return;
     }
 
-    /* ── Resolve current user ── */
-    const CURRENT_USER = db.users.find(u => u.email === CURRENT_USER_EMAIL);
+    // Resolve current user
+    let CURRENT_USER = null;
+    const localUser = safeParse(localStorage.getItem('currentUser'), null);
+    if (localUser && localUser.email) {
+      CURRENT_USER = db.users.find(u => u.email === localUser.email);
+    }
     if (!CURRENT_USER) {
-      toast(`User "${CURRENT_USER_EMAIL}" not found in users.json`, "error");
+      CURRENT_USER = db.users.find(u => u.email === CURRENT_USER_EMAIL);
+    }
+    if (!CURRENT_USER) {
+      toast(`User "${CURRENT_USER_EMAIL}" not found.`, "error");
       return;
     }
-    const ROLE = CURRENT_USER.role;
+    if (!CURRENT_USER.role) {
+      toast(`User profile incomplete: missing role.`, "error");
+      return;
+    }
 
-    /* ── Resolve firm for this user ── */
+    const ROLE = CURRENT_USER.role;
     const CURRENT_FIRM = CURRENT_USER.firmId
       ? db.firms.find(f => f.id === CURRENT_USER.firmId) || null
       : null;
     const FIRM_NAME = CURRENT_FIRM ? CURRENT_FIRM.name : "Independent";
 
-    /* ── Resolve current case ── */
+    // FIX: Update breadcrumb and case header immediately with the correct CURRENT_CASE_ID
+    const breadcrumb = document.querySelector(".breadcrumb");
+    if (breadcrumb) {
+      breadcrumb.innerHTML = `<a href="documents-main.html" style="color: inherit; text-decoration: none;">Documents</a> > <span>Loading... (${CURRENT_CASE_ID})</span>`;
+    }
+
     const CURRENT_CASE = db.cases.find(c => c.id === CURRENT_CASE_ID);
     if (!CURRENT_CASE) {
       renderAccessDenied(`Case "${CURRENT_CASE_ID}" does not exist.`, "CASE_NOT_FOUND");
@@ -362,18 +411,26 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       return;
     }
 
-    /* ── CROSS-FIRM GUARD ──────────────────────────────────────────
-       Rule: non-client users can only access cases from their own firm.
-       Clients are firmless — they rely solely on explicit caseAccess entries.
-       Exception: a user whose caseAccess explicitly lists this case is
-       granted access even if the firm IDs don't match (e.g. co-counsel).
-    ─────────────────────────────────────────────────────────────── */
+    // FIX: Update case header with actual case title and ID from data
+    if (breadcrumb) {
+      breadcrumb.innerHTML = `<a href="documents-main.html" style="color: inherit; text-decoration: none;">Documents</a> > <span>${CURRENT_CASE.title} (${CURRENT_CASE_ID})</span>`;
+    }
+    const caseTitle = document.querySelector(".case-header h1");
+    if (caseTitle) {
+      caseTitle.innerHTML = `${CURRENT_CASE.title} <span class="status">${CURRENT_CASE.status}</span>`;
+    }
+    // FIX: Update the static case ID paragraph
+    const caseIdParagraph = document.querySelector(".case-header p");
+    if (caseIdParagraph) {
+      caseIdParagraph.innerHTML = `Case ID: <strong>${CURRENT_CASE_ID}</strong>`;
+    }
+
+    // Cross-firm guard
     const userHasExplicitCaseAccess = !!(
       CURRENT_USER.caseAccess && CURRENT_USER.caseAccess[CURRENT_CASE_ID]
     );
 
     if (ROLE !== "client") {
-      // Non-clients must either belong to the case's firm OR have explicit access
       const caseFromOtherFirm = CURRENT_FIRM && CURRENT_CASE.firmId !== CURRENT_FIRM.id;
       if (caseFromOtherFirm && !userHasExplicitCaseAccess) {
         renderAccessDenied(
@@ -385,34 +442,42 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       }
     }
 
-    /* ── Check user has per-document access to this case ── */
-    const userCaseDocIds = userHasExplicitCaseAccess
-      ? CURRENT_USER.caseAccess[CURRENT_CASE_ID]
-      : null;
+    // Resolve document access
+    let userCaseDocIds = null;
 
-    if (!userCaseDocIds || userCaseDocIds.length === 0) {
+    if (ROLE === "lawfirm_admin" && CURRENT_FIRM && CURRENT_CASE.firmId === CURRENT_FIRM.id) {
+      userCaseDocIds = db.documents
+        .filter(d => d.caseId === CURRENT_CASE_ID)
+        .map(d => d.id);
+    } else if (userHasExplicitCaseAccess) {
+      userCaseDocIds = CURRENT_USER.caseAccess[CURRENT_CASE_ID];
+    } else if (ROLE === "client") {
+      // FIX: clients without explicit caseAccess entry still get access denied properly
       renderAccessDenied(
-        `You do not have document access to ${CURRENT_CASE_ID}.`,
+        `You do not have document access to ${CURRENT_CASE_ID}. Contact your firm administrator to request access.`,
         "NO_DOC_ACCESS"
       );
       renderRoleBadge(CURRENT_USER, ROLE, FIRM_NAME);
       return;
     }
 
-    /* ── Write active email to LS for activity-log.html ── */
-    localStorage.setItem("lexflow_active_email", CURRENT_USER_EMAIL);
-    localStorage.setItem("lexflow_active_firm",  CURRENT_USER.firmId || "");
+    if (!userCaseDocIds || userCaseDocIds.length === 0) {
+      renderAccessDenied(
+        `You do not have document access to ${CURRENT_CASE_ID}. Contact your firm administrator to request access.`,
+        "NO_DOC_ACCESS"
+      );
+      renderRoleBadge(CURRENT_USER, ROLE, FIRM_NAME);
+      return;
+    }
 
-    /* ── Per-user uploaded doc IDs ── */
+    localStorage.setItem("lexflow_active_email", CURRENT_USER_EMAIL);
+    localStorage.setItem("lexflow_active_firm", CURRENT_USER.firmId || "");
+
     const LS_USER_UPLOADS = `lexflow_user_uploads_${CURRENT_USER.id}`;
     let userUploadIds = new Set(lsGet(LS_USER_UPLOADS, []));
 
-    /* ════════════════════════════════════════
-       BUILD DOC LIST FOR CURRENT USER + CASE
-    ════════════════════════════════════════ */
     const allowedIds = new Set(userCaseDocIds);
 
-    // Master docs: belong to this case AND within this user's allowed ID list AND not deleted
     let docsData = db.documents
       .filter(d =>
         d.caseId === CURRENT_CASE_ID &&
@@ -421,7 +486,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       )
       .map(d => updatedMap[d.id] ? { ...d, ...updatedMap[d.id] } : { ...d });
 
-    // Session-uploaded docs: same case, uploaded by this user (or in their upload ID set), not deleted
+    // FIX: Also include uploaded docs for THIS case (not just CASE-45)
     const extraUploads = uploadedDocs.filter(d =>
       d.caseId === CURRENT_CASE_ID &&
       !deletedIds.has(d.id) &&
@@ -431,35 +496,29 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     const seen = new Set(docsData.map(d => d.id));
     extraUploads.forEach(d => { if (!seen.has(d.id)) { docsData.push(d); seen.add(d.id); } });
 
-    /* ════════════════════════════════════════
-       PERMISSIONS
-    ════════════════════════════════════════ */
     const PERMS = {
-      canView:     true,
+      canView: true,
       canDownload: true,
-      canUpload:   ["client", "lawyer", "lawfirm_admin"].includes(ROLE),
-      canUpdate:   ["lawyer", "lawfirm_admin", "intern"].includes(ROLE),
-      canDelete:   ["lawyer", "lawfirm_admin"].includes(ROLE),
+      canUpload: ["client", "lawyer", "lawfirm_admin"].includes(ROLE),
+      canUpdate: ["lawyer", "lawfirm_admin", "intern"].includes(ROLE),
+      canDelete: ["lawyer", "lawfirm_admin"].includes(ROLE),
     };
 
-    /* ════════════════════════════════════════
-       ACTIVITY LOG HELPERS
-    ════════════════════════════════════════ */
     function logActivity(action, doc) {
       const entry = {
-        id:      "ACT-" + Date.now(),
-        date:    new Date().toISOString(),
-        user:    CURRENT_USER.name,
-        email:   CURRENT_USER.email,
-        role:    ROLE,
-        firmId:  CURRENT_USER.firmId || null,
+        id: "ACT-" + Date.now(),
+        date: new Date().toISOString(),
+        user: CURRENT_USER.name,
+        email: CURRENT_USER.email,
+        role: ROLE,
+        firmId: CURRENT_USER.firmId || null,
         firmName: FIRM_NAME,
-        caseId:  CURRENT_CASE_ID,
+        caseId: CURRENT_CASE_ID,
         action,
-        docId:   doc.id,
+        docId: doc.id,
         docName: doc.name,
         docType: doc.type,
-        access:  doc.access,
+        access: doc.access,
       };
       activityLog.unshift(entry);
       if (activityLog.length > 500) activityLog = activityLog.slice(0, 500);
@@ -467,61 +526,36 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       refreshSidePanelActivity();
     }
 
-    /* ════════════════════════════════════════
-       ROLE BADGE
-    ════════════════════════════════════════ */
     renderRoleBadge(CURRENT_USER, ROLE, FIRM_NAME);
 
-    /* ════════════════════════════════════════
-       DOM REFERENCES
-    ════════════════════════════════════════ */
-    const grid        = document.querySelector(".documents-grid");
+    const grid = document.querySelector(".documents-grid");
     const searchInput = document.querySelector(".search-box input");
-    const typeSelect  = document.querySelector(".toolbar select");
-    const totalEl     = document.querySelector(".total");
-    const viewIcons   = document.querySelectorAll(".view-toggle svg");
-    const filterIcon  = viewIcons[0];
-    const sortIcon    = viewIcons[1];
-    const gridIcon    = viewIcons[2];
-    const listIcon    = viewIcons[3];
-    const uploadBtn   = document.querySelector(".btn-primary");
-    const modal       = document.querySelector(".upload-modal");
+    const typeSelect = document.querySelector(".toolbar select");
+    const totalEl = document.querySelector(".total");
+    const viewIcons = document.querySelectorAll(".view-toggle svg");
+    const filterIcon = viewIcons[0];
+    const sortIcon = viewIcons[1];
+    const gridIcon = viewIcons[2];
+    const listIcon = viewIcons[3];
+    const uploadBtn = document.querySelector(".btn-primary");
+    const modal = document.querySelector(".upload-modal");
 
-    /* ── Defensive DOM checks ── */
     if (!grid || !searchInput || !typeSelect || !totalEl || !uploadBtn || !modal) {
-      console.error("hrtll.js: Required DOM elements missing. Check HTML structure.");
       toast("Page structure error — required elements not found.", "error");
       return;
     }
 
-    /* ── Update breadcrumb & case header with live data ── */
-    const breadcrumb = document.querySelector(".breadcrumb");
-    if (breadcrumb) {
-      breadcrumb.innerHTML = `Documents > <span>${CURRENT_CASE.title} (${CURRENT_CASE_ID})</span>`;
-    }
-    const caseTitle = document.querySelector(".case-header h1");
-    if (caseTitle) {
-      caseTitle.innerHTML = `${CURRENT_CASE.title} <span class="status">${CURRENT_CASE.status}</span>`;
-    }
-    const caseIdEl = document.querySelector(".case-header p strong");
-    if (caseIdEl) caseIdEl.textContent = CURRENT_CASE_ID;
-
-    /* ── Update case meta fields if present ── */
+    // Update case meta fields
     const metaDivs = document.querySelectorAll(".case-meta > div");
     if (metaDivs.length >= 4) {
-      const caseLayer  = db.users.find(u => u.id === CURRENT_CASE.lawyerId);
+      const caseLayer = db.users.find(u => u.id === CURRENT_CASE.lawyerId);
       const caseClient = db.users.find(u => u.id === CURRENT_CASE.clientId);
-      metaDivs[0].innerHTML = `<span>FIRM</span>${FIRM_NAME}`;
+      metaDivs[0].innerHTML = `<span>CLIENT ID</span>${CURRENT_CASE.clientId || "—"}`;
+      metaDivs[1].innerHTML = `<span>CLIENT NAME</span>${caseClient ? caseClient.name : "—"}`;
       metaDivs[2].innerHTML = `<span>LAWYER</span>${caseLayer ? caseLayer.name : "—"}`;
       metaDivs[3].innerHTML = `<span>COURT</span>${CURRENT_CASE.court}`;
-      if (caseClient) {
-        metaDivs[1].innerHTML = `<span>CLIENT NAME</span>${caseClient.name}`;
-      }
     }
 
-    /* ════════════════════════════════════════
-       UI STATE
-    ════════════════════════════════════════ */
     const uiState = {
       view: "grid",
       search: "",
@@ -531,29 +565,26 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     };
     let activeAccess = [];
 
-    /* ════════════════════════════════════════
-       HELPERS
-    ════════════════════════════════════════ */
     function tagClass(type) {
       const map = {
-        "CONTRACT":     "contract",
-        "CASE EVIDENCE":"evidence",
-        "COURT ORDER":  "order",
+        "CONTRACT": "contract",
+        "CASE EVIDENCE": "evidence",
+        "COURT ORDER": "order",
         "CLIENT PROOF": "proof",
-        "AFFIDAVIT":    "affidavit",
-        "REPORT":       "report"
+        "AFFIDAVIT": "affidavit",
+        "REPORT": "report"
       };
       return map[(type || "").toUpperCase()] || "default";
     }
     function tagClassLegacy(type) {
-      const map = { "CONTRACT":"","CASE EVIDENCE":"red","COURT ORDER":"green","CLIENT PROOF":"red" };
+      const map = { "CONTRACT": "", "CASE EVIDENCE": "red", "COURT ORDER": "green", "CLIENT PROOF": "red" };
       return map[(type || "").toUpperCase()] ?? "";
     }
     function fmtDate(iso) {
       if (!iso) return "—";
       const d = new Date(iso);
       if (isNaN(d)) return iso;
-      return d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     }
     function isImage(name) {
       return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name || "");
@@ -571,18 +602,46 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       return "DOC-" + (maxId + 1);
     }
 
-    /* ════════════════════════════════════════
-       POPULATE TYPE SELECT
-    ════════════════════════════════════════ */
+    function syncSharedDocumentsIndex() {
+      const baseDocs = db.documents
+        .filter(d => !deletedIds.has(d.id))
+        .map(d => updatedMap[d.id] ? { ...d, ...updatedMap[d.id] } : { ...d });
+
+      const uploadDocs = uploadedDocs
+        .filter(d => !deletedIds.has(d.id))
+        .map(d => updatedMap[d.id] ? { ...d, ...updatedMap[d.id] } : { ...d });
+
+      const merged = [...baseDocs];
+      const seen = new Set(merged.map(d => d.id));
+      uploadDocs.forEach((d) => {
+        if (!seen.has(d.id)) { merged.push(d); seen.add(d.id); }
+      });
+
+      const normalized = merged.map((d) => {
+        const caseMeta = db.cases.find((c) => c.id === d.caseId) || {};
+        return {
+          id: d.id,
+          caseId: d.caseId || "",
+          caseCnr: d.caseCnr || d.caseId || "",
+          caseTitle: caseMeta.title || d.caseTitle || "",
+          court: caseMeta.court || d.court || "",
+          name: d.name,
+          type: d.type,
+          date: d.date,
+          status: d.status || "Reviewing",
+          access: d.access || "PRIVATE",
+        };
+      });
+
+      lsSet(LS_DOCS_INDEX, normalized);
+    }
+
     function refreshTypeSelect() {
       const allTypes = [...new Set(docsData.map(d => d.type).filter(Boolean))].sort();
       typeSelect.innerHTML = `<option>All Types</option>` +
         allTypes.map(t => `<option>${sanitize(t)}</option>`).join("");
     }
 
-    /* ════════════════════════════════════════
-       BUILD CARD / ROW
-    ════════════════════════════════════════ */
     function buildCard(d) {
       const el = document.createElement("div");
       el.className = "doc-card";
@@ -643,8 +702,8 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       el.querySelectorAll("[data-action]").forEach(btn => {
         btn.addEventListener("click", () => {
           switch (btn.dataset.action) {
-            case "view":     openViewModal(d);     break;
-            case "download": downloadDoc(d);       break;
+            case "view": openViewModal(d); break;
+            case "download": downloadDoc(d); break;
             case "update":
               if (!PERMS.canUpdate) { toast("You do not have permission to update documents.", "error"); return; }
               openUpdateModal(d);
@@ -658,9 +717,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       });
     }
 
-    /* ════════════════════════════════════════
-       VIEW MODAL
-    ════════════════════════════════════════ */
+    // View Modal
     const viewOverlay = document.createElement("div");
     viewOverlay.className = "view-modal-overlay";
     viewOverlay.innerHTML = `
@@ -676,7 +733,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
         </div>
       </div>`;
     document.body.appendChild(viewOverlay);
-
     viewOverlay.querySelector(".view-modal-close").addEventListener("click", closeViewModal);
     viewOverlay.querySelector(".vm-close-btn").addEventListener("click", closeViewModal);
     viewOverlay.addEventListener("click", e => { if (e.target === viewOverlay) closeViewModal(); });
@@ -714,9 +770,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       _currentViewDoc = null;
     }
 
-    /* ════════════════════════════════════════
-       DOWNLOAD
-    ════════════════════════════════════════ */
     function downloadDoc(d) {
       const src = d.blobUrl || d.filePath;
       if (!src) { toast("No file available for download.", "warn"); return; }
@@ -730,9 +783,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       logActivity("downloaded", d);
     }
 
-    /* ════════════════════════════════════════
-       DELETE
-    ════════════════════════════════════════ */
+    // Delete Modal
     const delOverlay = document.createElement("div");
     delOverlay.className = "del-confirm-overlay";
     delOverlay.innerHTML = `
@@ -746,7 +797,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
         </div>
       </div>`;
     document.body.appendChild(delOverlay);
-
     delOverlay.querySelector(".cancel-btn").addEventListener("click", () => {
       delOverlay.classList.remove("active");
       _pendingDeleteId = null;
@@ -757,23 +807,18 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       const idx = docsData.findIndex(d => d.id === _pendingDeleteId);
       if (idx !== -1) {
         const doc = docsData[idx];
-
-        /* ── CROSS-FIRM DELETE GUARD: double-check at action time ── */
         if (!PERMS.canDelete) {
           toast("You do not have permission to delete documents.", "error");
           delOverlay.classList.remove("active"); _pendingDeleteId = null; return;
         }
-
         deletedIds.add(doc.id);
         lsSet(LS_DELETED, [...deletedIds]);
         uploadedDocs = uploadedDocs.filter(d => d.id !== doc.id);
         lsSet(LS_UPLOADS, uploadedDocs);
-
-        // Revoke blob URL to free memory
-        if (doc.blobUrl) { try { URL.revokeObjectURL(doc.blobUrl); } catch(_) {} }
-
+        if (doc.blobUrl) { try { URL.revokeObjectURL(doc.blobUrl); } catch (_) { } }
         logActivity("deleted", doc);
         docsData.splice(idx, 1);
+        syncSharedDocumentsIndex();
         render();
         toast(`🗑 ${doc.name} deleted`);
       }
@@ -787,9 +832,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       delOverlay.classList.add("active");
     }
 
-    /* ════════════════════════════════════════
-       UPDATE MODAL
-    ════════════════════════════════════════ */
+    // Update Modal
     const updateOverlay = document.createElement("div");
     updateOverlay.className = "update-modal-overlay";
     updateOverlay.innerHTML = `
@@ -831,7 +874,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       </div>`;
     document.body.appendChild(updateOverlay);
 
-    const updDZ      = updateOverlay.querySelector("#update-dz");
+    const updDZ = updateOverlay.querySelector("#update-dz");
     const updPreview = updateOverlay.querySelector(".upd-file-preview");
     let _updDoc = null, _updFile = null;
 
@@ -839,7 +882,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       .forEach(btn => btn.addEventListener("click", closeUpdateModal));
     updateOverlay.addEventListener("click", e => { if (e.target === updateOverlay) closeUpdateModal(); });
 
-    updDZ.addEventListener("dragover",  e => { e.preventDefault(); updDZ.classList.add("drag-over"); });
+    updDZ.addEventListener("dragover", e => { e.preventDefault(); updDZ.classList.add("drag-over"); });
     updDZ.addEventListener("dragleave", () => updDZ.classList.remove("drag-over"));
     updDZ.addEventListener("drop", e => {
       e.preventDefault(); updDZ.classList.remove("drag-over");
@@ -853,11 +896,10 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     });
 
     function setUpdFile(file) {
-      // 10 MB guard
-      if (file.size > 10 * 1024 * 1024) {
-        toast("File exceeds 10 MB limit.", "error"); return;
-      }
+      if (file.size > 10 * 1024 * 1024) { toast("File exceeds 10 MB limit.", "error"); return; }
       _updFile = file;
+      updDZ.style.borderColor = "";
+      updDZ.style.background = "";
       updPreview.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f1f5f9;border-radius:8px;font-size:0.8rem;";
       updPreview.innerHTML = `
         <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📄 ${sanitize(file.name)}</span>
@@ -869,12 +911,24 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       });
     }
 
+    // function openUpdateModal(d) {
+    //   _updDoc = d; _updFile = null;
+    //   updPreview.style.display = "none"; updPreview.innerHTML = "";
+    //   updateOverlay.querySelector(".upd-name").value = d.name;
+    //   updateOverlay.querySelector(".upd-access").value = d.access || "PRIVATE";
+    //   updateOverlay.querySelector(".upd-version-label").textContent = `v${d.version ?? 1}`;
+    //   updateOverlay.classList.add("active");
+    //   document.body.style.overflow = "hidden";
+    // }
+
     function openUpdateModal(d) {
       _updDoc = d; _updFile = null;
       updPreview.style.display = "none"; updPreview.innerHTML = "";
       updateOverlay.querySelector(".upd-name").value = d.name;
       updateOverlay.querySelector(".upd-access").value = d.access || "PRIVATE";
       updateOverlay.querySelector(".upd-version-label").textContent = `v${d.version ?? 1}`;
+      // Reset dropzone error state
+      updDZ.style.borderColor = "";
       updateOverlay.classList.add("active");
       document.body.style.overflow = "hidden";
     }
@@ -884,63 +938,52 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       document.body.style.overflow = "";
       _updDoc = _updFile = null;
     }
-
     updateOverlay.querySelector(".upd-save").addEventListener("click", () => {
       if (!_updDoc) return;
-
-      /* Re-check permission at action time */
-      if (!PERMS.canUpdate) {
-        toast("You do not have permission to update documents.", "error"); return;
-      }
-
-      const newName   = updateOverlay.querySelector(".upd-name").value.trim();
+      if (!PERMS.canUpdate) { toast("You do not have permission to update documents.", "error"); return; }
+      const newName = updateOverlay.querySelector(".upd-name").value.trim();
       const newAccess = updateOverlay.querySelector(".upd-access").value;
       if (!newName) { toast("Document name cannot be empty.", "error"); return; }
-      if (newName.length > 255) { toast("Document name is too long (max 255 chars).", "error"); return; }
 
-      // Revoke old blob if replacing file
-      if (_updFile && _updDoc.blobUrl) {
-        try { URL.revokeObjectURL(_updDoc.blobUrl); } catch(_) {}
+      // FILE IS NOW REQUIRED
+      if (!_updFile) {
+        updDZ.style.borderColor = "#be123c";
+        updDZ.style.background = "#fff1f2";
+        toast("Please upload a new file to proceed.", "error");
+        return;
       }
 
+      if (_updDoc.blobUrl) { try { URL.revokeObjectURL(_updDoc.blobUrl); } catch (_) { } }
       const patch = {
-        name:   newName,
+        name: newName,
         access: newAccess,
-        date:   new Date().toISOString().split("T")[0]
+        date: new Date().toISOString().split("T")[0],
+        blobUrl: URL.createObjectURL(_updFile),
+        fileType: (_updFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3),
+        version: (_updDoc.version || 1) + 1,
       };
-      if (_updFile) {
-        _updDoc.blobUrl  = URL.createObjectURL(_updFile);
-        _updDoc.fileType = (_updFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3);
-        patch.version    = (_updDoc.version || 1) + 1;
-      }
       Object.assign(_updDoc, patch);
-
       updatedMap[_updDoc.id] = { ...(updatedMap[_updDoc.id] || {}), ...patch };
       lsSet(LS_UPDATES, updatedMap);
-
       const ui = uploadedDocs.findIndex(d => d.id === _updDoc.id);
       if (ui !== -1) { uploadedDocs[ui] = { ...uploadedDocs[ui], ...patch }; lsSet(LS_UPLOADS, uploadedDocs); }
-
       logActivity("updated", _updDoc);
+      syncSharedDocumentsIndex();
       closeUpdateModal();
       render();
       toast(`✓ ${_updDoc.name} updated to v${_updDoc.version ?? 1}`);
     });
-
-    /* ════════════════════════════════════════
-       SORT DROPDOWN
-    ════════════════════════════════════════ */
+    // Sort Dropdown
     const sortOpts = [
-      { key:"date",     label:"Date" },
-      { key:"name",     label:"File Name" },
-      { key:"uploader", label:"Uploader" },
+      { key: "name", label: "File Name" },
+      { key: "uploader", label: "Uploader" },
     ];
     const sortDD = document.createElement("div");
     sortDD.className = "lex-dd";
     sortDD.innerHTML = `
       <div class="dd-head">Sort by</div>
       ${sortOpts.map(o =>
-        `<div class="dd-row sort-opt ${uiState.sortKey === o.key ? "on" : ""}" data-key="${o.key}">
+      `<div class="dd-row sort-opt ${uiState.sortKey === o.key ? "on" : ""}" data-key="${o.key}">
           ${o.label}<span class="dd-arrow">${uiState.sortKey === o.key ? (uiState.sortDir === "asc" ? "↑" : "↓") : ""}</span>
          </div>`).join("")}`;
     document.body.appendChild(sortDD);
@@ -960,16 +1003,14 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       });
     });
 
-    /* ════════════════════════════════════════
-       FILTER DROPDOWN
-    ════════════════════════════════════════ */
+    // Filter Dropdown
     const filterDD = document.createElement("div");
     filterDD.className = "lex-dd";
     filterDD.innerHTML = `
       <div class="dd-head">Filter by Access</div>
-      ${["PRIVATE","SHARED"].map(s =>
-        `<label class="dd-row"><input type="checkbox" class="fcb" value="${s}"> ${s}</label>`
-      ).join("")}
+      ${["PRIVATE", "SHARED"].map(s =>
+      `<label class="dd-row"><input type="checkbox" class="fcb" value="${s}"> ${s}</label>`
+    ).join("")}
       <div class="dd-foot">
         <button class="dd-clear">Clear</button>
         <button class="dd-apply">Apply</button>
@@ -989,27 +1030,15 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       closeAll();
     });
 
-    /* ════════════════════════════════════════
-       MAIN RENDER
-    ════════════════════════════════════════ */
     function render() {
       let data = [...docsData];
-
-      /* ── INTERN RULE ─────────────────────────────────────────────
-         Interns only see SHARED docs. This is enforced here in the
-         render layer, NOT during data load — so the full list is
-         always available if an intern's role changes mid-session
-         without data corruption.
-      ─────────────────────────────────────────────────────────────*/
       if (ROLE === "intern") data = data.filter(d => d.access === "SHARED");
-
       const q = uiState.search.toLowerCase().trim();
       if (q) data = data.filter(d =>
         (d.name || "").toLowerCase().includes(q) ||
-        (d.id   || "").toLowerCase().includes(q) ||
+        (d.id || "").toLowerCase().includes(q) ||
         (d.type || "").toLowerCase().includes(q)
       );
-
       if (uiState.typeFilter !== "All Types") data = data.filter(d => d.type === uiState.typeFilter);
       if (activeAccess.length) data = data.filter(d => activeAccess.includes(d.access));
 
@@ -1023,7 +1052,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
           vb = (b[uiState.sortKey] || "").toLowerCase();
         }
         if (va < vb) return uiState.sortDir === "asc" ? -1 : 1;
-        if (va > vb) return uiState.sortDir === "asc" ?  1 : -1;
+        if (va > vb) return uiState.sortDir === "asc" ? 1 : -1;
         return 0;
       });
 
@@ -1050,9 +1079,6 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       data.forEach(d => grid.appendChild(uiState.view === "grid" ? buildCard(d) : buildRow(d)));
     }
 
-    /* ════════════════════════════════════════
-       DROPDOWN HELPERS
-    ════════════════════════════════════════ */
     function openDD(dd, anchor) {
       const isOpen = dd.classList.contains("open");
       closeAll();
@@ -1060,7 +1086,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       dd.classList.add("open");
       requestAnimationFrame(() => {
         const rect = anchor.getBoundingClientRect();
-        dd.style.top  = (rect.bottom + window.scrollY + 8) + "px";
+        dd.style.top = (rect.bottom + window.scrollY + 8) + "px";
         dd.style.left = Math.max(4, rect.right + window.scrollX - dd.offsetWidth) + "px";
       });
     }
@@ -1069,28 +1095,21 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       filterDD.classList.remove("open");
     }
 
-    /* ════════════════════════════════════════
-       VIEW TOGGLE
-    ════════════════════════════════════════ */
     function syncViewIcons() {
       gridIcon.style.fill = uiState.view === "grid" ? "var(--brand-accent)" : "var(--text-secondary)";
       listIcon.style.fill = uiState.view === "list" ? "var(--brand-accent)" : "var(--text-secondary)";
     }
 
-    /* ════════════════════════════════════════
-       EVENT BINDING
-    ════════════════════════════════════════ */
     searchInput.addEventListener("input", e => { uiState.search = e.target.value; render(); });
     typeSelect.addEventListener("change", e => { uiState.typeFilter = e.target.value; render(); });
     if (filterIcon) filterIcon.addEventListener("click", e => { e.stopPropagation(); openDD(filterDD, filterIcon); });
-    if (sortIcon)   sortIcon.addEventListener("click",   e => { e.stopPropagation(); openDD(sortDD,   sortIcon);   });
-    if (gridIcon)   gridIcon.addEventListener("click", () => { uiState.view = "grid"; render(); syncViewIcons(); });
-    if (listIcon)   listIcon.addEventListener("click", () => { uiState.view = "list"; render(); syncViewIcons(); });
-    sortDD.addEventListener("click",   e => e.stopPropagation());
+    if (sortIcon) sortIcon.addEventListener("click", e => { e.stopPropagation(); openDD(sortDD, sortIcon); });
+    if (gridIcon) gridIcon.addEventListener("click", () => { uiState.view = "grid"; render(); syncViewIcons(); });
+    if (listIcon) listIcon.addEventListener("click", () => { uiState.view = "list"; render(); syncViewIcons(); });
+    sortDD.addEventListener("click", e => e.stopPropagation());
     filterDD.addEventListener("click", e => e.stopPropagation());
     document.addEventListener("click", closeAll);
 
-    // Escape key closes all modals
     document.addEventListener("keydown", e => {
       if (e.key !== "Escape") return;
       closeViewModal();
@@ -1101,9 +1120,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       closeAll();
     });
 
-    /* ════════════════════════════════════════
-       UPLOAD MODAL
-    ════════════════════════════════════════ */
+    // ─── UPLOAD MODAL ───────────────────────────────────────────
     let selectedFile = null;
 
     if (!PERMS.canUpload) {
@@ -1115,26 +1132,66 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       uploadBtn.addEventListener("click", openModal);
     }
 
-    const closeBtn  = modal.querySelector(".upload-modal__close");
+    const closeBtn = modal.querySelector(".upload-modal__close");
     const cancelBtn = modal.querySelector(".upload-modal__btn--ghost");
     const submitBtn = modal.querySelector(".upload-modal__btn--primary");
-    const dropzone  = modal.querySelector(".upload-modal__dropzone");
-    const dropText  = modal.querySelector(".upload-modal__drop-text");
+    const dropzone = modal.querySelector(".upload-modal__dropzone");
+    const dropText = modal.querySelector(".upload-modal__drop-text");
 
-    // Pre-fill case ID in the upload modal
-    const caseIdInputs = modal.querySelectorAll('input[type="text"]');
-    if (caseIdInputs[1]) caseIdInputs[1].value = CURRENT_CASE_ID;
-    if (caseIdInputs[1]) caseIdInputs[1].readOnly = true; // Case ID should not be editable
+    // FIX: Set read-only fields and update with current case/user data
+    const caseClientEl = db.users.find(u => u.id === CURRENT_CASE.clientId);
+    const clientNameInModal = modal.querySelectorAll('input[type="text"]')[0];
+    const caseIdInModal = modal.querySelectorAll('input[type="text"]')[1];
 
-    function openModal()  { modal.classList.add("active");    document.body.style.overflow = "hidden"; }
+    // FIX: Populate with dynamic data from current case
+    if (clientNameInModal) {
+      clientNameInModal.value = caseClientEl ? caseClientEl.name : (CURRENT_USER.role === 'client' ? CURRENT_USER.name : '');
+      clientNameInModal.readOnly = true;
+    }
+    if (caseIdInModal) {
+      caseIdInModal.value = CURRENT_CASE_ID;
+      caseIdInModal.readOnly = true;
+    }
+
+    // FIX: Make confidential level select read-only (disabled) — only type and description remain editable
+    const allSelects = modal.querySelectorAll("select");
+    // allSelects[0] = Document Type (editable)
+    // allSelects[1] = Confidential Level (read-only, show PRIVATE always)
+    if (allSelects[1]) {
+      allSelects[1].disabled = true;
+    }
+
+    // Add "Uploaded By" display (read-only)
+    // Find description field and inject uploader info above it
+    const descField = modal.querySelector(".upload-modal__textarea");
+    if (descField && descField.parentElement) {
+      const uploaderInfo = document.createElement("div");
+      uploaderInfo.className = "upload-modal__field upload-modal__field--full";
+      uploaderInfo.innerHTML = `
+        <label class="upload-modal__label">Uploaded By</label>
+        <div class="upload-modal__input-wrapper">
+          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+            <path fill="none" d="M0 0h24v24H0V0z"></path>
+            <path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m0 10c2.7 0 5.8 1.29 6 2H6c.23-.72 3.31-2 6-2m0-12C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+          </svg>
+          <input class="upload-modal__input" type="text" value="${sanitize(CURRENT_USER.name)} (${sanitize(ROLE)})" readonly>
+        </div>`;
+      const bodyEl = modal.querySelector(".upload-modal__body");
+      const descParent = descField.closest(".upload-modal__field");
+      if (bodyEl && descParent) {
+        bodyEl.insertBefore(uploaderInfo, descParent);
+      }
+    }
+
+    function openModal() { modal.classList.add("active"); document.body.style.overflow = "hidden"; }
     function closeModal() { modal.classList.remove("active"); document.body.style.overflow = ""; resetFile(); }
 
-    if (closeBtn)  closeBtn.addEventListener("click",  closeModal);
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
     if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
     if (dropzone) {
-      dropzone.addEventListener("dragover",  e => { e.preventDefault(); dropzone.classList.add("drag-over"); });
+      dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("drag-over"); });
       dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
       dropzone.addEventListener("drop", e => {
         e.preventDefault(); dropzone.classList.remove("drag-over");
@@ -1149,10 +1206,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     }
 
     function handleFile(file) {
-      // 10 MB guard
-      if (file.size > 10 * 1024 * 1024) {
-        toast("File exceeds 10 MB limit.", "error"); return;
-      }
+      if (file.size > 10 * 1024 * 1024) { toast("File exceeds 10 MB limit.", "error"); return; }
       selectedFile = file;
       const existing = dropzone ? dropzone.querySelector(".file-preview") : null;
       if (existing) existing.remove();
@@ -1175,40 +1229,32 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
 
     function resetFile() {
       selectedFile = null;
-      if (dropzone) {
-        const p = dropzone.querySelector(".file-preview");
-        if (p) p.remove();
-      }
+      if (dropzone) { const p = dropzone.querySelector(".file-preview"); if (p) p.remove(); }
       if (dropText) dropText.textContent = "Drag & Drop Files Here or Click to Upload";
     }
 
     if (submitBtn) {
       submitBtn.addEventListener("click", () => {
-        const allTextInputs   = modal.querySelectorAll('input[type="text"]');
-        const clientNameInput = allTextInputs[0];
-        const clientName      = clientNameInput ? clientNameInput.value.trim() : "";
-        if (!clientName)   { toast("Please fill in the client name.", "error");   return; }
-        if (!selectedFile) { toast("Please select a file to upload.", "error");   return; }
+        if (!selectedFile) { toast("Please select a file to upload.", "error"); return; }
 
-        const allSelects  = modal.querySelectorAll("select");
-        const typeVal     = allSelects[0] ? allSelects[0].value : "CONTRACT";
-        const uploaderVal = (allTextInputs[2] ? allTextInputs[2].value.trim() : "") || CURRENT_USER.name;
+        const typeVal = allSelects[0] ? allSelects[0].value : "CONTRACT";
 
         const newDocMeta = {
-          id:            nextDocId(),
-          name:          selectedFile.name,
-          filePath:      null,
-          blobUrl:       null,
-          caseId:        CURRENT_CASE_ID,
-          type:          typeVal.toUpperCase(),
-          fileType:      (selectedFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3),
-          uploader:      uploaderVal,
+          id: nextDocId(),
+          name: selectedFile.name,
+          filePath: null,
+          blobUrl: null,
+          // FIX: Use CURRENT_CASE_ID so uploads work for any case, not just CASE-45
+          caseId: CURRENT_CASE_ID,
+          type: typeVal.toUpperCase(),
+          fileType: (selectedFile.name.split(".").pop() || "BIN").toUpperCase().slice(0, 3),
+          uploader: CURRENT_USER.name,
           uploaderEmail: CURRENT_USER.email,
-          firmId:        CURRENT_USER.firmId || null,
-          date:          new Date().toISOString().split("T")[0],
-          version:       1,
-          access:        "PRIVATE",
-          iconColor:     "green",
+          firmId: CURRENT_USER.firmId || null,
+          date: new Date().toISOString().split("T")[0],
+          version: 1,
+          access: "PRIVATE",
+          iconColor: "green",
         };
 
         uploadedDocs.unshift(newDocMeta);
@@ -1221,6 +1267,7 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
         docsData.unshift(sessionDoc);
 
         logActivity("uploaded", sessionDoc);
+        syncSharedDocumentsIndex();
 
         closeModal();
         refreshTypeSelect();
@@ -1229,59 +1276,56 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       });
     }
 
-    /* ════════════════════════════════════════
-       ACTIVITY SIDE PANEL (live update)
-    ════════════════════════════════════════ */
+    // FIX: Activity side panel — dynamic, filtered by current case
     function refreshSidePanelActivity() {
       const cardEl = document.querySelector(".card");
       if (!cardEl) return;
 
+      // Remove all existing .activity elements
       cardEl.querySelectorAll(".activity").forEach(el => el.remove());
 
       const insertBefore = cardEl.querySelector(".btn-outline");
 
-      // Filter activity for this case AND this firm only
+      // Filter activity for THIS case only
       const latest = activityLog.filter(e =>
-        (!e.caseId || e.caseId === CURRENT_CASE_ID) &&
+        e.caseId === CURRENT_CASE_ID &&
         (!e.firmId || !CURRENT_USER.firmId || e.firmId === CURRENT_USER.firmId)
       ).slice(0, 2);
 
-      latest.forEach(entry => {
+      if (latest.length === 0) {
         const div = document.createElement("div");
         div.className = "activity";
-        div.innerHTML = `
-          <p><strong>${sanitize(entry.user)}</strong> ${sanitize(entry.action)} <em>${sanitize(entry.docName)}</em></p>
-          <span>${fmtDate(entry.date)}</span>`;
-        cardEl.insertBefore(div, insertBefore);
-      });
-
-      if (latest.length === 0 && insertBefore) {
-        const div = document.createElement("div");
-        div.className = "activity";
-        div.innerHTML = `<p style="color:var(--text-secondary);font-size:0.8rem;">No activity yet.</p><span></span>`;
-        cardEl.insertBefore(div, insertBefore);
+        div.innerHTML = `<p style="color:var(--text-secondary);font-size:0.8rem;">No activity yet for this case.</p><span></span>`;
+        if (insertBefore) cardEl.insertBefore(div, insertBefore);
+        else cardEl.appendChild(div);
+      } else {
+        latest.forEach(entry => {
+          const div = document.createElement("div");
+          div.className = "activity";
+          div.innerHTML = `
+            <p><strong>${sanitize(entry.user)}</strong> ${sanitize(entry.action)} <em>${sanitize(entry.docName)}</em></p>
+            <span>${fmtDate(entry.date)}</span>`;
+          if (insertBefore) cardEl.insertBefore(div, insertBefore);
+          else cardEl.appendChild(div);
+        });
       }
 
-      // Clients cannot see "View All Activity"
+      // FIX: Hide "View All Activity" for clients
       if (ROLE === "client") {
         const viewAllBtn = cardEl.querySelector(".btn-outline");
         if (viewAllBtn) viewAllBtn.style.display = "none";
       }
     }
 
-    /* ════════════════════════════════════════
-       BOOT
-    ════════════════════════════════════════ */
+    // Boot
     refreshTypeSelect();
     syncViewIcons();
+    syncSharedDocumentsIndex();
     render();
     refreshSidePanelActivity();
 
   } // end init()
 
-  /* ════════════════════════════════════════
-     ACCESS DENIED RENDER (before init body)
-  ════════════════════════════════════════ */
   function renderAccessDenied(reason, code) {
     const grid = document.querySelector(".documents-grid");
     if (grid) {
@@ -1294,17 +1338,14 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
     }
   }
 
-  /* ════════════════════════════════════════
-     ROLE BADGE (called before/after init)
-  ════════════════════════════════════════ */
   function renderRoleBadge(user, role, firmName) {
     const existing = document.getElementById("lex-role-badge");
     if (existing) existing.remove();
     const roleColors = {
-      lawyer:        { bg:"#eff6ff", color:"#1d4ed8", border:"#bfdbfe" },
-      intern:        { bg:"#f1f5f9", color:"#475569", border:"#cbd5e1" },
-      client:        { bg:"#fefce8", color:"#854d0e", border:"#fde68a" },
-      lawfirm_admin: { bg:"#f0fdf4", color:"#166534", border:"#86efac" },
+      lawyer: { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+      intern: { bg: "#f1f5f9", color: "#475569", border: "#cbd5e1" },
+      client: { bg: "#fefce8", color: "#854d0e", border: "#fde68a" },
+      lawfirm_admin: { bg: "#f0fdf4", color: "#166534", border: "#86efac" },
     };
     const rc = roleColors[role] || roleColors.lawyer;
     const badge = document.createElement("div");
@@ -1319,14 +1360,11 @@ const CURRENT_CASE_ID    = localStorage.getItem('caseId') || 'CASE-45';
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     `;
     const firm = firmName ? ` · ${firmName}` : "";
-    badge.textContent = `👤 ${user.name} · ${role.replace("_"," ").toUpperCase()}${firm} · ${CURRENT_CASE_ID}`;
+    badge.textContent = `👤 ${user.name} · ${role.replace("_", " ").toUpperCase()}${firm} · ${CURRENT_CASE_ID}`;
     badge.title = badge.textContent;
     document.body.appendChild(badge);
   }
 
-  /* ════════════════════════════════════════
-     TOAST (module-level, available before init)
-  ════════════════════════════════════════ */
   function toast(msg, type = "success") {
     const t = document.createElement("div");
     t.className = `lex-toast ${type}`;
