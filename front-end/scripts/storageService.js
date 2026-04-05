@@ -19,6 +19,7 @@ const StorageService = (() => {
   }
 
   function _read(key) {
+    if (key === 'lawFirms') key = 'lexflow_law_firms';
     try {
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : [];
@@ -28,6 +29,7 @@ const StorageService = (() => {
   }
 
   function _write(key, arr) {
+    if (key === 'lawFirms') key = 'lexflow_law_firms';
     localStorage.setItem(key, JSON.stringify(arr));
     // Intentionally keep two keys:
     // - users: StorageService/Auth workflows
@@ -46,7 +48,8 @@ const StorageService = (() => {
     },
 
     getById(key, id) {
-      return _read(key).find(item => item.id === id);
+      if (key === 'lawFirms') key = 'lexflow_law_firms';
+      return _read(key).find(item => String(item.id) === String(id));
     },
 
     create(key, data) {
@@ -62,8 +65,9 @@ const StorageService = (() => {
     },
 
     update(key, id, newData) {
+      if (key === 'lawFirms') key = 'lexflow_law_firms';
       const collection = _read(key);
-      const idx = collection.findIndex(item => item.id === id);
+      const idx = collection.findIndex(item => String(item.id) === String(id));
       if (idx === -1) return null;
 
       collection[idx] = { ...collection[idx], ...newData };
@@ -72,8 +76,9 @@ const StorageService = (() => {
     },
 
     remove(key, id) {
+      if (key === 'lawFirms') key = 'lexflow_law_firms';
       const collection = _read(key);
-      const filtered = collection.filter(item => item.id !== id);
+      const filtered = collection.filter(item => String(item.id) !== String(id));
       if (filtered.length === collection.length) return false;
 
       _write(key, filtered);

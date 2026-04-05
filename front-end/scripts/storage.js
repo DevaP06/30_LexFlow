@@ -43,14 +43,19 @@ async function initStorage() {
     if (window._isInitStorageRunning) return;
     window._isInitStorageRunning = true;
     try {
-        if (!localStorage.getItem(STORAGE_KEYS.FIRMS)) {
-            localStorage.setItem(STORAGE_KEYS.FIRMS, '[]');
-            const response = await fetch('../data/law-firms.json');
-            const data = await response.json();
-            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.FIRMS) || '[]');
-            localStorage.setItem(STORAGE_KEYS.FIRMS, JSON.stringify([...data, ...current]));
-            console.log('Firms initialized');
-        }
+        // Initialize Firms - Always attempt to merge default data by ID to ensure consistency
+        const responseFirms = await fetch('../data/law-firms.json');
+        const defaultFirms = await responseFirms.json();
+        const currentFirms = JSON.parse(localStorage.getItem(STORAGE_KEYS.FIRMS) || '[]');
+        
+        // Merge strategy: Keep existing user-added firms, add missing default firms
+        const firmMap = new Map();
+        defaultFirms.forEach(f => firmMap.set(String(f.id), f));
+        currentFirms.forEach(f => firmMap.set(String(f.id), f)); // User data overwrites/appends
+        
+        localStorage.setItem(STORAGE_KEYS.FIRMS, JSON.stringify(Array.from(firmMap.values())));
+        console.log('[Storage] Firms synchronized');
+
         if (!localStorage.getItem(STORAGE_KEYS.CONSULTATIONS)) {
             localStorage.setItem(STORAGE_KEYS.CONSULTATIONS, '[]');
             const response = await fetch('../data/consultations.json');
@@ -90,14 +95,14 @@ async function initStorage() {
 const LexFlowStorage = {
     // ===== FIRMS =====
     getFirms: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.FIRMS) || '[]'),
-    getFirmById: (id) => LexFlowStorage.getFirms().find(f => f.id === id),
+    getFirmById: (id) => LexFlowStorage.getFirms().find(f => String(f.id) === String(id)),
 
     // ===== CONSULTATIONS =====
     getConsultations: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.CONSULTATIONS) || '[]'),
     
     getConsultationById: (id) => {
         const list = LexFlowStorage.getConsultations();
-        return list.find(c => c.id === id);
+        return list.find(c => String(c.id) === String(id));
     },
     
     /**
@@ -182,7 +187,7 @@ const LexFlowStorage = {
     
     getLawyerById: (id) => {
         const list = LexFlowStorage.getLawyers();
-        return list.find(l => l.id === id);
+        return list.find(l => String(l.id) === String(id));
     },
     
     updateLawyer: (id, updates) => {
