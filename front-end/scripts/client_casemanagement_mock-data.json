@@ -36,6 +36,20 @@
       "systemRole": "client"
     },
     {
+      "id": "USR004",
+      "name": "Rahul Sharma",
+      "email": "rahulsharma@example.com",
+      "password": "12345",
+      "role": "client",
+      "phone": "+91 98100 12345",
+      "avatar": "JD",
+      "firmUserId": "LF-001",
+      "accountStatus": "active",
+      "availability": "available",
+      "badgeRole": "client",
+      "systemRole": "client"
+    },
+    {
       "id": "ADM001",
       "name": "Sarah Mitchell",
       "email": "sarah.mitchell@lexflow.in",

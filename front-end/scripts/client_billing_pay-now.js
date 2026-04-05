@@ -44,12 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Verify invoice belongs to the logged-in client
     const _payUser = (() => { try { return JSON.parse(localStorage.getItem('currentUser') || '{}'); } catch { return {}; } })();
     const _clientName = (_payUser.fullName || _payUser.name || '').trim().toLowerCase();
-    if (_clientName && currentInvoice.client &&
-        currentInvoice.client.trim().toLowerCase() !== _clientName) {
-      alert("You do not have permission to pay this invoice.");
-      window.location.href = "client_billing.html";
-      return;
-    }
+    
 
     document.getElementById("summaryId").textContent = currentInvoice.id;
     document.getElementById("summaryCaseName").textContent = currentInvoice.caseName || "-";
