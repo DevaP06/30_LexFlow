@@ -841,9 +841,12 @@
       || localStorage.getItem("userRole")
       || "lawfirm_admin";
 
-    const ACTIVE_NAME = (localUser && localUser.name)
-      || localStorage.getItem("lexflow_active_name")
-      || "Anita Verma";
+    // const ACTIVE_NAME = (localUser && localUser.name)
+    //   || localStorage.getItem("lexflow_active_name")
+    //   || "Anita Verma";
+      const ACTIVE_NAME = (localUser && (localUser.fullName || localUser.name))
+  || localStorage.getItem("lexflow_active_name")
+  || ACTIVE_EMAIL;
 
     const CURRENT_USER = {
       email: ACTIVE_EMAIL,
