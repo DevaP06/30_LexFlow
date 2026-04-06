@@ -207,10 +207,69 @@
         </section>
 
     </main>
+    
+    <!-- ============ CONVERT TO CASE MODAL ============ -->
+    <div class="modal-overlay" id="conversion-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <h2>Convert to Case</h2>
+                    <p>Initialize a new formal case from this consultation.</p>
+                </div>
+                <button class="modal-close" id="close-conversion-modal" type="button" aria-label="Close">&times;</button>
+            </div>
+            <form id="case-conversion-form">
+                <input type="hidden" id="conv-cons-id">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="conv-case-title">Case Title</label>
+                        <input type="text" id="conv-case-title" placeholder="e.g. Sharma vs Union of India" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="conv-cnr">CNR Number</label>
+                        <input type="text" id="conv-cnr" placeholder="Unique Case Number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="conv-case-type">Case Type</label>
+                        <select id="conv-case-type" required>
+                            <option value="">Select Category</option>
+                            <option value="Civil">Civil</option>
+                            <option value="Criminal">Criminal</option>
+                            <option value="Property">Property</option>
+                            <option value="Family">Family</option>
+                            <option value="Corporate">Corporate</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="conv-court">Court</label>
+                        <input type="text" id="conv-court" placeholder="e.g. Delhi High Court" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="conv-opposing">Opposing Party</label>
+                        <input type="text" id="conv-opposing" placeholder="Name of adversary" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="conv-client">Client Name</label>
+                        <input type="text" id="conv-client" readonly style="background: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="conv-lawyer">Assigned Lawyer</label>
+                        <input type="text" id="conv-lawyer" readonly style="background: #f3f4f6; cursor: not-allowed;">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="cancel-conversion">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Case</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ============ SCRIPTS ============ -->
     <script src="../scripts/storage.js"></script>
     <script src="../scripts/storageService.js"></script>
     <script src="../scripts/auth.js"></script>
+    <script src="../scripts/cases-storage.js"></script>
     <script src="../scripts/sidebar-utils.js"></script>
     <script>
         // Auth Guard

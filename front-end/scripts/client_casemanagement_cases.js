@@ -7,7 +7,27 @@ const casesStorage = window.LexFlowCasesStorage;
 async function initCases() {
   try {
     allCases = await casesStorage.getCases();
-    filteredCases = [...allCases];
+    
+    // Get current user for filtering
+    const currentUser = typeof AuthService !== 'undefined' ? AuthService.getCurrentUser() : null;
+    
+    if (currentUser) {
+      const userName = (currentUser.fullName || currentUser.name || '').toLowerCase().trim();
+      const userId = currentUser.id;
+      
+      filteredCases = allCases.filter(c => {
+        const matchesId = userId && c.clientId === userId;
+        const matchesName = userName && c.client && c.client.contact && c.client.contact.toLowerCase().trim() === userName;
+        return matchesId || matchesName;
+      });
+      
+      // If filtering results in 0 cases for a primary demo user (like John Doe), 
+      // we might want to show at least one example, but per requirement, we filter strictly.
+      console.log(`[Cases] Filtered ${filteredCases.length} cases for user: ${currentUser.name}`);
+    } else {
+      filteredCases = [...allCases];
+    }
+    
     renderPage(1);
   } catch (e) {
     console.error("Error loading cases:", e);

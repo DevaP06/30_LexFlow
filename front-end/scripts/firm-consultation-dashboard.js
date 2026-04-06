@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCancel = e.target.closest('.btn-cancel');
         const btnAccept = e.target.closest('.btn-accept');
         const btnReject = e.target.closest('.btn-reject');
+        const btnConvert = e.target.closest('.btn-convert-case');
+        const btnCloseModal = e.target.closest('#close-conversion-modal');
+        const btnCancelConv = e.target.closest('#cancel-conversion');
 
         if (btnJoin) {
             const id = btnJoin.dataset.id;
@@ -34,7 +37,95 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnAccept) {
             handleAccept(btnAccept.dataset.id);
         }
+
+        if (btnConvert) {
+            openConversionModal(btnConvert.dataset.id);
+        }
+
+        if (btnCloseModal || btnCancelConv) {
+            document.getElementById('conversion-modal').classList.remove('active');
+        }
     });
+
+    /**
+     * Handles opening the conversion modal with pre-filled data
+     */
+    function openConversionModal(consId) {
+        const cons = LexFlowStorage.getConsultationById(consId);
+        if (!cons) return;
+
+        const modal = document.getElementById('conversion-modal');
+        const form = document.getElementById('case-conversion-form');
+        
+        // Reset and pre-fill
+        form.reset();
+        document.getElementById('conv-cons-id').value = cons.id;
+        document.getElementById('conv-client').value = cons.clientName;
+        document.getElementById('conv-lawyer').value = cons.lawyerName || 'Unassigned';
+        
+        modal.classList.add('active');
+    }
+
+    // Handle Form Submission
+    const conversionForm = document.getElementById('case-conversion-form');
+    if (conversionForm) {
+        conversionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const consId = document.getElementById('conv-cons-id').value;
+            const cons = LexFlowStorage.getConsultationById(consId);
+            if (!cons) return;
+
+            // Generate Case Data
+            const newCase = {
+                id: 'CASE-' + Date.now(),
+                consId: cons.id, // Linking back to the consultation
+                clientId: cons.clientId || null, // Storing the client's internal ID
+                cnr: document.getElementById('conv-cnr').value,
+                title: document.getElementById('conv-case-title').value,
+                type: document.getElementById('conv-case-type').value,
+                court: document.getElementById('conv-court').value,
+                status: 'Active',
+                filedDate: new Date().toISOString().split('T')[0],
+                progress: 0,
+                lawyerId: cons.lawyerId || 'ADM001', // Fallback to a default if not assigned
+                client: {
+                    contact: cons.clientName,
+                    type: 'Individual',
+                    opposingParty: document.getElementById('conv-opposing').value
+                },
+                team: [
+                    {
+                        id: cons.lawyerId || 'ADM001',
+                        name: cons.lawyerName || ' Sarah Mitchell',
+                        role: 'Lead Counsel'
+                    }
+                ],
+                timeline: [
+                    {
+                        title: 'Case Created from Consultation',
+                        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+                        grey: true
+                    }
+                ],
+                documents: []
+            };
+
+            // Save via LexFlowCasesStorage
+            if (window.LexFlowCasesStorage) {
+                const currentCases = await window.LexFlowCasesStorage.getCases();
+                currentCases.unshift(newCase);
+                await window.LexFlowCasesStorage.saveCases(currentCases);
+                
+                alert('Case successfully created! Redirecting to Case List...');
+                document.getElementById('conversion-modal').classList.remove('active');
+                window.location.href = 'firm_manager_casemanagement_cases.html';
+            } else {
+                console.error('LexFlowCasesStorage not found');
+                alert('Error: Storage system not found. Please refresh.');
+            }
+        });
+    }
 
     /**
      * Handles the lawyer assignment and consultation acceptance
@@ -231,8 +322,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="status-badge status-${cons.status.toLowerCase()}">${cons.status}</span></td>
                 <td>
                     <div class="table-actions">
-                        <button class="btn btn-sm btn-primary btn-join" data-id="${cons.id}">Join Call</button>
-                        <button class="btn btn-sm btn-outline btn-cancel" data-id="${cons.id}">Cancel</button>
+                        <button class="btn btn-sm btn-primary btn-join" data-id="${cons.id}" title="Join Consultation">Join</button>
+                        <button class="btn btn-sm btn-outline btn-convert-case" data-id="${cons.id}" title="Convert to formal Case">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            Case
+                        </button>
+                        <button class="btn btn-sm btn-outline btn-cancel" data-id="${cons.id}" title="Cancel request">Cancel</button>
                     </div>
                 </td>
             `;

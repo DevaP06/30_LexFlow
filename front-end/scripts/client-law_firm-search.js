@@ -254,6 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Create new consultation with all required fields
             const newConsultation = {
                 id: consultationId,
+                clientId: activeUser.id, // Store client ID for case linking
                 clientName: clientName,
                 lawyerName: 'Awaiting Assignment',
                 firmName: firmName,
